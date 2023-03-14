@@ -3,6 +3,7 @@ const express = require('express');
 const mongoose = require('mongoose');
 const morgan = require('morgan');
 const cors = require('cors');
+const AppModel = require("./models/appschema");
 require("dotenv").config();
 
  
@@ -38,3 +39,25 @@ const port = process.env.PORT || 8080;
 const server = app.listen(port, () => {
     console.log(`Server is running on port ${port}`)
 })
+
+app.get("/insert", (req, res) =>{
+    var newAppModel = new AppModel({
+        app_name: "First App",
+        creator: "Deez",
+        published: false,
+        role_membership_url: "amazon.com"
+    });
+    newAppModel.save((err, data) =>{
+        if(err)
+            console.error(err)
+        else
+            res.status(200).send({"msg": "Inserted to DB"});
+    })
+})
+var newAppModel = new AppModel({
+    app_name: "First App",
+    creator: "Deez",
+    published: false,
+    role_membership_url: "amazon.com"
+});
+newAppModel.save();

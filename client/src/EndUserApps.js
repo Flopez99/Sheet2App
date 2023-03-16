@@ -7,7 +7,7 @@ function EndUserApps() {
         <div>
             <Container >
                 <Stack direction ="row" justifyContent="space-evenly">
-                    <Button component={Link} to="/">Switch to Developer</Button>
+                    <Button component={Link} to="/developer">Switch to Developer</Button>
                     <Typography variant = "h2" color = "textPrimary">End User</Typography>
                     <Button>Button</Button>
                 </Stack>

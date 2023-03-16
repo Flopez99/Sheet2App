@@ -15,36 +15,26 @@ import { createTheme, ThemeProvider } from '@mui/material/styles';
 import DataSource from './DataSource';
 import axios from 'axios'
 import { useNavigate } from 'react-router-dom'
+import {useEffect, useState} from 'react'
+import ViewScreen from './ViewScreen';
 
 
 const theme = createTheme();
 
-function CreateApp(props) {
-  const navigate = useNavigate();
-  const handleSubmit = async (event) => {
-    event.preventDefault();
-    const data = new FormData(event.currentTarget);
-    console.log({
-      AppName: data.get('App Name'),
-      URL: data.get('rolemembershipsheet'),
-    });
-    // creator: {type: String, required: true},
-    // app_name: {type: String, required: true},
-    // published: {type: Boolean, required: true},
-    // views: [{type:Schema.Types.ObjectId, ref: 'View'}],
-    // data_sources: [{type:Schema.Types.ObjectId, ref: 'DataSource'}],
-    // role_membership_url: {type:String, required:true}
-    await axios.post("http://localhost:8080/app", {
-      creator: props.user.email,
-      app_name: data.get('App Name'),
-      published: false,
-      role_membership_url: data.get('rolemembershipsheet')
+
+function EditApp(props) {//props.datasource contains datasource id needed to fill in page
+ const [datasource, setDatasource] = useState({})
+ console.log(props.datasource)
+ useEffect(async () => {
+    await axios.get("http://localhost:8080/app", { params: {
+        id: props.datasource
+    }})
+    .then((res) =>{
+        console.log("Got Datasource")
+        console.log(res.data)
+        setDatasource(res.data)
     })
-    .then((res) => {
-      console.log(res.data._id)
-      navigate("/editapp", {state: res.data._id})
-    })
-  };
+  }, []);
   return (
     <ThemeProvider theme={theme}>
       <Container component="main" maxWidth="xs">
@@ -61,13 +51,14 @@ function CreateApp(props) {
             <LockOutlinedIcon />
           </Avatar>
           <Typography component="h1" variant="h5">
-            Create App
+            Edit App
           </Typography>
-          <Box component="form" noValidate onSubmit={handleSubmit}  sx={{ mt: 3 }}>
+          <Box component="form" noValidate  sx={{ mt: 3 }}>
             <Grid container spacing={1}>
               <Grid item xs={12} sm={12}>
                 <TextField
                   name="App Name"
+                  value = {datasource.app_name || ""}
                   required
                   fullWidth
                   id="appName"
@@ -78,6 +69,7 @@ function CreateApp(props) {
               <Grid item xs={12}>
                 <TextField
                   required
+                  value = {datasource.role_membership_url || ""}
                   fullWidth
                   id="rolemembershipsheet"
                   label="Role Membership Sheet URL"
@@ -85,13 +77,37 @@ function CreateApp(props) {
                 />
               </Grid>
             </Grid>
+              <Grid container spacing = {2}>
+              <Grid item xs={12} sm = {6}>
+                    <Button
+                        component={Link} to="/createdatasource"
+                        type="AddDataSource"
+                        fullWidth
+                        variant="contained"
+                        sx={{ mt: 3, mb: 2 }}
+                        >
+                        Add Data
+                    </Button>
+                </Grid>
+                <Grid item xs={12} sm = {6}>
+                        <Button
+                            component={Link} to="/view"
+                            type="AddView"
+                            fullWidth
+                            variant="contained"
+                            sx={{ mt: 3, mb: 2 }}
+                            >
+                            Add View
+                        </Button>
+                </Grid>
+              </Grid>
             <Button
               type="submit"
               fullWidth
               variant="contained"
               sx={{ mt: 3, mb: 2 }}
             >
-              Create
+              Update
             </Button>
           </Box>
         </Box>
@@ -101,4 +117,4 @@ function CreateApp(props) {
   )
 }
 
-export default CreateApp
+export default EditApp

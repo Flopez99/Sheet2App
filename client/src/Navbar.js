@@ -31,7 +31,7 @@ function Navbar(props) {
   return (
     <AppBar position = 'relative'>
     <Toolbar>
-        {Object.keys(props.user).length != 0 &&
+        {Object.keys(props.user).length !== 0 &&
           <button onClick={(e) => handleSignOut(e)}>Log Out</button>
         }
         <AppsIcon /> {/* Our logo is here    */}

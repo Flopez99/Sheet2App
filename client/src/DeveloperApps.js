@@ -1,7 +1,9 @@
 import React from 'react'
 import {IconButton, Stack, Button, Typography, AppBar, Card, CardActionArea, CardContent, CardMedia, CssBaseline, Grid, Toolbar, Container} from '@mui/material'
 import { Link } from 'react-router-dom';
-function DeveloperApps() {
+import UserAppsList from './UserAppsList'; // Import UserAppsList component
+
+function DeveloperApps({ userEmail }) {
   return (
     <main>
         <div>
@@ -13,6 +15,14 @@ function DeveloperApps() {
                 </Stack>
             </Container>
         </div>
+
+        {/* Include UserAppsList component here */}
+        <Container>
+          <Typography variant="h3" gutterBottom>
+            My Apps
+          </Typography>
+          <UserAppsList userEmail={userEmail} />
+        </Container>
     </main>
   )
 }

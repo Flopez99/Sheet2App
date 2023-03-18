@@ -34,6 +34,7 @@ function App() {
             var userObject = location.state
             console.log(userObject)
             setUser(userObject)
+
         }
       }
       

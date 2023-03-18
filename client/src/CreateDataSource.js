@@ -8,11 +8,13 @@ import FormControlLabel from '@mui/material/FormControlLabel';
 import Checkbox from '@mui/material/Checkbox';
 import { Link } from 'react-router-dom';
 import Grid from '@mui/material/Grid';
+import { DataGrid, GridRowsProp, GridColDef, GridValueGetterParams  } from '@mui/x-data-grid';
 import Box from '@mui/material/Box';
 import LockOutlinedIcon from '@mui/icons-material/LockOutlined';
 import Typography from '@mui/material/Typography';
 import Container from '@mui/material/Container';
 import { createTheme, ThemeProvider } from '@mui/material/styles';
+import { useEffect, useState } from 'react';
 
 
 function CreateDataSource() {
@@ -25,6 +27,50 @@ function CreateDataSource() {
       password: data.get('password'),
     });
   };
+  const rows = [
+    { id: 1, column: 'Student', initialValue: '=Jose', label: false, reference: "", type: 'String' },
+    { id: 2, column: 'Test1', initialValue: '=0', label: false, reference: "", type: 'Num' },
+    { id: 3, column: 'Test2', initialValue: '=0', label: false, reference: "", type: 'Num' },
+    { id: 4, column: 'HW1', initialValue: '=0', label: false, reference: "", type: 'Num' },
+    { id: 5, column: 'HW2', initialValue: '=0', label: false, reference: "", type: 'Num' },
+    { id: 6, column: 'Male', initialValue: '=FALSE', label: false, reference: "", type: 'Bool' },
+  ];
+  const columns  = [
+      { field: 'id', headerName: 'ID', width: 90 },
+      {
+        field: 'column',
+        headerName: 'Column  name',
+        width: 150,
+
+      },
+      {
+        field: 'initialValue',
+        headerName: 'Initial Value',
+        width: 150,
+        editable: true,
+        type: 'string'
+      },
+      {
+        field: 'label',
+        headerName: 'label',
+        type: 'boolean',
+        width: 110,
+        editable: true,
+      },
+      {
+        field: 'reference',
+        headerName: 'reference',
+        type: 'string',
+        width: 110,
+        editable: true,
+      },
+      {
+        field: 'type',
+        headerName: 'type',
+        type: 'string',
+        width: 110,
+      },
+    ];
   return (
     <ThemeProvider theme={theme}>
     <Container component="main" maxWidth="xs">
@@ -82,6 +128,22 @@ function CreateDataSource() {
           >
             Generate Column
           </Button>
+          <Box sx={{ height: 400, width: '100%' }}>
+          <DataGrid
+        rows={rows}
+        columns={columns}
+        initialState={{
+          pagination: {
+            paginationModel: {
+              pageSize: 5,
+            },
+          },
+        }}
+        pageSizeOptions={[5]}
+        checkboxSelection
+        disableRowSelectionOnClick
+      />
+    </Box>
           <Button
             type="submit"
             fullWidth

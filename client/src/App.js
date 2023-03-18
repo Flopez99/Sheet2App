@@ -4,6 +4,7 @@ import AppsIcon from '@mui/icons-material/Apps';
 import Navbar from './Navbar';
 import CreateApp from './CreateApp';
 import DeveloperApps from './DeveloperApps';
+import MyApps from './MyApps';
 import EndUserApps from './EndUserApps';
 import DataSource from './DataSource';
 import CreateDataSource from './CreateDataSource';
@@ -64,6 +65,7 @@ function App() {
         <Routes>
             <Route path="/" element= {<LandingPage/>}/>
             <Route path= "/developer" element = {<DeveloperApps userEmail = {user.email}/>}/>
+            <Route path="/myapps" element={<MyApps userEmail={user.email} />} />
             <Route path="/enduser" element={<EndUserApps isDeveloper={isDeveloper}/>}/>
             <Route path="/createapp" element={<CreateApp user = {user}/>}/>
             <Route path="/datasource" element={<DataSource/>}/>

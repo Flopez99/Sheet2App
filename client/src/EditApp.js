@@ -16,7 +16,7 @@ import DataSource from './DataSource';
 import axios from 'axios'
 import { useNavigate } from 'react-router-dom'
 import {useEffect, useState} from 'react'
-import ViewScreen from './ViewScreen';
+import CreateView from './CreateView';
 
 
 const theme = createTheme();

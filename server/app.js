@@ -6,10 +6,14 @@ const cors = require('cors');
 const  { google } = require('googleapis');
 const AppModel = require("./models/appschema");
 require("dotenv").config();
+const fs = require('fs');
+const { GoogleSpreadsheet } = require('google-spreadsheet');
+const credential = require('server/credentials.json');
 
- 
+
 //app
 const app = express();
+app.use(cors());
 
 
 mongoose.connect(process.env.MONGO_URI,{
@@ -154,3 +158,60 @@ const server = app.listen(port, () => {
 //     }) 
 // })
   
+
+
+// Googlesheet Data
+
+
+app.get('/api/fetchSheetData/:sheetId/:sheetIndex', async (req, res) => {
+    const { sheetId, sheetIndex } = req.params;
+    // const auth = await authorize();
+    // const sheets = google.sheets({ version: 'v4', auth });
+
+    const auth = new google.auth.GoogleAuth({
+        keyFile:"credentials.json",
+        scopes:"https://www.googleapis.com/auth/spreadsheets",
+    })
+
+    const sheets = google.sheets({version:"v4", auth})
+
+
+    try {
+      const response = await sheets.spreadsheets.values.get({
+        auth,
+        spreadsheetId: sheetId,
+        range: `${sheetIndex}!A1:Z`,
+      });
+
+    
+      if (response.status === 200) {
+        res.send(response.data);
+    
+      } else {
+        res.status(400).json({ error: 'Error fetching sheet data' });
+      }
+    } catch (error) {
+      console.error('Error fetching sheet data:', error);
+      res.status(500).json({ error: 'Error fetching sheet data' });
+    }
+  });
+  
+  app.listen(3001, () => {
+    console.log('Server listening on port 3001');
+  });
+  
+//   async function authorize() {
+//     const keyFileContent = fs.readFileSync('server/credentials.json', 'utf-8');
+//     const key = JSON.parse(keyFileContent);
+  
+//     const jwtClient = new google.auth.JWT(
+//       key.client_email,
+//       null,
+//       key.private_key,
+//       ['https://www.googleapis.com/auth/spreadsheets'],
+//       null
+//     );
+  
+//     await jwtClient.authorize();
+//     return jwtClient;
+//   }

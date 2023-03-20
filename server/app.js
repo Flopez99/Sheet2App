@@ -27,7 +27,136 @@ var bodyParser = require('body-parser');
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json())
 
-//Google Api
+
+// Gets the spreadsheet ID from the role_membership_url
+const getSpreadsheetIdFromUrl = (url) => {
+    const match = url.match(/\/spreadsheets\/d\/([a-zA-Z0-9-_]+)/);
+    return match ? match[1] : null;
+};
+
+// Checks if the provided email is included under any role other than the developer
+const isEndUser = async (sheets, spreadsheetId, userEmail) => {
+    if (!spreadsheetId) return false;
+  
+    try {
+
+        // Create the range to include all cells under every column except the first one
+        const range = `Sheet1!B2:Z`;
+
+        const result = await sheets.spreadsheets.values.get({
+            spreadsheetId,
+            range,
+        });
+
+        const rows = result.data.values || [];
+        for (const row of rows) {
+          for(let i in row){
+            if (row[i] && row[i].toLowerCase() === userEmail.toLowerCase()) {
+              return true;
+            }
+          }
+        }
+    } catch (error) {
+      console.error(`Error accessing the sheet: ${error}`);
+    }
+  
+    return false; 
+  };
+  
+  // GET all apps for a given end-user
+  app.get('/api/apps-enduser', async (req, res) => {
+    const userEmail = req.query.userEmail;
+  
+    // Load the stored credentials and create the Google Sheets API client
+    const auth = new google.auth.GoogleAuth({
+      keyFile: 'credentials.json',
+      scopes: ['https://www.googleapis.com/auth/spreadsheets'],
+    });
+
+    const client = await auth.getClient();
+    const sheets = google.sheets({ version: 'v4', auth: client });
+  
+    // Query all apps and check if the user is included under any role other than the developer in the role-membership sheet
+    const allApps = await AppModel.find({published:true}).sort({ _id: -1 }).exec();
+  
+    // Concurrently check if the user is an end-user in multiple apps
+    const endUserAppsPromises = allApps.map(async app => {
+      const spreadsheetId = getSpreadsheetIdFromUrl(app.role_membership_url);
+      if (spreadsheetId && await isEndUser(sheets, spreadsheetId, userEmail)) {
+        return app;
+      }
+      return null;
+    });
+    const endUserApps = (await Promise.all(endUserAppsPromises)).filter(app => app !== null);
+  
+    // Sort the end-user apps by the time they were added into the DB
+    endUserApps.sort((a, b) => b._id.getTimestamp() - a._id.getTimestamp());
+  
+    res.json(endUserApps);
+});
+
+
+// Checks if the provided email is included under the developer role
+const isDeveloper = async (sheets, spreadsheetId, userEmail) => {
+    if (!spreadsheetId) return false;
+  
+    try {
+      const result = await sheets.spreadsheets.values.get({
+        spreadsheetId,
+        range: 'A:A',
+      });
+  
+      const rows = result.data.values || [];
+      for (const row of rows) {
+        if (row[0] && row[0].toLowerCase() === userEmail.toLowerCase()) {
+          return true;
+        }
+      }
+    } catch (error) {
+      console.error(`Error accessing the sheet: ${error}`);
+    }
+  
+    return false;
+  };
+  
+  // GET all apps for a given user
+  app.get('/api/apps', async (req, res) => {
+    const userEmail = req.query.userEmail;
+  
+    // Load the stored credentials and create the Google Sheets API client
+    const auth = new google.auth.GoogleAuth({
+      keyFile: 'credentials.json',
+      scopes: ['https://www.googleapis.com/auth/spreadsheets'],
+    });
+    const client = await auth.getClient();
+  
+    const sheets = google.sheets({ version: 'v4', auth: client });
+  
+    // Get all apps where the user is listed under the "creator" field
+    const creatorApps = await AppModel.find({ creator: userEmail }).sort({ _id: -1 }).exec();
+  
+    // Query all apps where the user is not the creator and check if the user is included under the developer role in the role-membership sheet
+    const otherApps = await AppModel.find({ creator: { $ne: userEmail } }).sort({ _id: -1 }).exec();
+    
+    // Concurrently check if the user is a developer in multiple apps
+    const developerAppsPromises = otherApps.map(async app => {
+      const spreadsheetId = getSpreadsheetIdFromUrl(app.role_membership_url);
+      if (spreadsheetId && await isDeveloper(sheets, spreadsheetId, userEmail)) {
+        return app;
+      }
+      return null;
+    });
+    const developerApps = (await Promise.all(developerAppsPromises)).filter(app => app !== null);
+  
+    // Combine the apps where the user is the creator and the apps where the user is a developer
+    const combinedAppsSet = [...new Set([...creatorApps, ...developerApps])];
+    const combinedApps = Array.from(combinedAppsSet);
+  
+    // Sort the combined apps by the time they were added into the DB
+    combinedApps.sort((a, b) => b._id.getTimestamp() - a._id.getTimestamp());
+  
+    res.json(combinedApps);
+  });
 
 
 
@@ -62,10 +191,9 @@ app.get('/app', async (req, res) =>{
 })
 
 // GET all apps for a given user
-app.get('/api/apps', async (req, res) => {
+app.get('/api/apps1', async (req, res) => {
     const userEmail = req.query.userEmail;
 
-    console.log(userEmail)
 
     AppModel.find({ creator: userEmail })
       .sort({ _id: -1 })
@@ -73,6 +201,9 @@ app.get('/api/apps', async (req, res) => {
       .catch(error => res.status(500).json({ error }));
 });
 
+
+
+//Cross checks email with the global developers list
 app.get('/api/check-email', async (req, res) =>{
     const email = req.query.email;
     const sheetId = '1cn8iTJUjSuKK3qda5-EiGLLQUIXhX9jonsVsampczkM';

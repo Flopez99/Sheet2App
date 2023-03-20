@@ -1,7 +1,9 @@
 import React from 'react'
 import {IconButton, Stack, Button, Typography, AppBar, Card, CardActionArea, CardContent, CardMedia, CssBaseline, Grid, Toolbar, Container} from '@mui/material'
 import { Link } from 'react-router-dom';
-function EndUserApps({isDeveloper}) {
+import UserAppsList from './UserAppsList';
+
+function EndUserApps({userEmail,isDeveloper}) {
   return (
     <main>
         <div>
@@ -13,6 +15,8 @@ function EndUserApps({isDeveloper}) {
                 </Stack>
             </Container>
         </div>
+        <UserAppsList userEmail={userEmail} endUser={true}/>
+
     </main>
   )
 }

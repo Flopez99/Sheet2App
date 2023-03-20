@@ -66,7 +66,7 @@ function App() {
             <Route path="/" element= {<LandingPage/>}/>
             <Route path= "/developer" element = {<DeveloperApps userEmail = {user.email}/>}/>
             <Route path="/myapps" element={<MyApps userEmail={user.email} />} />
-            <Route path="/enduser" element={<EndUserApps isDeveloper={isDeveloper}/>}/>
+            <Route path="/enduser" element={<EndUserApps userEmail={user.email} isDeveloper={isDeveloper}/>}/>
             <Route path="/createapp" element={<CreateApp user = {user}/>}/>
             <Route path="/datasource" element={<DataSource/>}/>
             <Route path="/createdatasource" element={<CreateDataSource/>}/>

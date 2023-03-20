@@ -19,23 +19,34 @@ const useStyles = makeStyles({
   },
 });
 
-function UserAppsList({ userEmail }) {
+function UserAppsList({ userEmail, endUser }) {
   const classes = useStyles();
   const [userApps, setUserApps] = useState([]);
   const navigate = useNavigate();
 
+  const endPoint = endUser
+    ? 'http://localhost:8080/api/apps-enduser'
+    : 'http://localhost:8080/api/apps';
+
   useEffect(() => {
-    axios.get('http://localhost:8080/api/apps', { params: { userEmail } })
+    axios.get(endPoint, { params: { userEmail } })
       .then(response => {
+        console.log(response.data)
         setUserApps(response.data);
       })
       .catch(error => console.error(error));
-  }, [userEmail]);
+  }, [userEmail, endPoint]);
 
   const handleEditApp = (appId) => {
     // Handle the click event to edit the app
     // You can pass the app ID to the editApp component as a prop
-    navigate("/editapp", {state: appId})
+    
+    if(endUser){
+      //will make a route to show app for endusers
+    }else{
+      navigate("/editapp", {state: appId})
+    }
+
   };
 
   return (

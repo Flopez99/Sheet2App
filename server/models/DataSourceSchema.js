@@ -5,7 +5,8 @@ var Schema = mongoose.Schema;
 const DataSourceSchema = new Schema({
     name: {type:String, required:true},
     url: {type:String, required:true},
-    sheet_index: {type:Int, required:true},
+    sheet_index: {type:Number, required:true},
+    key: {type:Schema.Types.ObjectId, ref: 'Column'},
     columns: [{type:Schema.Types.ObjectId, ref: 'Column'}],
     consistent: {type: Boolean, required: true}
 })

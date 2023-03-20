@@ -5,10 +5,12 @@ const morgan = require('morgan');
 const cors = require('cors');
 const  { google } = require('googleapis');
 const AppModel = require("./models/appschema");
+const DataSource = require("./models/DataSourceSchema")
+const Column = require("./models/ColumnSchema")
 require("dotenv").config();
 const fs = require('fs');
 const { GoogleSpreadsheet } = require('google-spreadsheet');
-const credential = require('server/credentials.json');
+const credential = require('./credentials.json');
 
 
 //app
@@ -63,6 +65,33 @@ app.get('/app', async (req, res) =>{
     console.log(app_data)
     res.send(app_data)
 
+})
+
+app.post('/datasource', async (req, res) => {
+    console.log(req.body)
+    DataSource.create(req.body)
+    .then((instance) => {
+        console.log("good")
+        res.send(instance)
+    })
+    .catch((err) =>{
+        console.log("bad")
+        res.send(err);
+    })
+})
+
+app.post('/column', async (req,res) => {
+    console.log(req.body)
+    Column.create(req.body)
+    .then((instance) => {
+        console.log("good")
+        res.send(instance)
+    })
+    .catch((err) =>{
+        console.log('bad')
+        console.log(err)
+        res.send(err);
+    })
 })
 
 // GET all apps for a given user
@@ -163,11 +192,29 @@ const server = app.listen(port, () => {
 // Googlesheet Data
 
 
-app.get('/api/fetchSheetData/:sheetId/:sheetIndex', async (req, res) => {
-    const { sheetId, sheetIndex } = req.params;
-    // const auth = await authorize();
-    // const sheets = google.sheets({ version: 'v4', auth });
+app.get('/api/fetchSheetData', async (req, res) => {
+    // const email = req.query.email;
+    // const sheetId = '1cn8iTJUjSuKK3qda5-EiGLLQUIXhX9jonsVsampczkM';
+    // const range = 'A:A';
+    // const auth = new google.auth.GoogleAuth({
+    //     keyFile: 'credentials.json',
+    //     scopes: ['https://www.googleapis.com/auth/spreadsheets'],
+    // });
+    // const client = await auth.getClient();
+    // const sheets = google.sheets({version: 'v4', auth: client});
+    // const sheetResponse = await sheets.spreadsheets.values.get({
+    //     spreadsheetId: sheetId,
+    //     range: range
+    // });
+    // const sheetData = sheetResponse.data.values;
+    // const isDeveloper = sheetData.some(row => row[0] === email);
+    // res.send({isDeveloper});
 
+
+    const { sheetId, sheetIndex } = req.query;
+    console.log("Hi")
+    console.log(sheetId);
+    console.log(sheetIndex);
     const auth = new google.auth.GoogleAuth({
         keyFile:"credentials.json",
         scopes:"https://www.googleapis.com/auth/spreadsheets",
@@ -175,25 +222,80 @@ app.get('/api/fetchSheetData/:sheetId/:sheetIndex', async (req, res) => {
 
     const sheets = google.sheets({version:"v4", auth})
 
-
-    try {
-      const response = await sheets.spreadsheets.values.get({
+    const response = await sheets.spreadsheets.values.get({
         auth,
         spreadsheetId: sheetId,
-        range: `${sheetIndex}!A1:Z`,
-      });
+        range: `Sheet${sheetIndex}!A1:Z1`,
+      })
+      .then((response) =>{
+        console.log(response.data)
+        if (response.status === 200) {
+            res.send(response.data);
+        } else {
+            console.log("In Here")
+            res.status(400).json({ error: 'Error fetching sheet data' });
+        } 
+      })
+      .catch((error) =>{
+        console.error('Error fetching sheet data:', error);
+        res.status(500).json({ error: 'Error fetching sheet data' });
+      })
+
+    // try {
+    //   const response = await sheets.spreadsheets.values.get({
+    //     auth,
+    //     spreadsheetId: sheetId,
+    //     range: `Sheet${sheetIndex}!A:A`,
+    //   });
 
     
-      if (response.status === 200) {
-        res.send(response.data);
+    //   if (response.status === 200) {
+    //     res.send(response.data);
     
-      } else {
-        res.status(400).json({ error: 'Error fetching sheet data' });
-      }
-    } catch (error) {
-      console.error('Error fetching sheet data:', error);
-      res.status(500).json({ error: 'Error fetching sheet data' });
-    }
+    //   } else {
+    //     res.status(400).json({ error: 'Error fetching sheet data' });
+    //   }
+    // } catch (error) {
+    //   console.error('Error fetching sheet data:', error);
+    //   res.status(500).json({ error: 'Error fetching sheet data' });
+    // }
+
+    
+    
+    
+    
+    
+    
+    
+    // const auth = await authorize();
+    // const sheets = google.sheets({ version: 'v4', auth });
+
+    // const auth = new google.auth.GoogleAuth({
+    //     keyFile:"credentials.json",
+    //     scopes:"https://www.googleapis.com/auth/spreadsheets",
+    // })
+
+    // const sheets = google.sheets({version:"v4", auth})
+
+
+    // try {
+    //   const response = await sheets.spreadsheets.values.get({
+    //     auth,
+    //     spreadsheetId: sheetId,
+    //     range: `${sheetIndex}!A1:Z`,
+    //   });
+
+    
+    //   if (response.status === 200) {
+    //     res.send(response.data);
+    
+    //   } else {
+    //     res.status(400).json({ error: 'Error fetching sheet data' });
+    //   }
+    // } catch (error) {
+    //   console.error('Error fetching sheet data:', error);
+    //   res.status(500).json({ error: 'Error fetching sheet data' });
+    // }
   });
   
   app.listen(3001, () => {

@@ -12,7 +12,7 @@ import { Route, Routes, useLocation } from 'react-router-dom';
 import LandingPage from './LandingPage';
 import {useEffect, useState, useMemo} from 'react'
 import EditApp from './EditApp';
-import ViewScreen from './ViewScreen';
+import CreateView from './CreateView';
 
 
 function App() {
@@ -71,7 +71,7 @@ function App() {
             <Route path="/datasource" element={<DataSource/>}/>
             <Route path="/createdatasource" element={<CreateDataSource/>}/>
             <Route path="/editapp" element={<EditApp datasource = {datasource}/>}/>
-            <Route path="/view" element={<ViewScreen />} />
+            <Route path="/view" element={<CreateView />} />
 
         </Routes>
     </>

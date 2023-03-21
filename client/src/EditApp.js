@@ -17,6 +17,7 @@ import axios from 'axios'
 import { useNavigate } from 'react-router-dom'
 import {useEffect, useState} from 'react'
 import CreateView from './CreateView';
+import DataSourceList from './DataSourceList';
 
 
 const theme = createTheme();
@@ -80,7 +81,7 @@ function EditApp(props) {//props.datasource contains datasource id needed to fil
               <Grid container spacing = {2}>
               <Grid item xs={12} sm = {6}>
                     <Button
-                        component={Link} to="/createdatasource"
+                        component={Link} to="/createdatasource" state = {props.datasource}
                         type="AddDataSource"
                         fullWidth
                         variant="contained"
@@ -112,6 +113,8 @@ function EditApp(props) {//props.datasource contains datasource id needed to fil
           </Box>
         </Box>
       </Container>
+      {Object.keys(datasource).length !== 0 && (
+          <DataSourceList actual_appId = {props.datasource} datasources = {datasource.data_sources} /> )}
     </ThemeProvider>
   
   )

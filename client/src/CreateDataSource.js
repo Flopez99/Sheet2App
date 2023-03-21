@@ -18,6 +18,8 @@ import { updateCacheWithNewRows } from '@mui/x-data-grid/hooks/features/rows/gri
 import { useMemo, useRef } from "react";
 import Alert from '@mui/material/Alert';
 import { flattenOptionGroups } from '@mui/base';
+import { useNavigate } from 'react-router-dom'
+
 
 
 
@@ -82,7 +84,9 @@ function useApiRef() {
 }
 
 
-function CreateDataSource() {
+function CreateDataSource(props) {
+  const navigate = useNavigate();
+  console.log(props)
   const { apiRef, columns } = useApiRef();
   const theme = createTheme();
   const [rows, setRows] = useState([]);
@@ -185,6 +189,7 @@ function checkType(array){
       }
       //creates datasource
       console.log(" name: " + datasource_name)
+      var datasourceId;
       await axios.post("http://localhost:8080/datasource", {
         name: datasource_name,
         url: spreadsheetUrl,
@@ -195,6 +200,14 @@ function checkType(array){
       })
       .then((res) => {
         console.log(res.data._id)
+        datasourceId = res.data._id
+      })
+      await axios.post('http://localhost:8080/app_datasource', {
+        appId: props.appId,
+        datasourceId: datasourceId 
+      })
+      .then((res) => {
+        navigate("/editapp", {state: props.appId})
       })
     }
 

@@ -186,7 +186,7 @@ app.get('/app', async (req, res) =>{
     var app_data;
     console.log("Getting Id")
     console.log(req.query.id)
-    await AppModel.findById(req.query.id).then((res) => {
+    await AppModel.findById(req.query.id).populate('data_sources').then((res) => {
         app_data = res
         console.log("Good1")
     })
@@ -209,6 +209,18 @@ app.post('/datasource', async (req, res) => {
     })
 })
 
+app.get('/datasource', async (req, res) => {
+    var datasource_data;
+    await DataSource.findById(req.query.id).populate('columns').then((res) => {
+        datasource_data = res
+        console.log("Good1")
+    })
+    .catch((err) => console.log(err))
+    console.log(datasource_data)
+    res.send(datasource_data)
+
+})
+
 app.post('/column', async (req,res) => {
     console.log(req.body)
     Column.create(req.body)
@@ -221,6 +233,40 @@ app.post('/column', async (req,res) => {
         console.log(err)
         res.send(err);
     })
+})
+
+app.get('/datasource_list', async (req, res) => {
+    const appId = req.query.appId;
+    const app_datasources = await AppModel.findById(appId).populate('data_sources')
+    console.log(app_datasources)
+    res.send(app_datasources)
+})
+app.post('/app_datasource', async (req, res) => {
+    let appId = req.body.appId;
+    let datasourceId = req.body.datasourceId
+    console.log(req.body)
+    const testapp = await AppModel.findByIdAndUpdate(appId, {$push : {data_sources: datasourceId}})
+    console.log("Hello")
+    console.log(testapp)
+    res.send('done')
+})
+app.post('/updateColumn', async (req,res) =>{
+    let columnId = req.body.columnId
+    let column_data = req.body.column_data
+    let columntest = await Column.findByIdAndUpdate(columnId, column_data)
+    console.log(columntest)
+    res.send('done')
+})
+app.post('/updateDatasource', async (req, res) =>{
+    let datasourceId = req.body.datasourceId
+    let columns = req.body.columns
+    let name = req.body.name
+    let key = req.body.key
+    let result = DataSource.findById(datasourceId)
+    await DataSource.updateOne({_id: datasourceId}, {$push : {columns : {$each : columns}}} )
+    await DataSource.findByIdAndUpdate(datasourceId, {name: name})
+    await DataSource.findByIdAndUpdate(datasourceId, {key: key})
+    res.send("done")
 })
 
 // GET all apps for a given user

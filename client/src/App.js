@@ -13,12 +13,15 @@ import LandingPage from './LandingPage';
 import {useEffect, useState, useMemo} from 'react'
 import EditApp from './EditApp';
 import CreateView from './CreateView';
+import EditDataSource from './EditDataSource';
 
 
 function App() {
     const [user, setUser] = useState({})
     const [datasource, setDatasource] = useState({})
     const [isDeveloper, setIsDeveloper] = useState(false);
+    const [appId, setAppId] = useState({})
+    const [datasourceId, setDatasourceId] = useState({})
 
 
     let location = useLocation();
@@ -51,12 +54,29 @@ function App() {
       }
       if(location.pathname === "/editapp"){
         if(location.state != null){
-            var datasource = location.state
+            var datasource = location.state //not really datasource, its more appid
             console.log("id " + datasource)
             setDatasource(datasource)//passes as a datasource id
         }
       }
-    }, [location, user, datasource]);
+      if(location.pathname === "/createdatasource"){
+        if(location.state != null){
+            var appid = location.state //not really datasource, its more appid
+            console.log("id " + appid)
+            setAppId(appid)//passes as a datasource id
+        }
+      }
+      if(location.pathname === "/editdatasource"){
+        if(location.state != null){
+            console.log(location.state)
+            var datasourceId = location.state.datasourceId //not really datasource, its more appid
+            var appId = location.state.appId
+            console.log("id " + datasourceId)
+            setDatasourceId(datasourceId)//passes as a datasource id
+            setAppId(appId)
+        }
+      }
+    }, [location, user, datasource, appId, datasourceId]);
 
     return (
     <>
@@ -69,9 +89,10 @@ function App() {
             <Route path="/enduser" element={<EndUserApps userEmail={user.email} isDeveloper={isDeveloper}/>}/>
             <Route path="/createapp" element={<CreateApp user = {user}/>}/>
             <Route path="/datasource" element={<DataSource/>}/>
-            <Route path="/createdatasource" element={<CreateDataSource/>}/>
+            <Route path="/createdatasource" element={<CreateDataSource appId = {appId}/>}/>
             <Route path="/editapp" element={<EditApp datasource = {datasource}/>}/>
             <Route path="/view" element={<CreateView />} />
+            <Route path="/editdatasource" element = {<EditDataSource datasource_id={datasourceId} appId = {appId} />} />
 
         </Routes>
     </>

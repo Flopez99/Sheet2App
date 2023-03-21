@@ -1,4 +1,5 @@
-import React, {useState} from 'react';
+import React, {useState, useEffect} from 'react';
+import axios from 'axios';
 import {
   AppBar,
   Box,
@@ -18,34 +19,67 @@ import {
 } from '@mui/material';
 import { Link } from 'react-router-dom';
 import { createTheme, ThemeProvider } from '@mui/material/styles';
+import DataSourceDropdown from './DataSourceDropdown';
 
 const theme = createTheme();
 
 function CreateView() {
   const [name, setName] = useState('');
-    // const [table, setTable] = useState('');
-    // const [columns, setColumns] = useState([]);
-    const [viewType, setViewType] = useState('TableView'); //TableView or DetailView
-    const [addRecord, setAddRecord] = useState(false);
-    const [editRecord, setEditRecord] = useState(false);
-    const [deleteRecord, setDeleteRecord] = useState(false);
-    const [roles, setRoles] = useState([]);
-    // const [filter, setFilter] = useState('');
-    // const [userFilter, setUserFilter] = useState('');
-    // const [editFilter, setEditFilter] = useState('');
-    // const [editableColumns, setEditableColumns] = useState([]);
+  const [selectedDataSource, setSelectedDataSource] = useState('');
+  const [dataSourceList, setDataSourceList] = useState([]);
+  const [columns, setColumns] = useState([]);
+  const [viewType, setViewType] = useState('TableView'); //TableView or DetailView
+  const [addRecord, setAddRecord] = useState(false);
+  const [editRecord, setEditRecord] = useState(false);
+  const [deleteRecord, setDeleteRecord] = useState(false);
+  const [roles, setRoles] = useState([]);
+  const [filter, setFilter] = useState('');
+  const [userFilter, setUserFilter] = useState('');
+  const [editFilter, setEditFilter] = useState('');
+  const [editableColumns, setEditableColumns] = useState([]);
+
+  useEffect(() => {
+    axios.get('http://localhost:8080/datasources')
+      .then((response) => {
+        console.log(response.data);
+        setDataSourceList(response.data);
+      })
+      .catch((error) => {
+        console.log(error);
+      });
+  }, []);
 
   const handleSubmit = (event) => {
     event.preventDefault();
     // Create a view model based on the input values
     const viewModel = {
       name: name,
+      table: selectedDataSource,
+      columns: columns,
       view_type: viewType,
       add_record: addRecord,
       edit_record: editRecord,
       delete_record: deleteRecord,
       roles: roles,
+      filter: filter,
+      user_filter: userFilter,
+      edit_filter: editFilter,
+      editable_columns: editableColumns,
     };
+    fetch('http://localhost:8080/view', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(viewModel),
+    })
+      .then((response) => response.json())
+      .then((data) => {
+        console.log('Success:', data);
+      })
+      .catch((error) => {
+        console.error('Error:', error);
+      });
   };
 
   return (
@@ -77,6 +111,13 @@ function CreateView() {
                 />
               </Grid>
               <Grid item xs={12}>
+                <DataSourceDropdown
+                  dataSourceList={dataSourceList}
+                  selectedDataSource={selectedDataSource}
+                  setSelectedDataSource={setSelectedDataSource}
+                />
+              </Grid>
+              <Grid item xs={12}>
                 <TextField
                   select
                   required
@@ -104,7 +145,7 @@ function CreateView() {
                 </Grid>
               )}
               {viewType === 'DetailView' && (
-                <>
+                <Stack spacing={2}>
                   <Grid item xs={12}>
                     <FormControlLabel
                       control={
@@ -127,19 +168,64 @@ function CreateView() {
                       label="Allow Deleting Records"
                     />
                   </Grid>
-                </>
+                </Stack>
               )}
               <Grid item xs={12}>
                 <TextField
                   name="roles"
-                  required
                   fullWidth
                   id="roles"
                   label="Roles"
                   value={roles}
-                  onChange={(event) => setRoles(event.target.value)}
+                  onChange={(event) => setRoles(event.target.value.split(','))}
                 />
               </Grid>
+              <Grid item xs={12}>
+                <TextField
+                  name="filter"
+                  fullWidth
+                  id="filter"
+                  label="Filter"
+                  value={filter}
+                  onChange={(event) => setFilter(event.target.value)}
+                />
+              </Grid>
+              {viewType === 'TableView' && (
+                <Grid item xs={12}>
+                  <TextField
+                    name="userFilter"
+                    fullWidth
+                    id="userFilter"
+                    label="User Filter"
+                    value={userFilter}
+                    onChange={(event) => setUserFilter(event.target.value)}
+                  />
+                </Grid>
+              )}
+              {viewType === 'DetailView' && (
+                <Grid item xs={12}>
+                  <TextField
+                    name="editFilter"
+                    fullWidth
+                    id="editFilter"
+                    label="Edit Filter"
+                    value={editFilter}
+                    onChange={(event) => setEditFilter(event.target.value)}
+                  />
+                </Grid>
+              )}
+              {viewType === 'DetailView' && (
+                <Grid item xs={12}>
+                  <TextField
+                    name="editableColumns"
+                    fullWidth
+                    id="editableColumns"
+                    label="Editable Columns"
+                    value={editableColumns}
+                    onChange={(event) => setEditableColumns(event.target.value.split(','))}
+                  />
+                </Grid>
+              )}
             </Grid>
             <Button
               type="submit"

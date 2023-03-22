@@ -8,7 +8,7 @@ function DataSourceDropdown(props) {
   const handleChange = (event) => {
     setSelectedDataSource(event.target.value);
   };
-
+  
   return (
     <FormControl fullWidth>
       <InputLabel id="data-source-dropdown-label">Data Source</InputLabel>
@@ -19,11 +19,15 @@ function DataSourceDropdown(props) {
         label="Data Source"
         onChange={handleChange}
       >
-        {dataSourceList.map((dataSource) => (
-          <MenuItem key={dataSource.datasourceId} value={dataSource.datasourceId}>
-            {dataSource.datasource_name}
+      {dataSourceList.length > 0 ? (
+        dataSourceList.map((dataSource) => (
+          <MenuItem key={dataSource._id} value={dataSource._id}>
+            {dataSource.name}
           </MenuItem>
-        ))}
+        ))
+      ) : (
+        <MenuItem disabled>No data sources available</MenuItem>
+      )}
       </Select>
     </FormControl>
   );

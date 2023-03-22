@@ -23,7 +23,7 @@ import DataSourceDropdown from './DataSourceDropdown';
 
 const theme = createTheme();
 
-function CreateView() {
+function CreateView(props) {
   const [name, setName] = useState('');
   const [selectedDataSource, setSelectedDataSource] = useState('');
   const [dataSourceList, setDataSourceList] = useState([]);
@@ -39,7 +39,9 @@ function CreateView() {
   const [editableColumns, setEditableColumns] = useState([]);
 
   useEffect(() => {
-    axios.get('http://localhost:8080/datasources')
+    axios.get('http://localhost:8080/datasource_list1', {params: {
+      appId: props.appId
+      }})
       .then((response) => {
         console.log(response.data);
         setDataSourceList(response.data);

@@ -56,4 +56,4 @@ const handleEditApp = (datasourceid) => {
   )
 }
 
-export default DataSourceList
+export default React.memo(DataSourceList);

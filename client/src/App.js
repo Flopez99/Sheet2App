@@ -59,6 +59,14 @@ function App() {
             setDatasource(datasource)//passes as a datasource id
         }
       }
+
+      if(location.pathname === "/view"){
+        if(location.state != null){
+            var appId = location.state //not really datasource, its more appid
+            setAppId(appId)//passes as a datasource id
+        }
+      }
+
       if(location.pathname === "/createdatasource"){
         if(location.state != null){
             var appid = location.state //not really datasource, its more appid
@@ -91,7 +99,7 @@ function App() {
             <Route path="/datasource" element={<DataSource/>}/>
             <Route path="/createdatasource" element={<CreateDataSource appId = {appId}/>}/>
             <Route path="/editapp" element={<EditApp datasource = {datasource}/>}/>
-            <Route path="/view" element={<CreateView />} />
+            <Route path="/view" element={<CreateView appId = {appId}/>} />
             <Route path="/editdatasource" element = {<EditDataSource datasource_id={datasourceId} appId = {appId} />} />
 
         </Routes>

@@ -5,7 +5,7 @@ import CssBaseline from '@mui/material/CssBaseline';
 import TextField from '@mui/material/TextField';
 import FormControlLabel from '@mui/material/FormControlLabel';
 import Checkbox from '@mui/material/Checkbox';
-import { Link } from 'react-router-dom';
+import { Link, Navigate } from 'react-router-dom';
 import Grid from '@mui/material/Grid';
 import Box from '@mui/material/Box';
 import LockOutlinedIcon from '@mui/icons-material/LockOutlined';
@@ -25,7 +25,11 @@ const theme = createTheme();
 
 function EditApp(props) {//props.datasource contains datasource id needed to fill in page
  const [datasource, setDatasource] = useState({})
- console.log(props.datasource)
+ const [appName, setAppName] = useState('');
+ const [roleMembershipUrl, setRoleMembershipUrl] = useState('');
+ const [published, setPublished] = useState({})
+ const navigate = useNavigate();
+
  useEffect(async () => {
     await axios.get("http://localhost:8080/app", { params: {
         id: props.datasource
@@ -33,9 +37,57 @@ function EditApp(props) {//props.datasource contains datasource id needed to fil
     .then((res) =>{
         console.log("Got Datasource")
         console.log(res.data)
+
+        setPublished(res.data.published);
+        setAppName(res.data.app_name);
+        setRoleMembershipUrl(res.data.role_membership_url);
         setDatasource(res.data)
     })
   }, []);
+
+  const handleAppNameChange = (e) => {
+    setAppName(e.target.value);
+  };
+
+  const handleRoleMembershipUrlChange = (e) => {
+    setRoleMembershipUrl(e.target.value);
+  };
+
+  const handlePublishedChange = (e) => {
+    setPublished(e.target.checked);
+  }
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+
+    await axios.post('http://localhost:8080/updateApp', {
+      id: props.datasource,
+      app_name: appName,
+      role_membership_url: roleMembershipUrl,
+      published: published
+    }).then((response) => {
+      alert(response.data.message);
+    })
+    .catch((error) => {
+      alert("Error updating app");
+    });
+  };
+
+  const handleDeleteApp = async () => {
+    if (window.confirm('Are you sure you want to delete this app?')) {
+      await axios.post('http://localhost:8080/deleteApp', {
+        id: props.datasource
+      })
+      .then((response) => {
+        alert(response.data.message);
+        navigate('/myapps')
+      })
+      .catch((error) => {
+        alert("Error deleting app");
+      });
+    }
+  };
+
   return (
     <ThemeProvider theme={theme}>
       <Container component="main" maxWidth="xs">
@@ -54,54 +106,74 @@ function EditApp(props) {//props.datasource contains datasource id needed to fil
           <Typography component="h1" variant="h5">
             Edit App
           </Typography>
-          <Box component="form" noValidate  sx={{ mt: 3 }}>
+          <Box component="form" noValidate onSubmit={handleSubmit} sx={{ mt: 3 }}>
             <Grid container spacing={1}>
               <Grid item xs={12} sm={12}>
                 <TextField
                   name="App Name"
-                  value = {datasource.app_name || ""}
+                  value={appName || ''}
                   required
                   fullWidth
                   id="appName"
                   label="App Name"
                   autoFocus
+                  onChange={handleAppNameChange}
                 />
               </Grid>
               <Grid item xs={12}>
                 <TextField
                   required
-                  value = {datasource.role_membership_url || ""}
+                  value={roleMembershipUrl || ''}
                   fullWidth
                   id="rolemembershipsheet"
                   label="Role Membership Sheet URL"
                   name="rolemembershipsheet"
+                  onChange={handleRoleMembershipUrlChange}
                 />
               </Grid>
             </Grid>
-              <Grid container spacing = {2}>
-              <Grid item xs={12} sm = {6}>
-                    <Button
-                        component={Link} to="/createdatasource" state = {props.datasource}
-                        type="AddDataSource"
-                        fullWidth
-                        variant="contained"
-                        sx={{ mt: 3, mb: 2 }}
-                        >
-                        Add Data
-                    </Button>
-                </Grid>
-                <Grid item xs={12} sm = {6}>
-                        <Button
-                            component={Link} to="/view"
-                            type="AddView"
-                            fullWidth
-                            variant="contained"
-                            sx={{ mt: 3, mb: 2 }}
-                            >
-                            Add View
-                        </Button>
-                </Grid>
+            <Grid container spacing={2}>
+              <Grid item xs={12} sm={4}>
+                <Button
+                  component={Link}
+                  to="/createdatasource"
+                  state={props.datasource}
+                  type="AddDataSource"
+                  fullWidth
+                  variant="contained"
+                  sx={{ mt: 3, mb: 2 }}
+                >
+                  Add Data
+                </Button>
               </Grid>
+              <Grid item xs={12} sm={4}>
+                <Button
+                  component={Link}
+                  to="/view"
+                  state={props.datasource}
+                  type="AddView"
+                  fullWidth
+                  variant="contained"
+                  sx={{ mt: 3, mb: 2 }}
+                >
+                  Add View
+                </Button>
+              </Grid>
+              <Grid item xs={12} sm={4}>
+              <FormControlLabel
+                control={
+                  <Checkbox
+                    checked={published}
+                    onChange={handlePublishedChange}
+                    name="published"
+                    color="primary"
+                  />
+                }
+                label="Published"
+                sx={{ mt: 2 }}
+              />
+              </Grid>
+            </Grid>
             <Button
               type="submit"
               fullWidth
@@ -110,14 +182,25 @@ function EditApp(props) {//props.datasource contains datasource id needed to fil
             >
               Update
             </Button>
+            <Button
+              onClick={handleDeleteApp}
+              fullWidth
+              variant="contained"
+              sx={{ mt: 3, mb: 2, bgcolor: 'error.main' }}
+            >
+              Delete App
+            </Button>
           </Box>
         </Box>
       </Container>
       {Object.keys(datasource).length !== 0 && (
-          <DataSourceList actual_appId = {props.datasource} datasources = {datasource.data_sources} /> )}
+        <DataSourceList
+          actual_appId={props.datasource}
+          datasources={datasource.data_sources}
+        />
+      )}
     </ThemeProvider>
-  
-  )
+  );
 }
 
 export default EditApp

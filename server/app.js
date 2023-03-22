@@ -238,9 +238,35 @@ app.post('/column', async (req,res) => {
 app.get('/datasource_list', async (req, res) => {
     const appId = req.query.appId;
     const app_datasources = await AppModel.findById(appId).populate('data_sources')
+
     console.log(app_datasources)
     res.send(app_datasources)
 })
+
+app.get('/datasource_list1', async (req, res) => {
+    const appId = req.query.appId;
+    const app_datasources = await AppModel.findById(appId).populate('data_sources')
+    
+    res.send(app_datasources.data_sources)
+})
+
+app.post('/deleteApp', async (req, res) => {
+  const id = req.body.id;
+
+  try {
+    const app = await AppModel.findByIdAndDelete(id);
+
+    res.status(200).json({
+      message: 'App deleted successfully',
+    });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({
+      error: 'Internal server error',
+    });
+  }
+});
+
 app.post('/app_datasource', async (req, res) => {
     let appId = req.body.appId;
     let datasourceId = req.body.datasourceId
@@ -269,18 +295,6 @@ app.post('/updateDatasource', async (req, res) =>{
     res.send("done")
 })
 
-// GET all apps for a given user
-app.get('/api/apps1', async (req, res) => {
-    const userEmail = req.query.userEmail;
-
-
-    AppModel.find({ creator: userEmail })
-      .sort({ _id: -1 })
-      .then(apps => res.json(apps))
-      .catch(error => res.status(500).json({ error }));
-});
-
-
 
 //Cross checks email with the global developers list
 app.get('/api/check-email', async (req, res) =>{
@@ -302,39 +316,31 @@ app.get('/api/check-email', async (req, res) =>{
     res.send({isDeveloper});
 });
 
+app.post('/updateApp', async(req, res) =>{
+  const { id, app_name, role_membership_url, published } = req.body;
 
-app.get('/testing', async (req,res)=>{
-    const auth = new google.auth.GoogleAuth({
-        keyFile:"credentials.json",
-        scopes:"https://www.googleapis.com/auth/spreadsheets",
-    })
+  try {
+    const updateResult = await AppModel.updateOne(
+      { _id: id },
+      {
+        $set: {
+          app_name: app_name,
+          role_membership_url: role_membership_url,
+          published: published,
+        },
+      }
+    ); 
 
-    //Create client instance for auth
-    const client = await auth.getClient();
-
-    //Instance of Google Sheets API
-    const googleSheets = google.sheets({version:"v4", auth:client})
-
-    const spreadsheetId = "1cn8iTJUjSuKK3qda5-EiGLLQUIXhX9jonsVsampczkM";
-
-    //Get Spreadsheet metadata
-    const metaData = await googleSheets.spreadsheets.get({
-        auth,
-        spreadsheetId,
-    })
-
-    //Read the rows
-    const getRows = await googleSheets.spreadsheets.values.get({
-        auth,
-        spreadsheetId,
-        range:"Sheet1!A:A",
-    })
-
-
-    res.send(getRows.data)
-});
-
-
+    if (updateResult.modifiedCount === 1) {
+      res.status(200).json({ message: "App updated successfully" });
+    } else {
+      res.status(404).json({ message: "App not found" });
+    }
+  } catch (error) {
+    console.error("Error updating app:", error);
+    res.status(500).json({ message: "Error updating app" });
+  }
+})
 
 
 //routes
@@ -349,44 +355,10 @@ const server = app.listen(port, () => {
     console.log(`Server is running on port ${port}`)
 })
 
-// app.get("/insert", (req, res) =>{
-//     var newAppModel = new AppModel({
-//         app_name: "First App",
-//         creator: "Deez",
-//         published: false,
-//         role_membership_url: "amazon.com"
-//     });
-//     newAppModel.save((err, data) =>{
-//         if(err)
-//             console.error(err)
-//         else
-//             res.status(200).send({"msg": "Inserted to DB"});
-//     }) 
-// })
-  
-
 
 // Googlesheet Data
 
-
 app.get('/api/fetchSheetData', async (req, res) => {
-    // const email = req.query.email;
-    // const sheetId = '1cn8iTJUjSuKK3qda5-EiGLLQUIXhX9jonsVsampczkM';
-    // const range = 'A:A';
-    // const auth = new google.auth.GoogleAuth({
-    //     keyFile: 'credentials.json',
-    //     scopes: ['https://www.googleapis.com/auth/spreadsheets'],
-    // });
-    // const client = await auth.getClient();
-    // const sheets = google.sheets({version: 'v4', auth: client});
-    // const sheetResponse = await sheets.spreadsheets.values.get({
-    //     spreadsheetId: sheetId,
-    //     range: range
-    // });
-    // const sheetData = sheetResponse.data.values;
-    // const isDeveloper = sheetData.some(row => row[0] === email);
-    // res.send({isDeveloper});
-
 
     const { sheetId, sheetIndex } = req.query;
     console.log("Hi")
@@ -418,79 +390,4 @@ app.get('/api/fetchSheetData', async (req, res) => {
         res.status(500).json({ error: 'Error fetching sheet data' });
       })
 
-    // try {
-    //   const response = await sheets.spreadsheets.values.get({
-    //     auth,
-    //     spreadsheetId: sheetId,
-    //     range: `Sheet${sheetIndex}!A:A`,
-    //   });
-
-    
-    //   if (response.status === 200) {
-    //     res.send(response.data);
-    
-    //   } else {
-    //     res.status(400).json({ error: 'Error fetching sheet data' });
-    //   }
-    // } catch (error) {
-    //   console.error('Error fetching sheet data:', error);
-    //   res.status(500).json({ error: 'Error fetching sheet data' });
-    // }
-
-    
-    
-    
-    
-    
-    
-    
-    // const auth = await authorize();
-    // const sheets = google.sheets({ version: 'v4', auth });
-
-    // const auth = new google.auth.GoogleAuth({
-    //     keyFile:"credentials.json",
-    //     scopes:"https://www.googleapis.com/auth/spreadsheets",
-    // })
-
-    // const sheets = google.sheets({version:"v4", auth})
-
-
-    // try {
-    //   const response = await sheets.spreadsheets.values.get({
-    //     auth,
-    //     spreadsheetId: sheetId,
-    //     range: `${sheetIndex}!A1:Z`,
-    //   });
-
-    
-    //   if (response.status === 200) {
-    //     res.send(response.data);
-    
-    //   } else {
-    //     res.status(400).json({ error: 'Error fetching sheet data' });
-    //   }
-    // } catch (error) {
-    //   console.error('Error fetching sheet data:', error);
-    //   res.status(500).json({ error: 'Error fetching sheet data' });
-    // }
   });
-  
-  app.listen(3001, () => {
-    console.log('Server listening on port 3001');
-  });
-  
-//   async function authorize() {
-//     const keyFileContent = fs.readFileSync('server/credentials.json', 'utf-8');
-//     const key = JSON.parse(keyFileContent);
-  
-//     const jwtClient = new google.auth.JWT(
-//       key.client_email,
-//       null,
-//       key.private_key,
-//       ['https://www.googleapis.com/auth/spreadsheets'],
-//       null
-//     );
-  
-//     await jwtClient.authorize();
-//     return jwtClient;
-//   }

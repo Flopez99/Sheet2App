@@ -176,13 +176,18 @@ app.post('/create_view', async (req,res) =>{
   console.log(req.body.view)
   ViewModel.create(req.body.view)
   .then((instance) => {
-      console.log("good")
-      res.send(instance)
+    console.log(instance)
+
+    res.status(200).json({
+      message: 'View Created successfully',
+      view_create:instance
+    });
   })
   .catch((err) =>{
-      console.log("bad")
-      console.log(err)
-      res.send(err);
+    console.log(err)
+    res.status(500).json({
+      error: 'Error Creating View',
+    });
   })
 })
 

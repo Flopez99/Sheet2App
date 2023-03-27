@@ -211,7 +211,14 @@ app.post('/datasource', async (req, res) => {
 
 app.get('/datasource', async (req, res) => {
     var datasource_data;
-    await DataSource.findById(req.query.id).populate('columns').then((res) => {
+    await DataSource.findById(req.query.id)
+    .populate({
+      path: 'columns',
+      populate: {
+        path: 'references'
+      }
+    })
+    .then((res) => {
         datasource_data = res
         console.log("Good1")
     })
@@ -295,7 +302,23 @@ app.post('/updateDatasource', async (req, res) =>{
     res.send("done")
 })
 
-
+app.get('/datasource_url' , async (req, res) => {
+  console.log('in datasource_url')
+  console.log(req.query)
+  DataSource.findOne({ url: req.query.url, sheet_index: req.query.sheetIndex })
+  .then(dataSource => {
+    res.send(dataSource)
+    if (dataSource) {
+      console.log(`Data source with URL  and sheet index  already exists.`);
+      res.send(dataSource)
+    } else {
+      console.log(`Data source with URL  and sheet index  does not exist yet.`);
+      res.send('')
+      // Create a new data source document and save it to the database if it does not exist yet
+    }
+  })
+  .catch(err => console.error(err));
+})
 //Cross checks email with the global developers list
 app.get('/api/check-email', async (req, res) =>{
     const email = req.query.email;

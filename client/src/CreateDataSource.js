@@ -95,6 +95,8 @@ function CreateDataSource(props) {
   const [datasource_name, setDatasource_name] = useState("")
   const [spreadsheetUrl, setSpreadsheetUrl] = useState("")
   const [sheetIndex, setSheetIndex] = useState(0)
+  const [referenceError, setReferenceError] = useState(false)
+
 
   
 
@@ -138,6 +140,52 @@ function checkLabel(array){
       return label_row
     }
 }
+async function checkReference(array){
+  let flag = true;
+  console.log('in reference')
+  console.log(array)
+  // array.forEach((column) => {
+  //   if(column.value.reference !== undefined){
+  //     console.log("good")
+  //     console.log(column.value.reference)
+  //   }
+  // })
+  for(let column of array){
+    if(column.value.reference !== ""){
+      console.log(column.value)
+      const stringArr = column.value.reference.split(" ")
+
+      let url = stringArr[0]
+      let sheetIndex = stringArr[1]
+      console.log(url)
+      console.log(sheetIndex)
+      if(url === null)
+        console.log('error') // should change this to displaying alert
+      await axios.get('http://localhost:8080/datasource_url' , {params : {
+        url: url,
+        sheetIndex: sheetIndex
+      }})
+      .then((res) => {
+        console.log(res)
+        if(res.data === ''){
+          console.log('not good')
+          setReferenceError(true)
+          flag = false;
+        }
+        else{
+          column.value.reference = res.data._id
+        }
+      })
+
+    }
+    // if(column.value.reference){
+    //   console.log('true')
+    //   console.log(column)
+    // }
+  }
+  return flag;
+
+}
 function checkType(array){
   let flag = true;
   array.forEach((row) =>{
@@ -165,6 +213,7 @@ function checkType(array){
     var label_row 
     if(label_row= checkLabel(array) === null)
       boolFlag = false;
+    boolFlag = boolFlag && (await checkReference(array));
     if(boolFlag){
       console.log("Here")
       //creates columns
@@ -177,7 +226,7 @@ function checkType(array){
           name: column.value.column_name,
           initial_value: column.value.initial_value,
           label: column.value.label,
-          //references  STILL GOT TO IMPLEMENT
+          references:  column.value.reference,
           type: column.value.type
         })
         .then((res) => {
@@ -280,6 +329,7 @@ function checkType(array){
           </Box>
           {labelError && (<Alert severity="error">Label only allowed for 1 Column!</Alert>)}
           {typeError && (<Alert severity="error">All Columns Should habve A Type. Ex. Text, Boolean, URL, Number!</Alert>)}
+          {referenceError && (<Alert severity="error">To use reference must place Google Sheet URL + whitespace + sheetIndex. Reference may not be valid</Alert>)}
           <Box sx={{ height: 400, width: '100%'}}>
             {Object.keys(rows).length !== 0 && (
               <DataGrid

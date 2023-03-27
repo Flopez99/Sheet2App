@@ -1,3 +1,5 @@
+// Have to show refernces. currently sets it up in the db but does not show it,
+//as it is objectid type not string/
 import React, { useEffect, useState } from 'react';
 import Avatar from '@mui/material/Avatar';
 import Button from '@mui/material/Button';
@@ -50,7 +52,9 @@ const columns  = [
       type: 'string',
       width: 110,
       editable: true,
-      flex: 1
+      flex: 1,
+      valueGetter: (params: GridValueGetterParams) => 
+      (params.row.references?.url || '') + ' ' + (params.row.references?.sheet_index || '')
     },
     {
       field: 'type',
@@ -91,6 +95,7 @@ const navigate = useNavigate();
   const [datasource_name, setDatasource_name] = useState("")
   const [labelError, setLabelError] = useState(false)
   const [typeError, setTypeError] = useState(false)
+  const [referenceError, setReferenceError] = useState(false)
   const [rows1, setRows1] = useState({})
   const theme = createTheme();
   useEffect(async () => {
@@ -166,16 +171,63 @@ const navigate = useNavigate();
     console.log(oldRow)
     return newRow;
   };
+  async function checkReference(array){
+    let flag = true;
+    console.log('in reference')
+    console.log(array)
+    // array.forEach((column) => {
+    //   if(column.value.reference !== undefined){
+    //     console.log("good")
+    //     console.log(column.value.reference)
+    //   }
+    // })
+    for(let column of array){
+      if(column.value.reference !== undefined){
+        const stringArr = column.value.reference.split(" ")
+
+        let url = stringArr[0]
+        let sheetIndex = stringArr[1]
+        console.log(url)
+        console.log(sheetIndex)
+        if(url === null)
+          console.log('error') // should change this to displaying alert
+        await axios.get('http://localhost:8080/datasource_url' , {params : {
+          url: url,
+          sheetIndex: sheetIndex
+        }})
+        .then((res) => {
+          console.log(res)
+          if(res.data === ''){
+            console.log('not good')
+            setReferenceError(true)
+            flag = false;
+          }
+          else{
+            column.value.reference = res.data._id
+          }
+        })
+
+      }
+      // if(column.value.reference){
+      //   console.log('true')
+      //   console.log(column)
+      // }
+    }
+    return flag;
+
+  }
   const handleUpdate = async() => {
     console.log(apiRef.current.getRowModels());
     var rowModel = await apiRef.current.getRowModels()
-    var array =  Array.from(rowModel, ([key, value]) =>({value}));
+    var array =   Array.from(rowModel, ([key, value]) =>({value}));
     //check if multiple Label
     var boolFlag = true
     boolFlag = boolFlag && checkType(array);
     var label_row 
     if(label_row= checkLabel(array) === null)
       boolFlag = false;
+    boolFlag = boolFlag && (await checkReference(array));
+    console.log(boolFlag)
     if(boolFlag){
         let new_columns = []
         var key_column;
@@ -183,11 +235,12 @@ const navigate = useNavigate();
             if(typeof column.value._id === 'undefined'){
                 //new Column
                 console.log(column.value)
+                //if(column.value.)
                 await axios.post("http://localhost:8080/column", {
                     name: column.value.name,
                     initial_value: column.value.initial_value,
                     label: column.value.label,
-                    //references  STILL GOT TO IMPLEMENT
+                    references:  column.value.reference,
                     type: column.value.type
                   })
                   .then((res) => {
@@ -203,7 +256,7 @@ const navigate = useNavigate();
                     name: column.value.name,
                     initial_value: column.value.initial_value,
                     label: column.value.label,
-                    //references  STILL GOT TO IMPLEMENT
+                    references: column.value.reference,
                     type: column.value.type
                 }
                 })
@@ -288,6 +341,7 @@ const navigate = useNavigate();
         </Box>
         {labelError && (<Alert severity="error">Label only allowed for 1 Column!</Alert>)}
         {typeError && (<Alert severity="error">All Columns Should habve A Type. Ex. Text, Boolean, URL, Number!</Alert>)}
+        {referenceError && (<Alert severity="error">To use reference must place Google Sheet URL + whitespace + sheetIndex. Reference may not be valid</Alert>)}
         <Box sx={{ height: 400, width: '100%'}}>
         {Object.keys(rows1).length !== 0 && (
             <DataGrid
@@ -295,7 +349,6 @@ const navigate = useNavigate();
               columns={columns}
               pageSize={5}
               rowsPerPageOptions={[5]}
-              checkbox
               processRowUpdate={handleRowUpdate}
             />)}
           </Box>
@@ -336,6 +389,21 @@ function getIdFromUrl(url) {
   const match = url.match(regex);
   return match ? match[1] : null;
 }
+//used chat gpt for this lol, asked it to use regex to get sheet index
+function getSheetIdFromString(str) {
+  const pattern = /#gid=(\d+)$/;
+  const match = str.match(pattern);
+  if (match) {
+    // If the string ends with '#gid=sheetId', extract the sheetId value
+    const sheetId = parseInt(match[1]);
+    return sheetId;
+  } else {
+    // If the string does not end with '#gid=sheetId', return null
+    return null;
+  }
+}
+
+
 }
 
 export default EditDataSource

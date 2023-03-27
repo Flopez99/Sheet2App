@@ -5,6 +5,7 @@ const morgan = require('morgan');
 const cors = require('cors');
 const  { google } = require('googleapis');
 const AppModel = require("./models/appschema");
+const ViewModel = require("./models/ViewSchema");
 const DataSource = require("./models/DataSourceSchema")
 const Column = require("./models/ColumnSchema")
 require("dotenv").config();
@@ -167,6 +168,25 @@ const isDeveloper = async (sheets, spreadsheetId, userEmail) => {
 
 
 //middleware
+
+
+
+app.post('/create_view', async (req,res) =>{
+  console.log("Creating view")
+  console.log(req.body.view)
+  ViewModel.create(req.body.view)
+  .then((instance) => {
+      console.log("good")
+      res.send(instance)
+  })
+  .catch((err) =>{
+      console.log("bad")
+      console.log(err)
+      res.send(err);
+  })
+})
+
+
 
 app.post('/app', async (req,res) =>{
     console.log("Hi")

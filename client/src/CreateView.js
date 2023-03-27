@@ -68,20 +68,15 @@ function CreateView(props) {
       edit_filter: editFilter,
       editable_columns: editableColumns,
     };
-    fetch('http://localhost:8080/view', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(viewModel),
-    })
-      .then((response) => response.json())
-      .then((data) => {
-        console.log('Success:', data);
+
+    axios.post('http://localhost:8080/create_view', {view: viewModel})
+      .then((response) => {
+        console.log(response)
       })
       .catch((error) => {
-        console.error('Error:', error);
+        console.log(error)
       });
+    
   };
 
   return (

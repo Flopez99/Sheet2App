@@ -6,7 +6,11 @@ const ColumnSchema = new Schema({
     name: {type: String, required:true},
     initial_value: {type: String},// any google sheet formula
     label: {type: Boolean, required:true }, //at most one column should be label column in table
-    references: {type:Schema.Types.ObjectId, ref: 'DataSource'},//if column is reference than what table does it reference to
+    references: {type:Schema.Types.ObjectId, ref: 'DataSource', 
+        validator: function(v) {
+            return v === '' || v === null || v != null;
+        },
+    },//if column is reference than what table does it reference to
     type: {type: String, required:true } //Includes {Boolean, Number, Text, URL}
 
 

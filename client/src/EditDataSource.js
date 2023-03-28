@@ -182,8 +182,9 @@ const navigate = useNavigate();
     //   }
     // })
     for(let column of array){
-      if(column.value.reference !== undefined){
+      if(column.value.reference !== undefined &&  column.value.reference !== ""){
         const stringArr = column.value.reference.split(" ")
+        console.log(column.value.reference)
 
         let url = stringArr[0]
         let sheetIndex = stringArr[1]

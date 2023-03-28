@@ -63,8 +63,28 @@ function CreateView(props) {
     for (let i = 1; i <= 5; i++) {
       initialSettings.push({ show: false, filter: false, userFilter: false });
     }
+
+
     setColumnSettings(initialSettings);
   }, []);
+
+  useEffect(async  () => {
+    const data_columns = [];
+    console.log(selectedDataSource)
+    await axios.get("http://localhost:8080/datasource", { params: {
+        id: selectedDataSource
+    }})
+    .then((res) =>{ 
+      console.log(res.data)
+      var count = 0;
+      for(const column of res.data.columns){
+        data_columns.push({id: count, show: false, filter: false, userFilter: false , ...column})
+        count++;
+      }
+      setColumnSettings(data_columns)
+    })
+
+  }, [selectedDataSource])
 
   const handleSubmit = (event) => {
     event.preventDefault();
@@ -226,7 +246,7 @@ function CreateView(props) {
                               <Checkbox />
                             </TableCell>
                             <TableCell component="th" scope="row">
-                              {index + 1}
+                              {column.name}
                             </TableCell>
                             <TableCell>
                               <Checkbox
@@ -275,7 +295,7 @@ function CreateView(props) {
                               <Checkbox />
                             </TableCell>
                             <TableCell component="th" scope="row">
-                              {index + 1}
+                              {column.name}
                             </TableCell>
                             <TableCell>
                               <Checkbox

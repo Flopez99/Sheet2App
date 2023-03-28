@@ -254,8 +254,12 @@ app.get('/datasource', async (req, res) => {
 })
 
 app.post('/column', async (req,res) => {
+    console.log("Here")
     console.log(req.body)
-    Column.create(req.body)
+    var new_column = req.body
+    if(new_column.references === "")
+      new_column.references = null 
+    Column.create(new_column)
     .then((instance) => {
         console.log("good")
         res.send(instance)

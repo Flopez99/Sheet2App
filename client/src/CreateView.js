@@ -1,4 +1,4 @@
-import React, {useState, useEffect} from 'react';
+import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import {
   AppBar,
@@ -10,6 +10,12 @@ import {
   FormControlLabel,
   Card,
   Grid,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
   Toolbar,
   MenuItem,
   TextField,
@@ -38,6 +44,8 @@ function CreateView(props) {
   const [editFilter, setEditFilter] = useState('');
   const [editableColumns, setEditableColumns] = useState([]);
 
+  const [columnSettings, setColumnSettings] = useState([]);
+
   useEffect(() => {
     axios.get('http://localhost:8080/datasource_list1', {params: {
       appId: props.appId
@@ -49,6 +57,13 @@ function CreateView(props) {
       .catch((error) => {
         console.log(error);
       });
+
+    // Initialize column settings
+    const initialSettings = [];
+    for (let i = 1; i <= 5; i++) {
+      initialSettings.push({ show: false, filter: false, userFilter: false });
+    }
+    setColumnSettings(initialSettings);
   }, []);
 
   const handleSubmit = (event) => {
@@ -68,15 +83,26 @@ function CreateView(props) {
       edit_filter: editFilter,
       editable_columns: editableColumns,
     };
-
-    axios.post('http://localhost:8080/create_view', {view: viewModel})
-      .then((response) => {
-        console.log(response)
+    fetch('http://localhost:8080/view', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(viewModel),
+    })
+      .then((response) => response.json())
+      .then((data) => {
+        console.log('Success:', data);
       })
       .catch((error) => {
-        console.log(error)
+        console.error('Error:', error);
       });
-    
+  };
+
+  const handleColumnSettingChange = (index, field) => {
+    const newSettings = [...columnSettings];
+    newSettings[index][field] = !newSettings[index][field];
+    setColumnSettings(newSettings);
   };
 
   return (
@@ -177,50 +203,103 @@ function CreateView(props) {
                   onChange={(event) => setRoles(event.target.value.split(','))}
                 />
               </Grid>
-              <Grid item xs={12}>
-                <TextField
-                  name="filter"
-                  fullWidth
-                  id="filter"
-                  label="Filter"
-                  value={filter}
-                  onChange={(event) => setFilter(event.target.value)}
-                />
-              </Grid>
+
               {viewType === 'TableView' && (
                 <Grid item xs={12}>
-                  <TextField
-                    name="userFilter"
-                    fullWidth
-                    id="userFilter"
-                    label="User Filter"
-                    value={userFilter}
-                    onChange={(event) => setUserFilter(event.target.value)}
-                  />
+                  <TableContainer component={Card}>
+                    <Table size="small">
+                      <TableHead>
+                        <TableRow>
+                          <TableCell>
+                            <Checkbox />
+                          </TableCell>
+                          <TableCell>Column</TableCell>
+                          <TableCell>Show?</TableCell>
+                          <TableCell>Filter</TableCell>
+                          <TableCell>User Filter</TableCell>
+                        </TableRow>
+                      </TableHead>
+                      <TableBody>
+                        {columnSettings.map((column, index) => (
+                          <TableRow key={index}>
+                            <TableCell>
+                              <Checkbox />
+                            </TableCell>
+                            <TableCell component="th" scope="row">
+                              {index + 1}
+                            </TableCell>
+                            <TableCell>
+                              <Checkbox
+                                checked={column.show}
+                                onChange={() => handleColumnSettingChange(index, 'show')}
+                              />
+                            </TableCell>
+                            <TableCell>
+                              <Checkbox
+                                checked={column.filter}
+                                onChange={() => handleColumnSettingChange(index, 'filter')}
+                              />
+                            </TableCell>
+                            <TableCell>
+                              <Checkbox
+                                checked={column.userFilter}
+                                onChange={() => handleColumnSettingChange(index, 'userFilter')}
+                              />
+                            </TableCell>
+                          </TableRow>
+                        ))}
+                      </TableBody>
+                    </Table>
+                  </TableContainer>
                 </Grid>
               )}
               {viewType === 'DetailView' && (
                 <Grid item xs={12}>
-                  <TextField
-                    name="editFilter"
-                    fullWidth
-                    id="editFilter"
-                    label="Edit Filter"
-                    value={editFilter}
-                    onChange={(event) => setEditFilter(event.target.value)}
-                  />
-                </Grid>
-              )}
-              {viewType === 'DetailView' && (
-                <Grid item xs={12}>
-                  <TextField
-                    name="editableColumns"
-                    fullWidth
-                    id="editableColumns"
-                    label="Editable Columns"
-                    value={editableColumns}
-                    onChange={(event) => setEditableColumns(event.target.value.split(','))}
-                  />
+                  <TableContainer component={Card}>
+                    <Table size="small">
+                      <TableHead>
+                        <TableRow>
+                          <TableCell>
+                            <Checkbox />
+                          </TableCell>
+                          <TableCell>Column</TableCell>
+                          <TableCell>Show?</TableCell>
+                          <TableCell>Edit Filter</TableCell>
+                          <TableCell>Editable Columns</TableCell>
+                        </TableRow>
+                      </TableHead>
+                      <TableBody>
+                        {columnSettings.map((column, index) => (
+                          <TableRow key={index}>
+                            <TableCell>
+                              <Checkbox />
+                            </TableCell>
+                            <TableCell component="th" scope="row">
+                              {index + 1}
+                            </TableCell>
+                            <TableCell>
+                              <Checkbox
+                                checked={column.show}
+                                onChange={() => handleColumnSettingChange(index, 'show')}
+                              />
+                            </TableCell>
+                            <TableCell>
+                              <Checkbox
+                                checked={column.filter}
+                                onChange={() => handleColumnSettingChange(index, 'filter')}
+                              />
+                            </TableCell>
+                            <TableCell>
+                              <Checkbox
+                                checked={column.userFilter}
+                                onChange={() => handleColumnSettingChange(index, 'userFilter')}
+                              />
+                            </TableCell>
+                          </TableRow>
+                        ))}
+                      </TableBody>
+                    </Table>
+                  </TableContainer>
                 </Grid>
               )}
             </Grid>
@@ -228,16 +307,18 @@ function CreateView(props) {
               type="submit"
               fullWidth
               variant="contained"
-              sx={{ mt: 3, mb: 2 }}>
-               Save
+              sx={{ mt: 3, mb: 2 }}
+            >
+              Save
             </Button>
           </Box>
         </Box>
       </Container>
     </ThemeProvider>
-    );
-    }
+  );
+}
 
 export default CreateView;
 
+                           
 

@@ -175,6 +175,7 @@ app.get('/roles', async (req, res) => {
   const appId = req.query.appId; 
   const role_sheet = await AppModel.findById(appId)
 
+  
   const spreadsheetId = getSpreadsheetIdFromUrl(role_sheet.role_membership_url);
   const auth = new google.auth.GoogleAuth({  
     keyFile: 'credentials.json', 
@@ -186,16 +187,20 @@ app.get('/roles', async (req, res) => {
 
   const range = `A1:Z1`; 
 
-  const result = await sheets.spreadsheets.values.get({
-      spreadsheetId,
-      range,
-  });
- 
-  const roles = result.data.values[0];
- 
-  console.log("Returning roles")
-  console.log(roles)
+  let roles = []
+  try{
+    const result = await sheets.spreadsheets.values.get({ 
+        spreadsheetId,
+        range, 
+    });
+    roles = result.data.values[0];
 
+  }catch(error){
+
+    console.log("Error Accessing Role Membership Sheet: " + error)
+
+  }
+ 
   res.send({ roles });
 })
 

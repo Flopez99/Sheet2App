@@ -122,7 +122,7 @@ function CreateView(props) {
       table: selectedDataSource,
       columns: selectedColumns,
       view_type: viewType,
-      add_record: addRecord,
+      add_record: addRecord, 
       edit_record: editRecord,
       delete_record: deleteRecord,
       roles: selectedRoleList,

@@ -168,11 +168,39 @@ const isDeveloper = async (sheets, spreadsheetId, userEmail) => {
 
 
 //middleware
+ 
 
+//Get roles from an app's role-membership-sheet
+app.get('/roles', async (req, res) => {
+  const appId = req.query.appId; 
+  const role_sheet = await AppModel.findById(appId)
 
+  const spreadsheetId = getSpreadsheetIdFromUrl(role_sheet.role_membership_url);
+  const auth = new google.auth.GoogleAuth({  
+    keyFile: 'credentials.json', 
+    scopes: ['https://www.googleapis.com/auth/spreadsheets'],
+  }); 
+
+  const client = await auth.getClient(); 
+  const sheets = google.sheets({ version: 'v4', auth: client });
+
+  const range = `A1:Z1`; 
+
+  const result = await sheets.spreadsheets.values.get({
+      spreadsheetId,
+      range,
+  });
+ 
+  const roles = result.data.values[0];
+ 
+  console.log("Returning roles")
+  console.log(roles)
+
+  res.send({ roles });
+})
 
 app.post('/create_view', async (req,res) =>{
-  console.log("Creating view")
+  console.log("Creating view") 
   console.log(req.body.view)
   ViewModel.create(req.body.view)
   .then((instance) => {
@@ -231,11 +259,11 @@ app.post('/datasource', async (req, res) => {
     .catch((err) =>{
         console.log("bad")
         res.send(err);
-    })
-})
-
+    }) 
+})  
+ 
 app.get('/datasource', async (req, res) => {
-    var datasource_data;
+    var datasource_data; 
     await DataSource.findById(req.query.id)
     .populate({
       path: 'columns',

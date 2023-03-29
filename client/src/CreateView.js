@@ -1,10 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
+
 import {
   AppBar,
   Box,
   Button,
   Checkbox,
+  Chip,
   Container,
   CssBaseline,
   FormControlLabel,
@@ -46,6 +48,27 @@ function CreateView(props) {
 
   const [columnSettings, setColumnSettings] = useState([]);
 
+  const [selectedRoles, setSelectedRoles] = useState([]);
+  
+  const [selectedRoleList, setSelectedRoleList] = useState([]);
+
+
+  //Hook for getting the available roles
+  useEffect(() => {
+    console.log(props.appId)
+    axios.get('http://localhost:8080/roles', {params: {
+      appId: props.appId
+    }})
+      .then(response => { 
+        console.log(response.data.roles)
+        setRoles(response.data.roles); 
+      })
+      .catch(error => {
+        console.log(error);
+      }); 
+  }, []);
+
+  
   useEffect(() => {
     axios.get('http://localhost:8080/datasource_list1', {params: {
       appId: props.appId
@@ -69,7 +92,7 @@ function CreateView(props) {
   }, []);
 
   useEffect(async  () => {
-    const data_columns = [];
+    const data_columns = []; 
     console.log(selectedDataSource)
     await axios.get("http://localhost:8080/datasource", { params: {
         id: selectedDataSource
@@ -88,35 +111,38 @@ function CreateView(props) {
 
   const handleSubmit = (event) => {
     event.preventDefault();
+
+    //Only columns that have Show? checked
+    const selectedColumns = columnSettings.filter(column => column.show).map(column => ({ id: column._id, name: column.name }));
+
+    console.log(selectedColumns)
     // Create a view model based on the input values
     const viewModel = {
       name: name,
       table: selectedDataSource,
-      columns: columns,
+      columns: selectedColumns,
       view_type: viewType,
       add_record: addRecord,
       edit_record: editRecord,
       delete_record: deleteRecord,
-      roles: roles,
+      roles: selectedRoleList,
       filter: filter,
       user_filter: userFilter,
       edit_filter: editFilter,
       editable_columns: editableColumns,
     };
-    fetch('http://localhost:8080/view', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(viewModel),
-    })
-      .then((response) => response.json())
-      .then((data) => {
-        console.log('Success:', data);
-      })
-      .catch((error) => {
-        console.error('Error:', error);
-      });
+
+    axios.post('http://localhost:8080/create_view', {view: viewModel})
+    .then((response) => {
+      console.log(response)
+    }).catch((error) => {
+      console.log(error)
+    });
+  };
+
+  const handleRoleDelete = (role) => { 
+    setSelectedRoleList(selectedRoleList.filter((r) => r !== role));
+    setRoles([...roles, role]);
   };
 
   const handleColumnSettingChange = (index, field) => {
@@ -213,15 +239,42 @@ function CreateView(props) {
                   </Grid>
                 </Stack>
               )}
+
+              <Box sx={{ display: 'flex', alignItems: 'center', flexWrap: 'wrap', mb: 1 }}>
+                {selectedRoleList.map(role => (
+                  <Chip
+                    key={role}
+                    label={role}
+                    onDelete={() => handleRoleDelete(role)}
+                    sx={{ m: 0.5 }}
+                  />
+                ))}
+              </Box>
               <Grid item xs={12}>
                 <TextField
-                  name="roles"
+                  select
+                  required
                   fullWidth
                   id="roles"
                   label="Roles"
-                  value={roles}
-                  onChange={(event) => setRoles(event.target.value.split(','))}
-                />
+                  value={selectedRoles}
+                  onChange={(event) => {
+                    setSelectedRoles(event.target.value);
+                    if (!selectedRoleList.includes(event.target.value)) {
+                      setSelectedRoleList([...selectedRoleList, event.target.value]);
+                      setRoles(roles.filter(r => r !== event.target.value));
+                    }
+                  }}
+                >
+                {roles.length === 0 ? (
+                  <MenuItem disabled value="">No more roles available</MenuItem>
+                ) : (
+                  roles.map(role => (
+                    <MenuItem key={role} value={role}>
+                      {role}
+                    </MenuItem>
+                  )))}
+                </TextField>
               </Grid>
 
               {viewType === 'TableView' && (

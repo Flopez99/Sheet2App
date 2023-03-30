@@ -142,7 +142,25 @@ function CreateView(props) {
 
   const handleRoleDelete = (role) => { 
     setSelectedRoleList(selectedRoleList.filter((r) => r !== role));
-    setRoles([...roles, role]);
+   //setRoles([...roles, role]);
+  };
+
+  const createHandleColumnSettingChange = (columnProperty) => {
+    return (index, field) => {
+      const newSettings = [...columnSettings];
+      newSettings[index][field] = !newSettings[index][field];
+  
+      // Disable all other checkboxes in the same column
+      if (field === columnProperty && newSettings[index][field]) {
+        for (let i = 0; i < newSettings.length; i++) {
+          if (i !== index && newSettings[i][columnProperty]) {
+            newSettings[i][columnProperty] = false;
+          }
+        }
+      }
+  
+      setColumnSettings(newSettings);
+    };
   };
 
   const handleColumnSettingChange = (index, field) => {
@@ -150,6 +168,10 @@ function CreateView(props) {
     newSettings[index][field] = !newSettings[index][field];
     setColumnSettings(newSettings);
   };
+
+  const handleFilterColumnChange = createHandleColumnSettingChange('filter');
+  const handleUserFilterColumnChange = createHandleColumnSettingChange('userFilter');
+  const handleEditFilterColumnChange = createHandleColumnSettingChange('editFilter');
 
   return (
     <ThemeProvider theme={theme}>
@@ -252,17 +274,18 @@ function CreateView(props) {
               </Box>
               <Grid item xs={12}>
                 <TextField
+                  defaultValue={''}
                   select
                   required
                   fullWidth
                   id="roles"
                   label="Roles"
-                  value={selectedRoles}
+                  //value={selectedRoles}
                   onChange={(event) => {
                     setSelectedRoles(event.target.value);
                     if (!selectedRoleList.includes(event.target.value)) {
                       setSelectedRoleList([...selectedRoleList, event.target.value]);
-                      setRoles(roles.filter(r => r !== event.target.value));
+                     // setRoles(roles.filter(r => r !== event.target.value));
                     }
                   }}
                 >
@@ -310,13 +333,15 @@ function CreateView(props) {
                             <TableCell>
                               <Checkbox
                                 checked={column.filter}
-                                onChange={() => handleColumnSettingChange(index, 'filter')}
+                                onChange={() => handleFilterColumnChange(index, 'filter')}
+                                disabled={column.type !== 'Boolean'}
                               />
                             </TableCell>
                             <TableCell>
                               <Checkbox
                                 checked={column.userFilter}
-                                onChange={() => handleColumnSettingChange(index, 'userFilter')}
+                                onChange={() => handleUserFilterColumnChange(index, 'userFilter')}
+                                disabled={column.type !== 'Text'}
                               />
                             </TableCell>
                           </TableRow>
@@ -358,14 +383,15 @@ function CreateView(props) {
                             </TableCell>
                             <TableCell>
                               <Checkbox
-                                checked={column.filter}
-                                onChange={() => handleColumnSettingChange(index, 'filter')}
+                                checked={column.editFilter}
+                                onChange={() => handleEditFilterColumnChange(index, 'editFilter')}
+                                disabled={column.type !== 'Boolean'}
                               />
                             </TableCell>
                             <TableCell>
                               <Checkbox
-                                checked={column.userFilter}
-                                onChange={() => handleColumnSettingChange(index, 'userFilter')}
+                                checked={column.editableColumns}
+                                onChange={() => handleColumnSettingChange(index, 'editableColumns')}
                               />
                             </TableCell>
                           </TableRow>

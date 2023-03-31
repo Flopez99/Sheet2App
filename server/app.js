@@ -208,13 +208,14 @@ app.post('/create_view', async (req,res) =>{
   console.log("Creating view") 
   console.log(req.body.view)
   ViewModel.create(req.body.view)
-  .then((instance) => {
+  .then(async (instance) => {
     console.log(instance)
-
+    const testapp = await AppModel.findByIdAndUpdate(req.body.appId, {$push : {views: instance._id}})
     res.status(200).json({
       message: 'View Created successfully',
       view_create:instance
     });
+
   })
   .catch((err) =>{
     console.log(err)
@@ -244,7 +245,17 @@ app.get('/app', async (req, res) =>{
     var app_data;
     console.log("Getting Id")
     console.log(req.query.id)
-    await AppModel.findById(req.query.id).populate('data_sources').then((res) => {
+    await AppModel.findById(req.query.id).populate('data_sources')
+    .populate({
+      path: 'views',
+      populate: {
+        path: 'table',
+        populate: {
+          path: 'columns'
+        }
+      }
+    })
+    .then((res) => {
         app_data = res
         console.log("Good1")
     })

@@ -32,6 +32,9 @@ import DataSourceDropdown from './DataSourceDropdown';
 const theme = createTheme();
 
 function CreateView(props) {
+  console.log(props)
+  const view = props.view
+  console.log(view)
   const [name, setName] = useState('');
   const [selectedDataSource, setSelectedDataSource] = useState('');
   const [dataSourceList, setDataSourceList] = useState([]);
@@ -41,10 +44,10 @@ function CreateView(props) {
   const [editRecord, setEditRecord] = useState(false);
   const [deleteRecord, setDeleteRecord] = useState(false);
   const [roles, setRoles] = useState([]);
-  const [filter, setFilter] = useState('');
-  const [userFilter, setUserFilter] = useState('');
-  const [editFilter, setEditFilter] = useState('');
-  const [editableColumns, setEditableColumns] = useState([]);
+  const [filter, setFilter] = useState();
+  const [userFilter, setUserFilter] = useState();
+  const [editFilter, setEditFilter] = useState();
+  //const [editableColumns, setEditableColumns] = useState([]);
 
   const [columnSettings, setColumnSettings] = useState([]);
 
@@ -53,7 +56,7 @@ function CreateView(props) {
   const [selectedRoleList, setSelectedRoleList] = useState([]);
 
 
-  //Hook for getting the available roles
+  //Hook for getting the available roles Ran when CreateView is initiated
   useEffect(() => {
     console.log(props.appId)
     axios.get('http://localhost:8080/roles', {params: {
@@ -67,7 +70,57 @@ function CreateView(props) {
         console.log(error);
       }); 
   }, []);
+//Hook used if for edit
+  useEffect(async () => {
+    if(Object.keys(view).length !== 0){
+      console.log('in here')
+      console.log(view);
+      setName(view.name)
+      setSelectedDataSource(view.table.name)
+      setViewType(view.view_type)
+      setAddRecord(view.add_record)
+      setEditRecord(view.edit_record)
+      setDeleteRecord(view.delete_record)
+      setSelectedRoleList(view.roles)
+      
+      
+      //creates all columns, and upadtes the ones needed
+      const data_columns = []
+      var count = 0;
+      for(const column of view.table.columns){
+        data_columns.push({id: count, show: false, filter: false, userFilter: false, editFilter: false, editableColumns: false  , ...column})
+        count++;
+      }
+      await data_columns
+      console.log(data_columns)
+      //sets all columns that have show as true as true
+      for(const column_id of view.columns){
+        let index = data_columns.findIndex((col) => col._id === column_id)
+        data_columns[index].show = true;
+      }
+      //sets all editable Columns
+      for(const column_id of view.editable_columns){
+        let index = data_columns.findIndex((col => col._id == column_id))
+        data_columns[index].editableColumns = true;
+      }
 
+      var index;
+      if((index = data_columns.findIndex((col) => col._id === view.filter)) !== -1){
+        data_columns[index].filter = true;
+        setFilter(data_columns[index])
+      }
+      if((index = data_columns.findIndex((col) => col._id === view.user_filter)) !== -1){
+        data_columns[index].userFilter = true;
+        setUserFilter(data_columns[index])
+      }
+      if((index = data_columns.findIndex((col) => col._id === view.edit_filter)) !== -1){
+        data_columns[index].editFilter = true;
+        setEditFilter(data_columns[index])
+      }
+      console.log(data_columns)
+      setColumnSettings(data_columns)
+    }
+  }, [view])
   
   useEffect(() => {
     axios.get('http://localhost:8080/datasource_list1', {params: {
@@ -88,7 +141,7 @@ function CreateView(props) {
     }
 
 
-    setColumnSettings(initialSettings);
+    //setColumnSettings(initialSettings);
   }, []);
 
   useEffect(async  () => {
@@ -101,7 +154,7 @@ function CreateView(props) {
       console.log(res.data)
       var count = 0;
       for(const column of res.data.columns){
-        data_columns.push({id: count, show: false, filter: false, userFilter: false , ...column})
+        data_columns.push({id: count, show: false, filter: false, userFilter: false, editFilter: false, editableColumns: false  , ...column})
         count++;
       }
       setColumnSettings(data_columns)
@@ -111,10 +164,13 @@ function CreateView(props) {
 
   const handleSubmit = (event) => {
     event.preventDefault();
-
     //Only columns that have Show? checked
-    const selectedColumns = columnSettings.filter(column => column.show).map(column => ({ id: column._id, name: column.name }));
-
+    console.log(columnSettings)
+    const selectedColumns = columnSettings.filter(column => column.show).map(column => (column._id));
+    const editableColumns = columnSettings.filter(column => column.editableColumns).map(column => (column._id));
+    console.log(selectedColumns)
+    console.log('hi')
+    console.log('bi')
     console.log(selectedColumns)
     // Create a view model based on the input values
     const viewModel = {
@@ -131,8 +187,8 @@ function CreateView(props) {
       edit_filter: editFilter,
       editable_columns: editableColumns,
     };
-
-    axios.post('http://localhost:8080/create_view', {view: viewModel})
+    console.log(viewModel)
+    axios.post('http://localhost:8080/create_view', {view: viewModel, appId: props.appId})
     .then((response) => {
       console.log(response)
     }).catch((error) => {
@@ -145,6 +201,7 @@ function CreateView(props) {
    //setRoles([...roles, role]);
   };
 
+  //handles changes for checkboxes that can only have 1 value as true
   const createHandleColumnSettingChange = (columnProperty) => {
     return (index, field) => {
       const newSettings = [...columnSettings];
@@ -158,7 +215,14 @@ function CreateView(props) {
           }
         }
       }
-  
+      //added these fields to set the columns that are needed
+      //if checked then sets filter, if remove cheked remove filter
+      if(field === "filter")
+        newSettings[index][field]?setFilter(newSettings[index]):setFilter()
+      if(field === "userFilter")
+        newSettings[index][field]?setUserFilter(newSettings[index]):setUserFilter()
+      if(field === "editFilter")
+        newSettings[index][field]?setEditFilter(newSettings[index]):setEditFilter()
       setColumnSettings(newSettings);
     };
   };

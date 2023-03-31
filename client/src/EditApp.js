@@ -18,13 +18,14 @@ import { useNavigate } from 'react-router-dom'
 import {useEffect, useState} from 'react'
 import CreateView from './CreateView';
 import DataSourceList from './DataSourceList';
+import ViewsList from './ViewsList';
 
 
 const theme = createTheme();
 
 
 function EditApp(props) {//props.datasource contains datasource id needed to fill in page
- const [datasource, setDatasource] = useState({})
+ const [app, setApp] = useState({})
  const [appName, setAppName] = useState('');
  const [roleMembershipUrl, setRoleMembershipUrl] = useState('');
  const [published, setPublished] = useState({})
@@ -32,7 +33,7 @@ function EditApp(props) {//props.datasource contains datasource id needed to fil
 
  useEffect(async () => {
     await axios.get("http://localhost:8080/app", { params: {
-        id: props.datasource
+        id: props.appId
     }})
     .then((res) =>{
         console.log("Got Datasource")
@@ -41,7 +42,7 @@ function EditApp(props) {//props.datasource contains datasource id needed to fil
         setPublished(res.data.published);
         setAppName(res.data.app_name);
         setRoleMembershipUrl(res.data.role_membership_url);
-        setDatasource(res.data)
+        setApp(res.data)
     })
   }, []);
 
@@ -61,7 +62,7 @@ function EditApp(props) {//props.datasource contains datasource id needed to fil
     e.preventDefault();
 
     await axios.post('http://localhost:8080/updateApp', {
-      id: props.datasource,
+      id: props.appId,
       app_name: appName,
       role_membership_url: roleMembershipUrl,
       published: published
@@ -76,7 +77,7 @@ function EditApp(props) {//props.datasource contains datasource id needed to fil
   const handleDeleteApp = async () => {
     if (window.confirm('Are you sure you want to delete this app?')) {
       await axios.post('http://localhost:8080/deleteApp', {
-        id: props.datasource
+        id: props.appId
       })
       .then((response) => {
         alert(response.data.message);
@@ -137,7 +138,7 @@ function EditApp(props) {//props.datasource contains datasource id needed to fil
                 <Button
                   component={Link}
                   to="/createdatasource"
-                  state={props.datasource}
+                  state={props.appId}
                   type="AddDataSource"
                   fullWidth
                   variant="contained"
@@ -150,7 +151,7 @@ function EditApp(props) {//props.datasource contains datasource id needed to fil
                 <Button
                   component={Link}
                   to="/view"
-                  state={props.datasource}
+                  state={props.appId}
                   type="AddView"
                   fullWidth
                   variant="contained"
@@ -193,10 +194,18 @@ function EditApp(props) {//props.datasource contains datasource id needed to fil
           </Box>
         </Box>
       </Container>
-      {Object.keys(datasource).length !== 0 && (
+      {Object.keys(app).length !== 0 && (
         <DataSourceList
-          actual_appId={props.datasource}
-          datasources={datasource.data_sources}
+          actual_appId={props.appId}
+          datasources={app.data_sources}
+        />
+      )}
+      <br></br>
+      <br></br>
+      <br></br>
+      {Object.keys(app).length !== 0 && (
+        <ViewsList
+          views = {app.views}
         />
       )}
     </ThemeProvider>

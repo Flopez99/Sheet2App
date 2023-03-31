@@ -22,6 +22,7 @@ function App() {
     const [isDeveloper, setIsDeveloper] = useState(false);
     const [appId, setAppId] = useState({})
     const [datasourceId, setDatasourceId] = useState({})
+    const [view, setView] = useState({})
 
 
     let location = useLocation();
@@ -54,9 +55,9 @@ function App() {
       }
       if(location.pathname === "/editapp"){
         if(location.state != null){
-            var datasource = location.state //not really datasource, its more appid
-            console.log("id " + datasource)
-            setDatasource(datasource)//passes as a datasource id
+            var appId = location.state //not really datasource, its more appid
+            console.log("id " + appId)
+            setAppId(appId)//passes as a datasource id
         }
       }
 
@@ -84,7 +85,16 @@ function App() {
             setAppId(appId)
         }
       }
-    }, [location, user, datasource, appId, datasourceId]);
+      if(location.pathname === "/editview"){
+        console.log('in view 1')
+        if(location.state != null){
+            const view = location.state.view //not really datasource, its more appid
+            console.log('in view')
+            console.log(location.state)
+            setView(view)//passes as a datasource id
+        }
+      }
+    }, [location, user, datasource, appId, datasourceId, view]);
 
     return (
     <>
@@ -98,8 +108,9 @@ function App() {
             <Route path="/createapp" element={<CreateApp user = {user}/>}/>
             <Route path="/datasource" element={<DataSource/>}/>
             <Route path="/createdatasource" element={<CreateDataSource appId = {appId}/>}/>
-            <Route path="/editapp" element={<EditApp datasource = {datasource}/>}/>
+            <Route path="/editapp" element={<EditApp appId = {appId}/>}/>
             <Route path="/view" element={<CreateView appId = {appId}/>} />
+            <Route path ="/editview" element={<CreateView appId = {appId} view= {view}/>}/>
             <Route path="/editdatasource" element = {<EditDataSource datasource_id={datasourceId} appId = {appId} />} />
 
         </Routes>

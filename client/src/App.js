@@ -14,6 +14,7 @@ import {useEffect, useState, useMemo} from 'react'
 import EditApp from './EditApp';
 import CreateView from './CreateView';
 import EditDataSource from './EditDataSource';
+import EndUserApp from './EndUserApp';
 
 
 function App() {
@@ -54,6 +55,13 @@ function App() {
         }
       }
       if(location.pathname === "/editapp"){
+        if(location.state != null){
+            var appId = location.state //not really datasource, its more appid
+            console.log("id " + appId)
+            setAppId(appId)//passes as a datasource id
+        }
+      }
+      if(location.pathname === "/end_user_app"){
         if(location.state != null){
             var appId = location.state //not really datasource, its more appid
             console.log("id " + appId)
@@ -112,7 +120,7 @@ function App() {
             <Route path="/view" element={<CreateView appId = {appId}/>} />
             <Route path ="/editview" element={<CreateView appId = {appId} view= {view}/>}/>
             <Route path="/editdatasource" element = {<EditDataSource datasource_id={datasourceId} appId = {appId} />} />
-
+            <Route path="/end_user_app" element = {<EndUserApp appId = {appId}/>}/>
         </Routes>
     </>
 

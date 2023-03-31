@@ -43,6 +43,8 @@ function UserAppsList({ userEmail, endUser }) {
     
     if(endUser){
       //will make a route to show app for endusers
+      navigate("/end_user_app", {state: appId})
+
     }else{
       navigate("/editapp", {state: appId})
     }

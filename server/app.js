@@ -4,7 +4,7 @@ const mongoose = require('mongoose');
 const morgan = require('morgan');
 const cors = require('cors');
 const  { google } = require('googleapis');
-const AppModel = require("./models/appschema");
+const AppModel = require("./models/appschema"); 
 const ViewModel = require("./models/ViewSchema");
 const DataSource = require("./models/DataSourceSchema")
 const Column = require("./models/ColumnSchema")
@@ -101,7 +101,7 @@ const isEndUser = async (sheets, spreadsheetId, userEmail) => {
   
     res.json(endUserApps);
 });
-
+ 
 
 // Checks if the provided email is included under the developer role
 const isDeveloper = async (sheets, spreadsheetId, userEmail) => {
@@ -198,11 +198,33 @@ app.get('/roles', async (req, res) => {
   }catch(error){
 
     console.log("Error Accessing Role Membership Sheet: " + error)
-
+ 
   }
  
   res.send({ roles });
 })
+
+
+app.post('/edit_view', async (req, res) => {
+  const viewId = req.body.viewId;
+  const viewData = req.body.view; 
+
+  ViewModel.findByIdAndUpdate(viewId, viewData)
+    .then((instance) => {
+      res.status(200).json({
+        message: 'View updated successfully',
+        view: instance,
+      });
+    })
+    .catch((err) => {
+      console.log(err);
+      res.status(500).json({
+        error: 'Error updating view',
+      });
+    });
+});
+
+
 
 app.post('/create_view', async (req,res) =>{
   console.log("Creating view") 

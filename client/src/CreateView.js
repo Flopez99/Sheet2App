@@ -70,58 +70,69 @@ function CreateView(props) {
         console.log(error);
       }); 
   }, []);
-//Hook used if for edit
-  useEffect(async () => {
-    if(Object.keys(view).length !== 0){
-      console.log('in here')
-      console.log(view);
-      setName(view.name)
-      setSelectedDataSource(view.table.name)
-      setViewType(view.view_type)
-      setAddRecord(view.add_record)
-      setEditRecord(view.edit_record)
-      setDeleteRecord(view.delete_record)
-      setSelectedRoleList(view.roles)
-      
-      
-      //creates all columns, and upadtes the ones needed
-      const data_columns = []
-      var count = 0;
-      for(const column of view.table.columns){
-        data_columns.push({id: count, show: false, filter: false, userFilter: false, editFilter: false, editableColumns: false  , ...column})
-        count++;
-      }
-      await data_columns
-      console.log(data_columns)
-      //sets all columns that have show as true as true
-      for(const column_id of view.columns){
-        let index = data_columns.findIndex((col) => col._id === column_id)
-        data_columns[index].show = true;
-      }
-      //sets all editable Columns
-      for(const column_id of view.editable_columns){
-        let index = data_columns.findIndex((col => col._id == column_id))
-        data_columns[index].editableColumns = true;
-      }
 
-      var index;
-      if((index = data_columns.findIndex((col) => col._id === view.filter)) !== -1){
-        data_columns[index].filter = true;
-        setFilter(data_columns[index])
+  //Hook used if for edit
+  useEffect(() => {
+    const fetchData = async () => {
+      if (Object.keys(view).length !== 0) {
+        console.log("in here");
+        console.log(view);
+        setName(view.name);
+        setSelectedDataSource(view.table);
+        setViewType(view.view_type);
+        setAddRecord(view.add_record);
+        setEditRecord(view.edit_record);
+        setDeleteRecord(view.delete_record);
+        setSelectedRoleList(view.roles);
+
+        const data_columns = [];
+        var count = 0;
+        for (const column of view.table.columns) {
+          data_columns.push({
+            id: count,
+            show: false,
+            filter: false,
+            userFilter: false,
+            editFilter: false,
+            editableColumns: false,
+            ...column,
+          });
+          count++;
+        }
+        await data_columns;
+        console.log(data_columns);
+
+        for (const column_id of view.columns) {
+          let index = data_columns.findIndex((col) => col._id === column_id);
+          data_columns[index].show = true;
+        }
+
+        for (const column_id of view.editable_columns) {
+          let index = data_columns.findIndex((col) => col._id === column_id);
+          data_columns[index].editableColumns = true;
+        }
+
+        var index;
+        if ((index = data_columns.findIndex((col) => col._id === view.filter)) !== -1) {
+          data_columns[index].filter = true;
+          setFilter(data_columns[index]);
+        }
+        if ((index = data_columns.findIndex((col) => col._id === view.user_filter)) !== -1) {
+          data_columns[index].userFilter = true;
+          setUserFilter(data_columns[index]);
+        }
+        if ((index = data_columns.findIndex((col) => col._id === view.edit_filter)) !== -1) {
+          data_columns[index].editFilter = true;
+          setEditFilter(data_columns[index]);
+        }
+        console.log(data_columns);
+        setColumnSettings(data_columns);
       }
-      if((index = data_columns.findIndex((col) => col._id === view.user_filter)) !== -1){
-        data_columns[index].userFilter = true;
-        setUserFilter(data_columns[index])
-      }
-      if((index = data_columns.findIndex((col) => col._id === view.edit_filter)) !== -1){
-        data_columns[index].editFilter = true;
-        setEditFilter(data_columns[index])
-      }
-      console.log(data_columns)
-      setColumnSettings(data_columns)
-    }
-  }, [view])
-  
+    };
+
+    fetchData();
+  }, [view]);
+
   useEffect(() => {
     axios.get('http://localhost:8080/datasource_list1', {params: {
       appId: props.appId
@@ -139,7 +150,6 @@ function CreateView(props) {
     for (let i = 1; i <= 5; i++) {
       initialSettings.push({ show: false, filter: false, userFilter: false });
     }
-
 
     //setColumnSettings(initialSettings);
   }, []);
@@ -188,7 +198,10 @@ function CreateView(props) {
       editable_columns: editableColumns,
     };
     console.log(viewModel)
-    axios.post('http://localhost:8080/create_view', {view: viewModel, appId: props.appId})
+
+    const endpoint = view ? "http://localhost:8080/edit_view" : "http://localhost:8080/create_view";
+
+    axios.post(endpoint, {view: viewModel, appId: props.appId, viewId:view._id})
     .then((response) => {
       console.log(response)
     }).catch((error) => {

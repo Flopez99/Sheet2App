@@ -1,36 +1,32 @@
-import React from 'react';
-import { MenuItem, FormControl, Select, InputLabel } from '@mui/material';
-import CreateView from './CreateView';
+import React, { useEffect, useState } from 'react';
+import { MenuItem, TextField } from '@mui/material';
 
 function DataSourceDropdown(props) {
-  const { dataSourceList, selectedDataSource, setSelectedDataSource } = props;
+  const dataSourceList = props.dataSourceList;
+  const [selectedDataSource, setSelectedDataSource] = useState(props.selectedDataSource);
 
-  const handleChange = (event) => {
-    setSelectedDataSource(event.target.value);
-  };
-  
+  useEffect(() => {
+    if (dataSourceList.length > 0 && !selectedDataSource) {
+      setSelectedDataSource(selectedDataSource);
+    }
+  }, [dataSourceList, selectedDataSource]);
+
   return (
-    <FormControl fullWidth>
-      <InputLabel id="data-source-dropdown-label">Data Source</InputLabel>
-      <Select
-        labelId="data-source-dropdown-label"
-        id="data-source-dropdown"
-        value={selectedDataSource}
-        label="Data Source"
-        onChange={handleChange}
-      >
-      {dataSourceList.length > 0 ? (
-        dataSourceList.map((dataSource) => (
-          <MenuItem key={dataSource._id} value={dataSource._id}>
-            {dataSource.name}
-          </MenuItem>
-        ))
-      ) : (
-        <MenuItem disabled>No data sources available</MenuItem>
-      )}
-      </Select>
-    </FormControl>
+    <TextField
+      select
+      required
+      fullWidth
+      id="dataSource"
+      label="Data Source"
+      value={selectedDataSource}
+      onChange={(event) => setSelectedDataSource(event.target.value)}
+    >
+      {dataSourceList.map((dataSource) => (
+        <MenuItem key={dataSource.id} value={dataSource.id}>
+          {dataSource.name}
+        </MenuItem>
+      ))}
+    </TextField>
   );
 }
-
 export default DataSourceDropdown;

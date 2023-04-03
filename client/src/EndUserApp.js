@@ -13,20 +13,24 @@ function EndUserApp(props) {
   const [app, setApp] = useState({})
   console.log("In enduserapp")
   //Used on Initialize
-  useEffect(async () => {
-    await axios.get("http://localhost:8080/app", { params: {
-      id: props.appId
-    }})
-    .then((res) =>{
-      console.log("Got Datasource")
-      console.log(res.data)
-      setApp(res.data)
-  })
-  }, [])
-
+  useEffect(() => {
+    const getApp = async () => {
+      try {
+        const res = await axios.get("http://localhost:8080/app", { params: { id: props.appId } });
+        console.log("Got App");
+        console.log(res.data);
+        setApp(res.data);
+      } catch (error) {
+        console.error(error);
+      }
+    };
+    getApp();
+  }, [props.appId]);
+  
   // useEffect(() => {
 
   // }, [app])
+  
   const datasource1 = []//info taken from table, and filled in with initial value info of column if needed
   const datasource2 = []
   const all_views = [] //list of accessible views of the user based on roles.

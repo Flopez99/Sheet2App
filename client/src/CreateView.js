@@ -154,34 +154,46 @@ function CreateView(props) {
     //setColumnSettings(initialSettings);
   }, []);
 
-  useEffect(async  () => {
-    const data_columns = []; 
-    console.log(selectedDataSource)
-    await axios.get("http://localhost:8080/datasource", { params: {
-        id: selectedDataSource
-    }})
-    .then((res) =>{ 
-      console.log(res.data)
+  useEffect(() => {
+    async function fetchData() {
+      const data_columns = [];
+      console.log(selectedDataSource);
+      const res = await axios.get("http://localhost:8080/datasource", {
+        params: {
+          id: selectedDataSource,
+        },
+      });
+      console.log(res.data);
+
+      setColumns(res.data.columns)
       var count = 0;
-      for(const column of res.data.columns){
-        data_columns.push({id: count, show: false, filter: false, userFilter: false, editFilter: false, editableColumns: false  , ...column})
+      for (const column of res.data.columns) {
+        data_columns.push({
+          id: count,
+          show: false,
+          filter: false,
+          userFilter: false,
+          editFilter: false,
+          editableColumns: false,
+          ...column,
+        });
         count++;
       }
-      setColumnSettings(data_columns)
-    })
 
-  }, [selectedDataSource])
+      setColumnSettings(data_columns);
+
+    }
+    fetchData();
+  }, [selectedDataSource]);
 
   const handleSubmit = (event) => {
     event.preventDefault();
     //Only columns that have Show? checked
-    console.log(columnSettings)
-    const selectedColumns = columnSettings.filter(column => column.show).map(column => (column._id));
-    const editableColumns = columnSettings.filter(column => column.editableColumns).map(column => (column._id));
-    console.log(selectedColumns)
-    console.log('hi')
-    console.log('bi')
-    console.log(selectedColumns)
+
+    const selectedColumns = columnSettings.filter(column => column.show).map(column => column);
+    const editableColumns = columnSettings.filter(column => column.editableColumns).map(column => column);
+
+
     // Create a view model based on the input values
     const viewModel = {
       name: name,
@@ -200,8 +212,9 @@ function CreateView(props) {
     console.log(viewModel)
 
     const endpoint = view ? "http://localhost:8080/edit_view" : "http://localhost:8080/create_view";
+    const viewID = view ? view._id : 0
 
-    axios.post(endpoint, {view: viewModel, appId: props.appId, viewId:view._id})
+    axios.post(endpoint, {view: viewModel, appId: props.appId, viewId:viewID})
     .then((response) => {
       console.log(response)
     }).catch((error) => {

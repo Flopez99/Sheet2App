@@ -15,7 +15,7 @@ import EditApp from './EditApp';
 import CreateView from './CreateView';
 import EditDataSource from './EditDataSource';
 import EndUserApp from './EndUserApp';
-
+import DisplayApp from './DisplayApp';
 
 function App() {
     const [user, setUser] = useState({})
@@ -120,7 +120,7 @@ function App() {
             <Route path="/view" element={<CreateView appId = {appId}/>} />
             <Route path ="/editview" element={<CreateView appId = {appId} view= {view}/>}/>
             <Route path="/editdatasource" element = {<EditDataSource datasource_id={datasourceId} appId = {appId} />} />
-            <Route path="/end_user_app" element = {<EndUserApp appId = {appId}/>}/>
+            <Route path="/end_user_app" element = {<DisplayApp appId = {appId}/>}/>
         </Routes>
     </>
 

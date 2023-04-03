@@ -1,24 +1,45 @@
-import React from 'react'
-import {IconButton, Stack, Button, Typography, AppBar, Card, CardActionArea, CardContent, CardMedia, CssBaseline, Grid, Toolbar, Container} from '@mui/material'
+import React from 'react';
+import {
+  Box,
+  Button,
+  Typography,
+  Container,
+  Paper,
+  Link as MuiLink,
+} from '@mui/material';
 import { Link } from 'react-router-dom';
 import UserAppsList from './UserAppsList';
 
-function EndUserApps({userEmail,isDeveloper}) {
+function EndUserApps({ userEmail, isDeveloper }) {
   return (
     <main>
-        <div>
-            <Container >
-                <Stack direction ="row" justifyContent="space-evenly">
-                    {isDeveloper && <Button component={Link} to="/developer">Switch to Developer</Button>}
-                    <Typography variant = "h2" color = "textPrimary">End User</Typography>
-                    <Button>Button</Button>
-                </Stack>
-            </Container>
-        </div>
-        <UserAppsList userEmail={userEmail} endUser={true}/>
-
+      <Box sx={{ flexGrow: 1, paddingTop: 3, paddingBottom: 3 }}>
+        <Container maxWidth="lg">
+          <Box
+            sx={{
+              display: 'flex',
+              justifyContent: 'space-between',
+              alignItems: 'center',
+              paddingBottom: 2,
+            }}
+          >
+            {isDeveloper && (
+              <Button component={Link} to="/developer" variant="contained">
+                Switch to Developer
+              </Button>
+            )}
+            <Typography variant="h2" color="textPrimary">
+              End User
+            </Typography>
+            <Button variant="contained" color="secondary">Button</Button>
+          </Box>
+          <Paper elevation={4}>
+            <UserAppsList userEmail={userEmail} endUser={true} />
+          </Paper>
+        </Container>
+      </Box>
     </main>
-  )
+  );
 }
 
-export default EndUserApps
+export default EndUserApps;

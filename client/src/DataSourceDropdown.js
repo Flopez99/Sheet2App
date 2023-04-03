@@ -6,10 +6,10 @@ function DataSourceDropdown(props) {
   const [selectedDataSource, setSelectedDataSource] = useState(props.selectedDataSource);
 
   useEffect(() => {
-    if (dataSourceList.length > 0 && !selectedDataSource) {
-      setSelectedDataSource(selectedDataSource);
+    if (dataSourceList.length > 0) {
+      setSelectedDataSource(props.selectedDataSource);
     }
-  }, [dataSourceList, selectedDataSource]);
+  }, [dataSourceList, props.selectedDataSource]);
 
   return (
     <TextField

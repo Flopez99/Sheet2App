@@ -12,6 +12,7 @@ function TableView({ view, sheetData }) {
   console.log(sheetData)
   const [filteredColumns, setFilteredColumns] = useState([])
   const [datasource, setDatasource] = useState({})
+  const [keyIndex, setKeyIndex] = useState(0)
 
   useEffect(() => {
     const getFilteredColumns = async () => { 
@@ -21,9 +22,13 @@ function TableView({ view, sheetData }) {
       var headers = sheetData.sheet_data[0]
       console.log(headers)
       console.log(allColumns)
+      let key_col = allColumns.find(column => column._id = sheetData.key)
+      let key_index = headers.findIndex(header => header === key_col.name)
+      console.log(key_index)
       const init_columns = allColumns.filter(column => shownColumns.includes(column._id))
         .map(obj => ({ ...obj, index: headers.findIndex(header => header === obj.name)}));
       console.log(init_columns)
+      setKeyIndex(key_index)
       setFilteredColumns(init_columns)
       setDatasource(sheetData)
     };
@@ -69,8 +74,8 @@ function TableView({ view, sheetData }) {
             {
 
             }
-            {typeof sheetData.sheet_data !== 'undefined' &&  (sheetData.sheet_data).slice(1).map((record, index) =>(
-                <TableRow key={index} className={classes.tableRow} onClick={() => handleClickRecord(record)}>
+            {typeof sheetData.sheet_data !== 'undefined' &&  (sheetData.sheet_data).slice(1).map((record) =>(
+                <TableRow key={record[keyIndex]} className={classes.tableRow} onClick={() => handleClickRecord(record)}>
                   {filteredColumns.map((column) => (
                     <TableCell key={column._id}>{record[column.index] || ''}</TableCell>
                   ))} 

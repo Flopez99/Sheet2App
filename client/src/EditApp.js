@@ -19,7 +19,7 @@ import {useEffect, useState} from 'react'
 import CreateView from './CreateView';
 import DataSourceList from './DataSourceList';
 import ViewsList from './ViewsList';
-
+import Paper from '@mui/material/Box';
 
 const theme = createTheme();
 
@@ -194,20 +194,24 @@ function EditApp(props) {//props.datasource contains datasource id needed to fil
           </Box>
         </Box>
       </Container>
-      {Object.keys(app).length !== 0 && (
-        <DataSourceList
-          actual_appId={props.appId}
-          datasources={app.data_sources}
-        />
-      )}
-      <br></br>
-      <br></br>
-      <br></br>
-      {Object.keys(app).length !== 0 && (
-        <ViewsList
-          views = {app.views}
-        />
-      )}
+      <Container>
+        <Paper elevation={4}>
+        {Object.keys(app).length !== 0 && (
+          <DataSourceList
+            actual_appId={props.appId}
+            datasources={app.data_sources}
+          />
+        )}
+        <br></br>
+        <br></br>
+        <br></br>
+        {Object.keys(app).length !== 0 && (
+          <ViewsList
+            views = {app.views}
+          />
+        )}
+        </Paper>
+      </Container>
     </ThemeProvider>
   );
 }

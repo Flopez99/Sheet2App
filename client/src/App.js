@@ -120,7 +120,7 @@ function App() {
             <Route path="/view" element={<CreateView appId = {appId}/>} />
             <Route path ="/editview" element={<CreateView appId = {appId} view= {view}/>}/>
             <Route path="/editdatasource" element = {<EditDataSource datasource_id={datasourceId} appId = {appId} />} />
-            <Route path="/end_user_app" element = {<DisplayApp appId = {appId}/>}/>
+            <Route path="/end_user_app" element = {<DisplayApp appId = {appId} userEmail = {user.email}/>}/>
         </Routes>
     </>
 

@@ -69,7 +69,7 @@ const isEndUser = async (sheets, spreadsheetId, userEmail) => {
   
     return false; 
   };
-  
+
   // GET all apps for a given end-user
   app.get('/api/apps-enduser', async (req, res) => {
     const userEmail = req.query.userEmail;
@@ -193,6 +193,8 @@ app.get('/roles', async (req, res) => {
         spreadsheetId,
         range, 
     });
+    console.log('in roles')
+    console.log(result.data.values)
     roles = result.data.values[0];
 
   }catch(error){
@@ -201,6 +203,53 @@ app.get('/roles', async (req, res) => {
  
   }
  
+  res.send({ roles });
+})
+
+app.get('/roles_user', async (req, res) => {
+  const appId = req.query.appId; 
+  const user = req.query.userEmail
+  console.log(user)
+  const role_sheet = await AppModel.findById(appId)
+
+  
+  const spreadsheetId = getSpreadsheetIdFromUrl(role_sheet.role_membership_url);
+  const auth = new google.auth.GoogleAuth({  
+    keyFile: 'credentials.json', 
+    scopes: ['https://www.googleapis.com/auth/spreadsheets'],
+  }); 
+
+  const client = await auth.getClient(); 
+  const sheets = google.sheets({ version: 'v4', auth: client });
+
+  const range = `A1:Z`; 
+  let roles = []
+  try{
+    const result = await sheets.spreadsheets.values.get({ 
+        spreadsheetId,
+        range, 
+    });
+    console.log('in roles')
+    console.log(result.data.values)
+    const sheet_data = result.data.values
+    for (let j = 0; j < sheet_data[0].length; j++) {
+      for (let i = 0; i < sheet_data.length; i++) {
+        if (sheet_data[i][j] === user) {
+          console.log('240')
+          console.log(sheet_data[0][j])
+          roles.push(sheet_data[0][j]);
+          // Break out of the inner loop once a match is found in this column
+          break;
+        }
+      }
+    }
+  
+
+  }catch(error){
+
+    console.log("Error Accessing Role Membership Sheet: " + error)
+ 
+  }
   res.send({ roles });
 })
 
@@ -336,7 +385,45 @@ app.post('/column', async (req,res) => {
         res.send(err);
     })
 })
+app.post('/delete_column', async (req, res) => {
+  console.log("In Deletion")
+  const columnId = req.body.columnId
 
+  // Remove the column from all views
+  try {
+    await ViewModel.updateMany(
+      {
+        $or: [
+          { columns: columnId },
+          { filter: columnId },
+          { user_filter: columnId },
+          { editable_columns: columnId }
+        ]
+      },
+      {
+        $pull: {
+          columns: columnId,
+          filter: columnId,
+          user_filter: columnId,
+          editable_columns: columnId
+        }
+      }
+    );
+    await DataSource.updateMany(
+      { columns: columnId },
+      { $pull: { columns: columnId } }
+    );
+    await Column.deleteOne({ _id: columnId });
+
+    console.log('References to the column have been removed from all views');
+  } catch (error) {
+    console.log("In Error")
+    console.error(error);
+  }
+  res.send("good")
+
+
+})
 app.get('/datasource_list', async (req, res) => {
     const appId = req.query.appId;
     const app_datasources = await AppModel.findById(appId).populate('data_sources')
@@ -381,7 +468,9 @@ app.post('/app_datasource', async (req, res) => {
 app.post('/updateColumn', async (req,res) =>{
     let columnId = req.body.columnId
     let column_data = req.body.column_data
+    console.log(column_data)
     let columntest = await Column.findByIdAndUpdate(columnId, column_data)
+    console.log('after upadte')
     console.log(columntest)
     res.send('done')
 })
@@ -493,6 +582,40 @@ app.get('/api/fetchSheetData', async (req, res) => {
         auth,
         spreadsheetId: sheetId,
         range: `Sheet${sheetIndex}!A1:Z1`,
+      })
+      .then((response) =>{
+        console.log(response.data)
+        if (response.status === 200) {
+            res.send(response.data);
+        } else {
+            console.log("In Here")
+            res.status(400).json({ error: 'Error fetching sheet data' });
+        } 
+      })
+      .catch((error) =>{
+        console.error('Error fetching sheet data:', error);
+        res.status(500).json({ error: 'Error fetching sheet data' });
+      })
+
+  });
+
+  app.get('/records', async (req, res) => {
+
+    const { sheetId, sheetIndex } = req.query;
+    console.log("Hi")
+    console.log(sheetId);
+    console.log(sheetIndex);
+    const auth = new google.auth.GoogleAuth({
+        keyFile:"credentials.json",
+        scopes:"https://www.googleapis.com/auth/spreadsheets",
+    })
+
+    const sheets = google.sheets({version:"v4", auth})
+
+    const response = await sheets.spreadsheets.values.get({
+        auth,
+        spreadsheetId: sheetId,
+        range: `Sheet${sheetIndex}!A1:Z`,
       })
       .then((response) =>{
         console.log(response.data)

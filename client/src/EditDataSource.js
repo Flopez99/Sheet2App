@@ -31,6 +31,14 @@ const columns  = [
   
     },
     {
+      field: 'key',
+      headerName: 'Key',
+      width: 110,
+      editable: true,
+      type: 'boolean',
+      flex: 1,
+    },
+    {
       field: 'initial_value',
       headerName: 'Initial Value',
       width: 150,
@@ -97,6 +105,8 @@ const navigate = useNavigate();
   const [typeError, setTypeError] = useState(false)
   const [referenceError, setReferenceError] = useState(false)
   const [rows1, setRows1] = useState({})
+  const [keyError, setKeyError] = useState(false)
+
   const theme = createTheme();
   useEffect(async () => {
     console.log("In Use Effect")
@@ -114,19 +124,24 @@ const navigate = useNavigate();
         var rows1 = [];
         var count = 0;
         for(const column of res.data.columns){
-            rows1.push({id: count, ...column})
+            if(res.data.key === column._id)
+              rows1.push({id: count, key:true, ...column})
+            else
+              rows1.push({id: count, key:false, ...column})
             count++;
         }
+
         await axios.get("http://localhost:8080/api/fetchSheetData" , {params : {
             sheetId: sheetId,
             sheetIndex: sheetIndex
         }})
-        .then((res) => {
+        .then(async (res) => {
+            console.log(res.data.values)
             const headers = res.data.values[0];
             console.log(headers);
-            generateRows(headers, rows1)
-            console.log(rows1)
-            setRows1(rows1);
+            const actual_rows = await generateRows(headers, rows1)
+            console.log(actual_rows)
+            setRows1(actual_rows);
         })
 
     })
@@ -148,6 +163,25 @@ const navigate = useNavigate();
       else{
         setLabelError(false)
         return label_row
+      }
+  }
+  function checkKey(array){
+    var key_row;
+      var count = 0;
+      array.forEach((row) => {
+        if(row.value.label === true){
+          key_row = row.value;
+          count++;
+        }
+      })
+      console.log(count)
+      if(count != 1){
+        setKeyError(true)
+        return null
+      }
+      else{
+        setKeyError(false)
+        return key_row
       }
   }
   function checkType(array){
@@ -225,11 +259,17 @@ const navigate = useNavigate();
     var boolFlag = true
     boolFlag = boolFlag && checkType(array);
     var label_row 
+    var key_row = checkKey(array)
+    if(checkKey(array) === null)
+      boolFlag = false;
     if(label_row= checkLabel(array) === null)
       boolFlag = false;
+
     boolFlag = boolFlag && (await checkReference(array));
     console.log(boolFlag)
     if(boolFlag){
+        console.log("Key ROw:")
+        console.log(key_row)
         let new_columns = []
         var key_column;
         for(const column of array){
@@ -245,8 +285,8 @@ const navigate = useNavigate();
                     type: column.value.type
                   })
                   .then((res) => {
-                    if(column.value.label === true)
-                      key_column = res.data._id
+                    // if(column.value.label === true)
+                    //   key_column = res.data._id
                     new_columns.push(res.data._id)
                   })
             }
@@ -262,8 +302,8 @@ const navigate = useNavigate();
                 }
                 })
                 .then((res) => {
-                if(column.value.label === true)
-                    key_column = res.data._id
+                // if(column.value.label === true)
+                //     key_column = res.data._id
                 })
 
             }
@@ -272,7 +312,7 @@ const navigate = useNavigate();
             await axios.post("http://localhost:8080/updateDatasource", {
                 datasourceId: datasource_id,
                 name: datasource_name,
-                key: key_column,
+                key: key_row,
                 columns: new_columns,
                 consistent: true
             })
@@ -366,23 +406,78 @@ const navigate = useNavigate();
     </Container>
   </ThemeProvider>
   )
+  //dataRows = actual headers from google sheet
+  //rows = rows from db
   async function generateRows(dataRows, rows){
-    let size = rows.length
+    let newRows = []
+    let count = 0
+    let existingColumns = []
     for(const header of dataRows ){
-        let doesExistFlag = false;
-        rows.forEach((column) => {
-            if(column.name === header)
-                doesExistFlag = true;
-        })
-        if(!doesExistFlag){
-            console.log("Im here")
-            rows.push({id: size, name: header, 
-                initial_value: "", label: false, reference: "", type: "" })
-            size++;
-        }
+      let current_row = rows.find(row => row.name === header)
+      if(current_row){
+        current_row.id = count;
+        newRows.push(current_row)
+        existingColumns.push(current_row._id)
+      }
+      else{
+          newRows.push({id: count, name: header, 
+              initial_value: "", label: false, reference: "", type: "" })
+      }
+      count++;
     }
-    console.log(rows)
-    return rows;
+
+    //deleting these values from db
+    for (const db_column of rows){ //rows that are in the DB
+      if(!(existingColumns.includes(db_column._id))){
+        console.log(db_column)
+        await axios.post("http://localhost:8080/delete_column", {
+          columnId: db_column._id
+        })
+        .then((res) => {
+          console.log('GOOOD')
+        })
+        .catch(()=> {
+          console.log('ERROR!!!!!!!!!!!')
+        })
+      }
+    }
+
+    console.log(newRows)
+    return newRows;
+
+
+
+    // console.log(dataRows)
+    // console.log(rows)
+    // let size = rows.length
+    // let existcolumnindexes = []
+    // for(const header of dataRows ){
+    //     let doesExistFlag = false;
+    //     rows.forEach((column) => {
+    //         if(column.name === header){
+    //             doesExistFlag = true;
+    //             existcolumnindexes.push(column.id)
+    //         }
+    //     })
+    //     if(!doesExistFlag){
+    //         console.log("Im here")
+    //         rows.push({id: size, name: header, 
+    //             initial_value: "", label: false, reference: "", type: "" })
+    //         existcolumnindexes.push(size)
+    //         size++;
+    //     }
+    // }
+    // console.log(rows)
+    // console.log(existcolumnindexes)
+    // console.log(size)
+    // for(let i = 0; i < size; i++){
+    //   if(!(existcolumnindexes.includes(i))){
+    //     console.log(i)
+    //     rows.splice(i, 1)
+    //   }
+    // }
+    // console.log(rows)
+    // return rows;
   }
 
 function getIdFromUrl(url) {

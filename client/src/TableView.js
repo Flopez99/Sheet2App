@@ -8,12 +8,19 @@ const useStyles = makeStyles({
   },
 });
 
-function TableView({ view }) {
+function TableView({ view, sheetData }) {
+  console.log(sheetData)
+  //console.log(Object.keys(sheetData).length)
   const classes = useStyles();
 
   const allColumns = view.table.columns
   const shownColumns = view.columns
   const filteredColumns = allColumns.filter(column => shownColumns.includes(column._id));
+  console.log(filteredColumns)
+
+  const handleClickRecord = (record) => {
+
+  }
 
   return (
     <div>
@@ -29,6 +36,13 @@ function TableView({ view }) {
           </TableHead>
           <TableBody>
             {/* Here we populate the rows with actual data */}
+            {/* {typeof sheetData.sheet_data !== 'undefined' &&  (sheetData.sheet_data).map((record) => (
+              <TableRow key={view._id} className={classes.tableRow} onClick={() => handleClickRecord(record)}>
+                {filteredColumns.map((column, index) => (
+                  <TableCell key={column._id}>{record[index] || ''}</TableCell>
+                ))}
+              </TableRow>
+            ))} */}
           </TableBody>
         </Table>
       </TableContainer>

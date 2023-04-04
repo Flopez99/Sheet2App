@@ -32,6 +32,14 @@ const columns  = [
 
   },
   {
+    field: 'key',
+    headerName: 'Key',
+    width: 110,
+    editable: true,
+    type: 'boolean',
+    flex: 1,
+  },
+  {
     field: 'initial_value',
     headerName: 'Initial Value',
     width: 150,
@@ -96,6 +104,7 @@ function CreateDataSource(props) {
   const [spreadsheetUrl, setSpreadsheetUrl] = useState("")
   const [sheetIndex, setSheetIndex] = useState(0)
   const [referenceError, setReferenceError] = useState(false)
+  const [keyError, setKeyError] = useState(false)
 
 
   
@@ -121,6 +130,25 @@ function CreateDataSource(props) {
       console.log('Invalid URL');
     }
   };
+function checkKey(array){
+  var key_row;
+    var count = 0;
+    array.forEach((row) => {
+      if(row.value.label === true){
+        key_row = row.value;
+        count++;
+      }
+    })
+    console.log(count)
+    if(count != 1){
+      setKeyError(true)
+      return null
+    }
+    else{
+      setKeyError(false)
+      return key_row
+    }
+}
 function checkLabel(array){
   var label_row;
     var count = 0;
@@ -210,8 +238,11 @@ function checkType(array){
     //check if multiple Label
     var boolFlag = true
     boolFlag = boolFlag && checkType(array);
-    var label_row 
+    var label_row
+    var key_row = checkKey(array)
     if(label_row= checkLabel(array) === null)
+      boolFlag = false;
+    if(key_row === null)
       boolFlag = false;
     boolFlag = boolFlag && (await checkReference(array));
     if(boolFlag){
@@ -230,9 +261,6 @@ function checkType(array){
           type: column.value.type
         })
         .then((res) => {
-          if(column.value.label === true)
-            key_column = res.data._id
-          console.log(res.data._id)
           column_list.push(res.data._id)
         })
       }
@@ -243,7 +271,7 @@ function checkType(array){
         name: datasource_name,
         url: spreadsheetUrl,
         sheet_index: sheetIndex,
-        key: key_column,
+        key: key_row,
         columns: column_list,
         consistent: true
       })
@@ -330,6 +358,7 @@ function checkType(array){
           {labelError && (<Alert severity="error">Label only allowed for 1 Column!</Alert>)}
           {typeError && (<Alert severity="error">All Columns Should habve A Type. Ex. Text, Boolean, URL, Number!</Alert>)}
           {referenceError && (<Alert severity="error">To use reference must place Google Sheet URL + whitespace + sheetIndex. Reference may not be valid</Alert>)}
+          {keyError && (<Alert severity="error">Must Have a Key!</Alert>)}
           <Box sx={{ height: 400, width: '100%'}}>
             {Object.keys(rows).length !== 0 && (
               <DataGrid
@@ -371,7 +400,7 @@ function checkType(array){
     const rowData = [];
     dataRows.forEach((element, index) =>{
       rowData.push({id: index, column_name: element, 
-        initial_value: "", label: false, reference: "", type: "" });
+        initial_value: "", label: false, reference: "", type: "", key: false });
     })
     console.log(rowData);
     return rowData

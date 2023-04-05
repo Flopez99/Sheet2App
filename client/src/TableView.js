@@ -8,7 +8,7 @@ const useStyles = makeStyles({
   },
 });
 
-function TableView({ view, sheetData }) {
+function TableView({ view, sheetData, onClickRecord }) {
   console.log(sheetData)
   const [filteredColumns, setFilteredColumns] = useState([])
   const [datasource, setDatasource] = useState({})
@@ -48,9 +48,11 @@ function TableView({ view, sheetData }) {
   //const filteredColumns = allColumns.filter(column => shownColumns.includes(column._id));//.map(obj => ({ ...obj, index: header.findIndex(obj.name)}));
   // console.log(filteredColumns)
 
-  const handleClickRecord = (record) => {
-
+  const handleClickRecord = (record, other) => {
+    onClickRecord(record,other)
   }
+
+
   if (filteredColumns.length === 0) {
     return <div>Loading views...</div>;
   }
@@ -70,12 +72,8 @@ function TableView({ view, sheetData }) {
             </TableRow>
           </TableHead>
           <TableBody>
-            {/* Here we populate the rows with actual data */}
-            {
-
-            }
             {typeof sheetData.sheet_data !== 'undefined' &&  (sheetData.sheet_data).slice(1).map((record) =>(
-                <TableRow key={record[keyIndex]} className={classes.tableRow} onClick={() => handleClickRecord(record)}>
+                <TableRow key={record[keyIndex]} className={classes.tableRow} onClick={() => handleClickRecord(record, record[keyIndex])}>
                   {filteredColumns.map((column) => (
                     <TableCell key={column._id}>{record[column.index] || ''}</TableCell>
                   ))} 

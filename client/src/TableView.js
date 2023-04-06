@@ -8,14 +8,17 @@ const useStyles = makeStyles({
   },
 });
 
-function TableView({ view, sheetData, onClickRecord }) {
+function TableView({ view, sheetData, onClickRecord, userEmail }) {
   console.log(sheetData)
   const [filteredColumns, setFilteredColumns] = useState([])
   const [datasource, setDatasource] = useState({})
   const [keyIndex, setKeyIndex] = useState(0)
+  const [filterIndex, setFilterIndex] = useState(-1)
+  const [userFilterIndex, setUserFilterIndex] = useState(-1)
 
   useEffect(() => {
     const getFilteredColumns = async () => { 
+      console.log(userEmail)
       console.log('IN GETFITERED COLUMNS')
       const allColumns = view.table.columns
       const shownColumns = view.columns
@@ -27,6 +30,25 @@ function TableView({ view, sheetData, onClickRecord }) {
       console.log(key_index)
       const init_columns = allColumns.filter(column => shownColumns.includes(column._id))
         .map(obj => ({ ...obj, index: headers.findIndex(header => header === obj.name)}));
+      //checks view.filter
+      if(view.filter !== undefined){
+        console.log('yes filter')
+        const init_filter_index = headers.findIndex(header => header === (allColumns.find(col => col._id == view.filter).name) )
+        setFilterIndex(init_filter_index)
+      }
+      else{
+        setFilterIndex(-1)
+      }
+      //checks user_filter
+      if(view.user_filter !== undefined){
+        const user_filter_index = headers.findIndex(header => header === (allColumns.find(col => col._id == view.user_filter).name) )
+        console.log(user_filter_index)
+        setUserFilterIndex(user_filter_index)
+      }
+      else{
+        setUserFilterIndex(-1)
+      }
+      console.log(view)
       console.log(init_columns)
       setKeyIndex(key_index)
       setFilteredColumns(init_columns)
@@ -72,13 +94,18 @@ function TableView({ view, sheetData, onClickRecord }) {
             </TableRow>
           </TableHead>
           <TableBody>
-            {typeof sheetData.sheet_data !== 'undefined' &&  (sheetData.sheet_data).slice(1).map((record) =>(
-                <TableRow key={record[keyIndex]} className={classes.tableRow} onClick={() => handleClickRecord(record, record[keyIndex])}>
-                  {filteredColumns.map((column) => (
-                    <TableCell key={column._id}>{record[column.index] || ''}</TableCell>
-                  ))} 
-                  </TableRow>
-              )
+            {typeof sheetData.sheet_data !== 'undefined' &&  (sheetData.sheet_data).slice(1).map((record) =>
+            {
+              if((filterIndex === -1 || record[filterIndex] === 'TRUE') && (userFilterIndex === -1 || record[userFilterIndex] === userEmail) ){
+                return(
+                  <TableRow key={record[keyIndex]} className={classes.tableRow} onClick={() => handleClickRecord(record, record[keyIndex])}>
+                    {filteredColumns.map((column) => (
+                      <TableCell key={column._id}>{record[column.index] || ''}</TableCell>
+                    ))} 
+                    </TableRow>
+                )
+              }
+            }
             )
           }
           </TableBody>

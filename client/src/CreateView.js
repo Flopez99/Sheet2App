@@ -244,11 +244,11 @@ function CreateView(props) {
       //added these fields to set the columns that are needed
       //if checked then sets filter, if remove cheked remove filter
       if(field === "filter")
-        newSettings[index][field]?setFilter(newSettings[index]):setFilter()
+        newSettings[index][field]?setFilter(newSettings[index]):setFilter(null)
       if(field === "userFilter")
-        newSettings[index][field]?setUserFilter(newSettings[index]):setUserFilter()
+        newSettings[index][field]?setUserFilter(newSettings[index]):setUserFilter(null)
       if(field === "editFilter")
-        newSettings[index][field]?setEditFilter(newSettings[index]):setEditFilter()
+        newSettings[index][field]?setEditFilter(newSettings[index]):setEditFilter(null)
       setColumnSettings(newSettings);
     };
   };

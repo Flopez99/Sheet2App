@@ -272,7 +272,8 @@ const navigate = useNavigate();
         console.log(key_row)
         let new_columns = []
         var key_column;
-        for(const column of array){
+        console.log(array)
+        for await (const column of array){
             if(typeof column.value._id === 'undefined'){
                 //new Column
                 console.log(column.value)
@@ -307,21 +308,24 @@ const navigate = useNavigate();
                 })
 
             }
-            //creates datasource
-            console.log(" name: " + datasource_name)
-            await axios.post("http://localhost:8080/updateDatasource", {
-                datasourceId: datasource_id,
-                name: datasource_name,
-                key: key_row,
-                columns: new_columns,
-                consistent: true
-            })
-            .then((res) => {
-                console.log(res.data._id)
-                console.log(appId)
-                navigate("/editApp",{state: appId} )
-            })
-          }
+        }
+        
+        //creates datasource
+        console.log(" name: " + datasource_name)
+        console.log(new_columns)
+        await axios.post("http://localhost:8080/updateDatasource", {
+            datasourceId: datasource_id,
+            name: datasource_name,
+            key: key_row,
+            columns: new_columns,
+            consistent: true
+        })
+        .then((res) => {
+            console.log(res.data)
+            console.log(res.data._id)
+            console.log(appId)
+            navigate("/editApp",{state: appId} )
+        })
 
     }
   }

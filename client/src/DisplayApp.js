@@ -32,6 +32,8 @@ function DisplayApp(props) {
   const classes = theme;
   const [selectedRecord, setSelectedRecord] = useState(null) 
 
+  const [schemaFlag, setSchemaFlag] = useState(true)
+
   useEffect(() => {
     const getApp = async () => {
       try {
@@ -112,9 +114,32 @@ function DisplayApp(props) {
     if(Object.keys(tableViews).length !== 0)
       getSheetData();
   },[tableViews])
-
+  useEffect(() => {
+    const checkSchema = async () => {
+      console.log("IN CHECK SCHEMA")
+      for(const datasource of sheetData){
+        const all_columns = datasource.columns
+        const column_headers = datasource.sheet_data[0] //column headers
+        for(const column_name of column_headers){
+          if((all_columns.findIndex(col => col.name === column_name)) === -1){
+            setSchemaFlag(false)
+            console.log(column_name)
+            console.log("SCHEMA BAD")
+            return
+          }
+        }
+      }
+      setSchemaFlag(true)
+      console.log("SCHEMA GOOD")
+    }
+    if(Object.keys(sheetData).length !== 0)
+      checkSchema();
+  }, [sheetData])
   if (tableViews.length === 0) {
     return <div>Loading views...</div>;
+  }
+  if(!schemaFlag){
+    return <div>Schema Inconsistent, Developer Must Update Datasources</div>;
   }
 
   const activeTableView = tableViews[activeTableViewIndex];
@@ -171,7 +196,7 @@ function DisplayApp(props) {
               <DetailView record={selectedRecord} detailView = {currDetailView}/>
             </div>
           ) : (
-            <TableView onClickRecord={handleClickRecord} view={activeTableView} sheetData={activeDataSource} />
+            <TableView onClickRecord={handleClickRecord} view={activeTableView} sheetData={activeDataSource} userEmail = {props.userEmail} />
           )}
         </div>
         </div>

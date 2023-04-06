@@ -9,6 +9,8 @@ import {
 import AppsIcon from '@mui/icons-material/Apps';
 import {gapi} from 'gapi-script';
 import { useNavigate } from 'react-router-dom';
+import HomeIcon from '@mui/icons-material/Home';
+
 
 
 const clientId = '144862274224-ji7vp538h3o8cdcp9t24actdpk7vqqjg.apps.googleusercontent.com';
@@ -35,9 +37,9 @@ function Navbar(props) {
   return (
     <AppBar position="relative">
       <Toolbar>
-        <IconButton edge="start" color="inherit" aria-label="menu" sx={{ mr: 2 }}>
-          <AppsIcon />
-        </IconButton>
+      <IconButton edge="start" color="inherit" aria-label="home" sx={{ mr: 2 }} onClick={() => navigate('/developer')}>
+        <HomeIcon />
+      </IconButton>
         <Typography variant="h6" flexGrow={1}>
           Sheet2App
         </Typography>

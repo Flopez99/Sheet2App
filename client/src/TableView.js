@@ -6,6 +6,11 @@ const useStyles = makeStyles({
   table: {
     minWidth: 650,
   },
+  tableRow: {
+    '&:hover': {
+      backgroundColor: 'rgba(0, 0, 0, 0.04)',
+    },
+  },  
   header: {
     fontWeight: 'bold',
     backgroundColor: '#f5f5f5',

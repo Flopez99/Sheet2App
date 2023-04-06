@@ -10,6 +10,7 @@ import AppsIcon from '@mui/icons-material/Apps';
 import {gapi} from 'gapi-script';
 import { useNavigate } from 'react-router-dom';
 import HomeIcon from '@mui/icons-material/Home';
+import DashboardIcon from '@mui/icons-material/Dashboard';
 
 
 
@@ -37,9 +38,11 @@ function Navbar(props) {
   return (
     <AppBar position="relative">
       <Toolbar>
-      <IconButton edge="start" color="inherit" aria-label="home" sx={{ mr: 2 }} onClick={() => navigate('/developer')}>
-        <HomeIcon />
-      </IconButton>
+        {Object.keys(props.user).length !== 0 && (
+          <IconButton edge="start" color="inherit" aria-label="home" sx={{ mr: 2 }} onClick={() => navigate('/developer')}>
+            <DashboardIcon />
+          </IconButton>
+         )}
         <Typography variant="h6" flexGrow={1}>
           Sheet2App
         </Typography>

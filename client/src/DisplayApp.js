@@ -253,6 +253,7 @@ import TableView from './TableView';
 import DetailView from './DetailView';
 
 
+
 const theme = createTheme({
   root: {
     flexGrow: 1,
@@ -274,10 +275,23 @@ const theme = createTheme({
     fontWeight: 'bold',
     textTransform: 'none',
   },
+  backButton: {
+    backgroundColor: '#3f51b5',
+    color: 'white',
+    borderRadius: '5px',
+    padding: '6px 16px',
+    fontSize: '35px',
+    fontWeight: 'bold',
+    textTransform: 'none',
+    '&:hover': {
+      backgroundColor: '#283593',
+    },
+  },
   indicator: {
     backgroundColor: '#ff9800',
   },
 });
+
 
 
 function DisplayApp(props) {
@@ -461,8 +475,10 @@ function DisplayApp(props) {
           <Typography variant="h3" className={classes.title}></Typography>
           {selectedRecord ? (
             <div>
-              <Button onClick={handleBackToTableView}>Back to Table View</Button>
-              <DetailView record={selectedRecord} detailView={currDetailView} />
+              <Button onClick={handleBackToTableView} className={classes.backButton}>
+                Back to Table View
+              </Button>
+              <DetailView record={selectedRecord} detailView={currDetailView} view = {activeTableView} />
             </div>
           ) : (
             <TableView

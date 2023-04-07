@@ -353,6 +353,12 @@ function DisplayApp(props) {
         setTableViews(tableViews1)
         setDetailViews(detailViews1)
 
+        const startTableView = tableViews1[0];
+        const startDetailViews = detailViews.filter(view => view.table.name === startTableView.table.name);
+
+        setcurrDetailView(startDetailViews.length > 0 ? startDetailViews[0] : null);
+        
+
       } catch (error) {
         console.error(error);
       }
@@ -391,6 +397,7 @@ function DisplayApp(props) {
     if(Object.keys(tableViews).length !== 0)
       getSheetData();
   },[tableViews])
+
   useEffect(() => {
     const checkSchema = async () => {
       console.log("IN CHECK SCHEMA")
@@ -429,8 +436,6 @@ function DisplayApp(props) {
 
     const newDataSource = sheetData.find(e => e._id === newTableView.table._id);
 
-    console.log(newTableView)
-    console.log(detailViews)
     const newDetailViews = detailViews.filter(view => view.table.name === newTableView.table.name);
 
     console.log("yo")

@@ -244,7 +244,6 @@
 // export default DisplayApp;
 
 // THE TOP PART PUTS IT AT THE BOTTOM OF THE TABLE
-
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { createTheme, ThemeProvider } from '@mui/material/styles';

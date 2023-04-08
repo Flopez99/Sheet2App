@@ -250,6 +250,7 @@ import { createTheme, ThemeProvider } from '@mui/material/styles';
 import { AppBar, Toolbar, Typography, Button, BottomNavigation, BottomNavigationAction, Tabs, Tab } from '@mui/material';
 import TableView from './TableView';
 import DetailView from './DetailView';
+import { Container } from '@mui/system';
 
 
 
@@ -458,27 +459,25 @@ function DisplayApp(props) {
   return (
     <ThemeProvider theme={theme}>
       <div>
-        <Tabs
-          value={activeTableViewIndex}
-          onChange={(event, newValue) => handleChangeView(newValue)}
-          variant="scrollable"
-          scrollButtons="auto"
-          className={classes.topNav}
-          classes={{ indicator: classes.indicator }}
-        >
-          {tableViews.map((view, index) => (
-            <Tab
-              key={view._id}
-              label={view.name}
-              className={classes.tab}
-            />
-          ))}
-        </Tabs>
+        {!selectedRecord && (
+          <Tabs
+            value={activeTableViewIndex}
+            onChange={(event, newValue) => handleChangeView(newValue)}
+            variant="scrollable"
+            scrollButtons="auto"
+            className={classes.topNav}
+            classes={{ indicator: classes.indicator }}
+          >
+            {tableViews.map((view, index) => (
+              <Tab key={view._id} label={view.name} className={classes.tab} />
+            ))}
+          </Tabs>
+        )}
         <div className={classes.root}>
           <Typography variant="h3" className={classes.title}></Typography>
           {selectedRecord ? (
             <div>
-              <Button onClick={handleBackToTableView} className={classes.backButton}>
+              <Button onClick={handleBackToTableView} className={classes.backButton} >
                 Back to Table View
               </Button>
               <DetailView record={selectedRecord} detailView={currDetailView} view = {activeTableView} />

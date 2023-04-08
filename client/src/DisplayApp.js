@@ -352,12 +352,10 @@ function DisplayApp(props) {
         console.log(tableViews1)
         setTableViews(tableViews1)
         setDetailViews(detailViews1)
-
-        const startTableView = tableViews1[0];
-        const startDetailViews = detailViews.filter(view => view.table.name === startTableView.table.name);
-
-        setcurrDetailView(startDetailViews.length > 0 ? startDetailViews[0] : null);
         
+        // Set the initial detail view
+        const newDetailView = detailViews1.find(view => view.table.name === tableViews1[0].table.name);
+        setcurrDetailView(newDetailView);
 
       } catch (error) {
         console.error(error);
@@ -419,6 +417,7 @@ function DisplayApp(props) {
     if(Object.keys(sheetData).length !== 0)
       checkSchema();
   }, [sheetData])
+  
   if (tableViews.length === 0) {
     return <div>Loading views...</div>;
   }

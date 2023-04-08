@@ -370,16 +370,24 @@ const navigate = useNavigate();
                 id="spreadsheeturl"
                 label="Spread Sheet Url"
                 name="spreadsheeturl"
+                autoFocus
+                InputLabelProps={{
+                  shrink: datasource.url ? true : false,
+                }}
               />
             </Grid>
             <Grid item xs={12}>
               <TextField
                 required
                 fullWidth
-                value = {datasource.sheet_index}
+                value={datasource.sheet_index}
                 id="sheetindex"
                 label="Sheet Index"
                 name="sheetindex"
+                autoFocus
+                InputLabelProps={{
+                  shrink: datasource.sheet_index ? true : false,
+                }}
               />
             </Grid>
           </Grid>

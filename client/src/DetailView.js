@@ -203,7 +203,7 @@ function DetailView({ record, detailView, view }) {
   console.log('DetailView:', detailView);
 
   return (
-    <Container maxWidth="sm" component={Box} className={classes.root}>
+    <Container maxWidth="sm" component={Box} className={classes.root} elevation = {4}>
       <Typography variant="h4" gutterBottom>Record Details</Typography>
       <Divider className={classes.divider} />
       {Object.keys(record).map((key, index) => (

@@ -18,7 +18,7 @@ const useStyles = makeStyles({
   },
 });
 
-function TableView({ view, sheetData, onClickRecord, userEmail }) {
+function TableView({ view, sheetData, onClickRecord, userEmail, detailView }) {
   console.log(sheetData);
   const [filteredColumns, setFilteredColumns] = useState([]);
   const [datasource, setDatasource] = useState({});
@@ -27,25 +27,27 @@ function TableView({ view, sheetData, onClickRecord, userEmail }) {
   const [userFilterIndex, setUserFilterIndex] = useState(-1);
   const [open, setOpen] = useState(false);
   const [newRecord, setNewRecord] = useState({});
+  const [allColumnsInTable, setAllColumnsInTable] = useState([])
 
 
   useEffect(() => {
     const getFilteredColumns = async () => {
       console.log(userEmail);
+      console.log(view)
       console.log('IN GETFITERED COLUMNS');
       const allColumns = view.table.columns;
       const shownColumns = view.columns;
       var headers = sheetData.sheet_data[0];
       console.log(headers);
       console.log(allColumns);
-      let key_col = allColumns.find((column) => (column._id = sheetData.key));
+      let key_col = allColumns.find((column) => (column._id === sheetData.key));
       let key_index = headers.findIndex((header) => header === key_col.name);
       console.log(key_index);
       const init_columns = allColumns
         .filter((column) => shownColumns.includes(column._id))
         .map((obj) => ({ ...obj, index: headers.findIndex((header) => header === obj.name) }));
       //checks view.filter
-      if (view.filter !== undefined) {
+      if (view?.filter !== undefined) {
         console.log('yes filter');
         const init_filter_index = headers.findIndex(
           (header) => header === allColumns.find((col) => col._id == view.filter).name,
@@ -55,7 +57,7 @@ function TableView({ view, sheetData, onClickRecord, userEmail }) {
         setFilterIndex(-1);
       }
       //checks user_filter
-      if (view.user_filter !== undefined) {
+      if (view?.user_filter !== undefined) {
         const user_filter_index = headers.findIndex(
           (header) => header === allColumns.find((col) => col._id == view.user_filter).name,
         );
@@ -64,6 +66,13 @@ function TableView({ view, sheetData, onClickRecord, userEmail }) {
       } else {
         setUserFilterIndex(-1);
       }
+
+      //creating addRecordColumns
+      const init_all_columns = allColumns.map((obj) => ({ ...obj, 
+        index: headers.findIndex((header) => header === obj.name), 
+        editable: (detailView.editable_columns?.some((edit_col_id) => (edit_col_id === obj._id))?true:false )}));
+      console.log(init_all_columns)
+      setAllColumnsInTable(init_all_columns)
       console.log(view);
       console.log(init_columns);
       setKeyIndex(key_index);
@@ -71,7 +80,7 @@ function TableView({ view, sheetData, onClickRecord, userEmail }) {
       setDatasource(sheetData);
     };
     getFilteredColumns();
-  }, [view, sheetData]);
+  }, [view, sheetData, detailView]);
   // useEffect(() => {
   //   const getSheetData = async () => {
   //     setDatasource(sheetData)
@@ -87,7 +96,7 @@ function TableView({ view, sheetData, onClickRecord, userEmail }) {
   // console.log(filteredColumns)
 
   const handleClickRecord = (record, other) => {
-    onClickRecord(record, other);
+    onClickRecord(record, other, sheetData.sheet_data[0]);
   };
 
   const handleAddRecord = () => {
@@ -174,16 +183,20 @@ function TableView({ view, sheetData, onClickRecord, userEmail }) {
         <DialogTitle id="add-record-dialog">Add New Record</DialogTitle>
         <DialogContent>
           <Grid container spacing={2}>
-            {filteredColumns.map((column) => (
-              <Grid item xs={12} key={column._id}>
-                <TextField
-                  label={column.name}
-                  fullWidth
-                  value={newRecord[column.index] || ''}
-                  onChange={(e) => setNewRecord({ ...newRecord, [column.index]: e.target.value })}
-                />
-              </Grid>
-            ))}
+            {allColumnsInTable.map((column) => {
+              if(column.editable){
+                return(
+                  <Grid item xs={12} key={column._id}>
+                    <TextField
+                      label={column.name}
+                      fullWidth
+                      value={newRecord[column.index] || ''}
+                      onChange={(e) => setNewRecord({ ...newRecord, [column.index]: e.target.value })}
+                    />
+                  </Grid>
+                )}
+              }
+            )}
           </Grid>
         </DialogContent>
         <DialogActions>

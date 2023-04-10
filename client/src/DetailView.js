@@ -109,7 +109,7 @@
 
 // export default DetailView;
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { makeStyles } from '@mui/styles';
 import { Typography, TextField, Button, Stack, Container, Box, Divider } from '@mui/material';
 
@@ -170,18 +170,49 @@ const useStyles = makeStyles({
 });
 
 
-function DetailView({ record, detailView, view }) {
+function DetailView({ record, detailView, view, tableHeader }) { //view is the tableView which it comes from
+  const [filteredColumns, setFilteredColumns] = useState([])
   const classes = useStyles();
   const [editedRecord, setEditedRecord] = useState(record);
   const [editing, setEditing] = useState(false);
+  const [editFilterIndex, setEditFilterIndex] = useState(-1)
+  console.log(detailView)
+  console.log(record)
+  console.log(view)
+    useEffect(() => {
+    const getFilteredColumns = async () => {
+      const allColumns = detailView.table.columns;
+      const shownColumns = detailView.columns
+      const init_columns = allColumns
+        .filter((column) => shownColumns.includes(column._id))
+        .map((obj) => ({ ...obj, 
+          index: tableHeader.findIndex((header) => header === obj.name), 
+          editable: (detailView.editable_columns?.some((edit_col_id) => (edit_col_id === obj._id))?true:false )}));
+    setFilteredColumns(init_columns)//filtered columns is going to filter column show
+    if(detailView.edit_filter !== null || detailView.edit_filter !== undefined){
+      const init_edit_filter_index = tableHeader.findIndex(
+        (header) => header === allColumns.find((col) => col._id == detailView.edit_filter).name,
+      );
+      setEditFilterIndex(init_edit_filter_index);
+    }
+    else{
+      setEditFilterIndex(-1);
+    }
+    //and also have attribue if editable
 
-  const isColumnEditable = (key) => {
-    if (!detailView.table) return false;
-    const column = detailView.table.columns.find((column) => column.name === key);  //detailView is empty for some reason so it can't look for the column names
-    return detailView.editable_columns.includes(column._id);
-  };
+    };
+    getFilteredColumns();
+  }, [record,detailView, view, tableHeader])
+  // const isColumnEditable = (key) => {
+  //   if (!detailView.table) return false;
+  //   const column = detailView.table.columns.find((column) => column.name === key);  //detailView is empty for some reason so it can't look for the column names
+  //   return detailView.editable_columns.includes(column._id);
+  // };
 
   const handleEditField = (event) => {
+    console.log(editedRecord)
+    console.log(event.target.name) //name === index in record that is being changed
+    console.log(event.target.value)
     setEditedRecord({
       ...editedRecord,
       [event.target.name]: event.target.value,
@@ -200,13 +231,25 @@ function DetailView({ record, detailView, view }) {
   const handleEditButtonClick = () => {
     setEditing(true);
   };
+
+  if(filteredColumns.length === 0){
+    return (
+      <div>
+        Loading or No Columns Shown In Detail View
+      </div>
+    )
+  }
   console.log('DetailView:', detailView);
+
+
 
   return (
     <Container maxWidth="sm" component={Box} className={classes.root} elevation = {4}>
       <Typography variant="h4" gutterBottom>Record Details</Typography>
       <Divider className={classes.divider} />
-      {Object.keys(record).map((key, index) => (
+      {/* {Object.keys(record).map((key, index) => {
+        if(true){
+        return (
         <div key={key} className={classes.fieldContainer}>
           <Typography variant="subtitle1" className={classes.fieldLabel}>
             {view.table.columns[index].name + " : "}
@@ -230,9 +273,39 @@ function DetailView({ record, detailView, view }) {
              </Box>
           )}
         </div>
-      ))}
+      )}}
+      )} */}
+      {filteredColumns.map((col, index) => {
+        if(true){
+        return (
+        <div key={col._id} className={classes.fieldContainer}>
+          <Typography variant="subtitle1" className={classes.fieldLabel}>
+            {col.name + " : "}
+          </Typography>
+          {editing ? (
+            <TextField
+              className={classes.centeredTextField}
+              variant="outlined"
+              size="small"
+              name={col.index}
+              value={editedRecord[col.index]}
+              onChange={handleEditField}
+              disabled={!(col.editable)}
+              fullWidth
+            />
+          ) : (
+            <Box className={classes.recordBox}>
+              <Typography variant="subtitle1" align="center">
+                {record[col.index]}
+              </Typography>
+             </Box>
+          )}
+        </div>
+      )}}
+      )}
       <Stack direction="row" spacing={2} className={classes.buttonContainer}>
-      {editing ? (
+      {(editFilterIndex === -1 || record[editFilterIndex] === 'TRUE') && detailView.edit_record &&
+      (editing ? (
           <Button variant="contained" color="primary" onClick={handleSaveChanges}>
             Save Changes
           </Button>
@@ -240,10 +313,13 @@ function DetailView({ record, detailView, view }) {
           <Button variant="outlined" color="primary" onClick={handleEditButtonClick}>
             Edit
           </Button>
-        )}
+        ))
+      }
+      {detailView.delete_record &&
         <Button variant="contained" color="secondary" onClick={handleDeleteRecord}>
           Delete Record
         </Button>
+      }
       </Stack>
     </Container>
   );

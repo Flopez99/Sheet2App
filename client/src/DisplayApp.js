@@ -308,6 +308,8 @@ function DisplayApp(props) {
   const [roles, setRoles] = useState([])
   const classes = theme;
   const [selectedRecord, setSelectedRecord] = useState(null) 
+  const [selectedTableHeader, setSelectedTableHeader] = useState(null) 
+
 
   const [schemaFlag, setSchemaFlag] = useState(true)
 
@@ -442,11 +444,12 @@ function DisplayApp(props) {
     setcurrDetailView(newDetailViews.length > 0 ? newDetailViews[0] : null);
   };
 
-  const handleClickRecord = (record, other) => {
+  const handleClickRecord = (record, other, tableHeader) => {
     if(currDetailView){
       console.log("This is curr detail")
       console.log(currDetailView)
       setSelectedRecord(record)
+      setSelectedTableHeader(tableHeader)
     }else{
       console.log("Uhh there's no detailview")
     }
@@ -480,7 +483,7 @@ function DisplayApp(props) {
               <Button onClick={handleBackToTableView} className={classes.backButton} >
                 Back to Table View
               </Button>
-              <DetailView record={selectedRecord} detailView={currDetailView} view = {activeTableView} />
+              <DetailView record={selectedRecord} detailView={currDetailView} view = {activeTableView} tableHeader={selectedTableHeader}/>
             </div>
           ) : (
             <TableView
@@ -488,6 +491,7 @@ function DisplayApp(props) {
               view={activeTableView}
               sheetData={activeDataSource}
               userEmail={props.userEmail}
+              detailView = {currDetailView}
             />
           )}
         </div>

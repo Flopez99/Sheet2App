@@ -55,14 +55,14 @@ const columns  = [
       flex: 1
     },
     {
-      field: 'reference',
+      field: 'references',
       headerName: 'reference',
       type: 'string',
       width: 110,
       editable: true,
       flex: 1,
-      valueGetter: (params: GridValueGetterParams) => 
-      (params.row.references?.url || '') + ' ' + (params.row.references?.sheet_index || '')
+      // valueGetter: (params: GridValueGetterParams) => 
+      // (params.row.references?.url || '') + ' ' + (params.row.references?.sheet_index || '')
     },
     {
       field: 'type',
@@ -129,6 +129,13 @@ const navigate = useNavigate();
             else
               rows1.push({id: count, key:false, ...column})
             count++;
+            if(!(column.references === null || column.references === undefined )){
+              console.log(column.references)
+              rows1[count - 1].references = "" + (column.references?.url || '') + ' ' + (column.references?.sheet_index || '')
+              console.log('REFERNCE!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!')
+              console.log(rows1[count -1])
+            }
+            console.log(rows1.references !== undefined)
         }
 
         await axios.get("http://localhost:8080/api/fetchSheetData" , {params : {
@@ -169,7 +176,7 @@ const navigate = useNavigate();
     var key_row;
       var count = 0;
       array.forEach((row) => {
-        if(row.value.label === true){
+        if(row.value.key === true){
           key_row = row.value;
           count++;
         }
@@ -216,9 +223,10 @@ const navigate = useNavigate();
     //   }
     // })
     for(let column of array){
-      if(column.value.reference !== undefined &&  column.value.reference !== ""){
-        const stringArr = column.value.reference.split(" ")
-        console.log(column.value.reference)
+      if(column.value.references !== undefined &&  column.value.references !== "" && column.value.references !== null){
+        console.log(column.value)
+        const stringArr = column.value.references.split(" ")
+        console.log(column.value.references)
 
         let url = stringArr[0]
         let sheetIndex = stringArr[1]
@@ -234,11 +242,13 @@ const navigate = useNavigate();
           console.log(res)
           if(res.data === ''){
             console.log('not good')
+            console.log(column.value)
             setReferenceError(true)
             flag = false;
           }
           else{
-            column.value.reference = res.data._id
+            column.value.reference_id = res.data._id
+            //column.value.references = res.data._id
           }
         })
 
@@ -267,11 +277,11 @@ const navigate = useNavigate();
 
     boolFlag = boolFlag && (await checkReference(array));
     console.log(boolFlag)
-    if(boolFlag){
+    var key_column;
+    if  (boolFlag){
         console.log("Key ROw:")
         console.log(key_row)
         let new_columns = []
-        var key_column;
         console.log(array)
         for await (const column of array){
             if(typeof column.value._id === 'undefined'){
@@ -282,12 +292,14 @@ const navigate = useNavigate();
                     name: column.value.name,
                     initial_value: column.value.initial_value,
                     label: column.value.label,
-                    references:  column.value.reference,
+                    references:  column.value.reference_id,
                     type: column.value.type
                   })
                   .then((res) => {
-                    // if(column.value.label === true)
-                    //   key_column = res.data._id
+                    if(column.value.key){
+                      key_column = res.data._id
+                      console.log(key_column)
+                  }
                     new_columns.push(res.data._id)
                   })
             }
@@ -298,13 +310,15 @@ const navigate = useNavigate();
                     name: column.value.name,
                     initial_value: column.value.initial_value,
                     label: column.value.label,
-                    references: column.value.reference,
+                    references: column.value.reference_id,
                     type: column.value.type
                 }
                 })
                 .then((res) => {
-                // if(column.value.label === true)
-                //     key_column = res.data._id
+                  if(column.value.key){
+                      key_column = column.value._id
+                      console.log(column.value._id)
+                  }
                 })
 
             }
@@ -313,10 +327,11 @@ const navigate = useNavigate();
         //creates datasource
         console.log(" name: " + datasource_name)
         console.log(new_columns)
+        console.log(key_column)
         await axios.post("http://localhost:8080/updateDatasource", {
             datasourceId: datasource_id,
             name: datasource_name,
-            key: key_row,
+            key: key_column,
             columns: new_columns,
             consistent: true
         })
@@ -433,7 +448,7 @@ const navigate = useNavigate();
       }
       else{
           newRows.push({id: count, name: header, 
-              initial_value: "", label: false, reference: "", type: "" })
+              initial_value: "", label: false, references: "", type: "" })
       }
       count++;
     }

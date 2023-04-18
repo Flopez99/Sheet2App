@@ -344,7 +344,8 @@ app.post('/datasource', async (req, res) => {
         res.send(instance)
     })
     .catch((err) =>{
-        console.log("bad")
+        console.log("bad Datasource")
+        console.log(err)
         res.send(err);
     }) 
 })  

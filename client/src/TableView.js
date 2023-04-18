@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { makeStyles } from '@mui/styles';
 import { Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, Typography, Stack, Container, Grid, Button, Box } from '@mui/material';
 import { Dialog, DialogTitle, DialogContent, TextField, DialogActions } from '@mui/material';
+import { Link } from 'react-router-dom';
 
 const useStyles = makeStyles({
   table: {
@@ -32,17 +33,11 @@ function TableView({ view, sheetData, onClickRecord, userEmail, detailView }) {
 
   useEffect(() => {
     const getFilteredColumns = async () => {
-      console.log(userEmail);
-      console.log(view)
-      console.log('IN GETFITERED COLUMNS');
       const allColumns = view.table.columns;
       const shownColumns = view.columns;
       var headers = sheetData.sheet_data[0];
-      console.log(headers);
-      console.log(allColumns);
       let key_col = allColumns.find((column) => (column._id === sheetData.key));
       let key_index = headers.findIndex((header) => header === key_col.name);
-      console.log(key_index);
       const init_columns = allColumns
         .filter((column) => shownColumns.includes(column._id))
         .map((obj) => ({ ...obj, index: headers.findIndex((header) => header === obj.name) }));
@@ -70,30 +65,18 @@ function TableView({ view, sheetData, onClickRecord, userEmail, detailView }) {
       //creating addRecordColumns
       const init_all_columns = allColumns.map((obj) => ({ ...obj, 
         index: headers.findIndex((header) => header === obj.name), 
-        editable: (detailView.editable_columns?.some((edit_col_id) => (edit_col_id === obj._id))?true:false )}));
+        editable: (detailView?.editable_columns?.some((edit_col_id) => (edit_col_id === obj._id))?true:false )}));
       console.log(init_all_columns)
       setAllColumnsInTable(init_all_columns)
-      console.log(view);
-      console.log(init_columns);
       setKeyIndex(key_index);
       setFilteredColumns(init_columns);
       setDatasource(sheetData);
     };
     getFilteredColumns();
   }, [view, sheetData, detailView]);
-  // useEffect(() => {
-  //   const getSheetData = async () => {
-  //     setDatasource(sheetData)
-  //   };
-  //   getSheetData();
-  // }, [sheetData])
-  //console.log(Object.keys(sheetData).length)
+
   const classes = useStyles();
-  //const header = sheetData[0]
-  // const allColumns = view.table.columns
-  // const shownColumns = view.columns
-  //const filteredColumns = allColumns.filter(column => shownColumns.includes(column._id));//.map(obj => ({ ...obj, index: header.findIndex(obj.name)}));
-  // console.log(filteredColumns)
+
 
   const handleClickRecord = (record, other) => {
     onClickRecord(record, other, sheetData.sheet_data[0]);
@@ -156,9 +139,17 @@ function TableView({ view, sheetData, onClickRecord, userEmail, detailView }) {
                             className={classes.tableRow}
                             onClick={() => handleClickRecord(record, record[keyIndex])}
                           >
-                            {filteredColumns.map((column) => (
-                              <TableCell key={column._id}>{record[column.index] || ''}</TableCell>
-                            ))}
+                            {filteredColumns.map((column) => {
+                                if(column.type === "URL"){
+                                  return(<TableCell key={column._id}>
+                                    <a href={record[column.index]} target="_blank" rel="noreferrer">{record[column.index]}</a>
+                                  </TableCell>)
+                                }
+                                else{
+                                  return (<TableCell key={column._id}>{record[column.index] || ''}</TableCell>)
+                                }
+                              }
+                            )}
                           </TableRow>
                         );
                       }

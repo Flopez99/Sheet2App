@@ -251,7 +251,7 @@ function checkType(array){
       var key_column;
       var column_list = []
       // array.forEach( (column) => {
-      for(const column of array){
+      for await (const column of array){
         console.log(column)
         await axios.post("http://localhost:8080/column", {
           name: column.value.column_name,
@@ -262,16 +262,19 @@ function checkType(array){
         })
         .then((res) => {
           column_list.push(res.data._id)
+          if(column.value.key)
+            key_column = res.data._id
         })
       }
       //creates datasource
       console.log(" name: " + datasource_name)
+      console.log(key_column)
       var datasourceId;
       await axios.post("http://localhost:8080/datasource", {
         name: datasource_name,
         url: spreadsheetUrl,
         sheet_index: sheetIndex,
-        key: key_row,
+        key: key_column,
         columns: column_list,
         consistent: true
       })

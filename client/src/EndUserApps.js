@@ -18,20 +18,28 @@ function EndUserApps({ userEmail, isDeveloper }) {
           <Box
             sx={{
               display: 'flex',
-              justifyContent: 'space-between',
+              justifyContent: 'center',
               alignItems: 'center',
               paddingBottom: 2,
             }}
           >
             {isDeveloper && (
-              <Button component={Link} to="/developer" variant="contained">
+              <Button component={Link} to="/developer" variant="contained" color ="secondary">
                 Switch to Developer
               </Button>
             )}
-            <Typography variant="h2" color="textPrimary">
-              End User
-            </Typography>
-            <Button variant="contained" color="secondary">Button</Button>
+            <Box sx={{ flexGrow: 1 }} /> 
+              <Typography
+                variant="h3"
+                color="textPrimary"
+                sx={{
+                                  
+                  paddingBottom: '0.5rem',
+                }}
+              >
+                End User
+              </Typography>
+            <Box sx={{ flexGrow: 2 }} /> 
           </Box>
           <Paper elevation={4}>
             <UserAppsList userEmail={userEmail} endUser={true} />

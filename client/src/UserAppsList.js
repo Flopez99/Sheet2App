@@ -59,7 +59,6 @@ function UserAppsList({ userEmail, endUser }) {
             <TableCell>App Name</TableCell>
             <TableCell>Creator</TableCell>
             <TableCell>Published</TableCell>
-            <TableCell>Actions</TableCell>
           </TableRow>
         </TableHead>
         <TableBody>
@@ -68,7 +67,6 @@ function UserAppsList({ userEmail, endUser }) {
               <TableCell component="th" scope="row">{app.app_name}</TableCell>
               <TableCell component="th" scope="row">{app.creator}</TableCell>
               <TableCell component="th" scope="row">{app.published ? "Yes" : "No"}</TableCell>
-              <TableCell>Edit</TableCell>
             </TableRow>
           ))}
         </TableBody>

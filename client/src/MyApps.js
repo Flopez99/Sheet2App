@@ -7,9 +7,9 @@ function MyApps({ userEmail }) {
   return (
     <Container>
       <Box sx={{ mt: 4, mb: 4, display: 'flex',
-              justifyContent: 'spacing-between',
-              alignItems: 'center',
-              }}>
+          justifyContent: 'spacing-between',
+          alignItems: 'center',
+          }}>
       <Button component={Link} to="/developer" variant="contained" color ="primary">
         Switch to Developer
       </Button>

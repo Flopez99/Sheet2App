@@ -32,10 +32,7 @@ function EndUserApps({ userEmail, isDeveloper }) {
               <Typography
                 variant="h3"
                 color="textPrimary"
-                sx={{
-                                  
-                  paddingBottom: '0.5rem',
-                }}
+                sx={{paddingBottom: '0.5rem'}}
               >
                 End User
               </Typography>

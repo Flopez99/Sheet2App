@@ -633,3 +633,11 @@ app.get('/api/fetchSheetData', async (req, res) => {
       })
 
   });
+
+  app.post('/addRecord', async (req, res) => {
+    const { data } = req.body;
+    // Logic to store the data in database using the data object
+
+    res.json({ success: true, message: 'Record added successfully' });
+  });
+  

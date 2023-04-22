@@ -16,9 +16,9 @@ import DashboardIcon from '@mui/icons-material/Dashboard';
 
 const clientId = '144862274224-ji7vp538h3o8cdcp9t24actdpk7vqqjg.apps.googleusercontent.com';
 
-function Navbar(props) {
+function Navbar({ user, isDeveloper }) {
   const navigate = useNavigate();
-  console.log(props);
+  console.log(user);
   
   function handleSignOut(event) {
     navigate('/', { state: 'Logged Out' });
@@ -38,7 +38,7 @@ function Navbar(props) {
   return (
     <AppBar position="relative">
       <Toolbar>
-        {Object.keys(props.user).length !== 0 && (
+        {Object.keys(user).length !== 0 && isDeveloper && (
           <IconButton edge="start" color="inherit" aria-label="home" sx={{ mr: 2 }} onClick={() => navigate('/developer')}>
             <DashboardIcon />
           </IconButton>
@@ -46,7 +46,7 @@ function Navbar(props) {
         <Typography variant="h6" flexGrow={1}>
           Sheet2App
         </Typography>
-        {Object.keys(props.user).length !== 0 && (
+        {Object.keys(user).length !== 0 && (
           <Button color="inherit" onClick={(e) => handleSignOut(e)}>
             Log Out
           </Button>

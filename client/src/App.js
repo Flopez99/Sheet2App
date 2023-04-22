@@ -107,7 +107,7 @@ function App() {
     return (
     <>
         <CssBaseline />
-        <Navbar user = {user} />
+        <Navbar user = {user} isDeveloper={isDeveloper}/>
         <Routes>
             <Route path="/" element= {<LandingPage/>}/>
             <Route path= "/developer" element = {<DeveloperApps userEmail = {user.email}/>}/>

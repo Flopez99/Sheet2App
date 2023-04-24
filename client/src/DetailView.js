@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import { makeStyles } from '@mui/styles';
 import { Typography, TextField, Button, Stack, Container, Box, Divider } from '@mui/material';
+import axios from 'axios';
 
 const useStyles = makeStyles({
   root: {
@@ -61,7 +62,7 @@ const useStyles = makeStyles({
 });
 
 
-function DetailView({ record, detailView, view, tableHeader }) { //view is the tableView which it comes from
+function DetailView({ record, detailView, view, tableHeader, keyIndex }) { //view is the tableView which it comes from
   const [filteredColumns, setFilteredColumns] = useState([])
   const classes = useStyles();
   const [editedRecord, setEditedRecord] = useState(record);
@@ -99,8 +100,18 @@ function DetailView({ record, detailView, view, tableHeader }) { //view is the t
     });
   };
 
-  const handleSaveChanges = () => {
+  const handleSaveChanges = async () => {
     console.log('Record updated:', editedRecord);
+    let record_list = Object.values(editedRecord)
+    var sheetId = getIdFromUrl(view.table.url);
+    var sheetIndex = view.table.sheet_index
+    await axios.post("http://localhost:8080/api/edit_record", {
+      sheetId: sheetId, 
+      sheetIndex: sheetIndex,
+      record: record_list,
+      prevHeader: tableHeader,
+      keyIndex: keyIndex
+    })
     setEditing(false);
   };
 
@@ -175,6 +186,11 @@ function DetailView({ record, detailView, view, tableHeader }) { //view is the t
       </Stack>
     </Container>
   );
+  function getIdFromUrl(url) {
+    const regex = /spreadsheets\/d\/([a-zA-Z0-9-_]+)/;
+    const match = url.match(regex);
+    return match ? match[1] : null;
+  }
 }
 
 export default DetailView;

@@ -48,7 +48,8 @@ function TableView({ view, sheetData, onClickRecord, userEmail, detailView }) {
           (header) => header === allColumns.find((col) => col._id == view.filter).name,
         );
         setFilterIndex(init_filter_index);
-      } else {
+      } 
+      else {
         setFilterIndex(-1);
       }
       //checks user_filter
@@ -79,7 +80,7 @@ function TableView({ view, sheetData, onClickRecord, userEmail, detailView }) {
 
 
   const handleClickRecord = (record, other) => {
-    onClickRecord(record, other, sheetData.sheet_data[0]);
+    onClickRecord(record, other, sheetData.sheet_data[0], keyIndex);
   };
 
   const handleAddRecord = () => {
@@ -200,7 +201,12 @@ function TableView({ view, sheetData, onClickRecord, userEmail, detailView }) {
         </DialogActions>
       </Dialog>
     </Stack>
-  );  
+  ); 
+  function getIdFromUrl(url) {
+    const regex = /spreadsheets\/d\/([a-zA-Z0-9-_]+)/;
+    const match = url.match(regex);
+    return match ? match[1] : null;
+  } 
 }
 
 export default TableView;

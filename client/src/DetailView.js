@@ -105,13 +105,26 @@ function DetailView({ record, detailView, view, tableHeader, keyIndex }) { //vie
     let record_list = Object.values(editedRecord)
     var sheetId = getIdFromUrl(view.table.url);
     var sheetIndex = view.table.sheet_index
-    await axios.post("http://localhost:8080/api/edit_record", {
-      sheetId: sheetId, 
-      sheetIndex: sheetIndex,
-      record: record_list,
-      prevHeader: tableHeader,
-      keyIndex: keyIndex
-    })
+    try{
+      const response = await axios.post("http://localhost:8080/api/edit_record", {
+        sheetId: sheetId, 
+        sheetIndex: sheetIndex,
+        record: record_list,
+        prevHeader: tableHeader,
+        keyIndex: keyIndex
+      })
+      console.log('HERE')
+      if (response.data.success) {
+        console.log(response.data.message);
+        // Update the SheetData and re-render in DisplayApp 
+        // We can call a function passed down as a prop to refresh the data?
+      } else {
+        console.log('Error adding record:', response.data.message);
+      }
+    }
+    catch(error) {
+      console.error('Error sending data to the server:', error);
+    }
     setEditing(false);
   };
 

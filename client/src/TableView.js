@@ -92,9 +92,35 @@ function TableView({ view, sheetData, onClickRecord, userEmail, detailView }) {
 
   const handleSubmit = async () => {
     console.log('Submit new record:', newRecord);
+    var sheetId = getIdFromUrl(view.table.url);
+    var sheetIndex = view.table.sheet_index
+    //adding inital values, and setting other variables as ""
+    for await (const colmn of allColumnsInTable){
+      if(!(newRecord[colmn.index])){ // the columns not added by User
+        if(!(colmn.editable)){//checks if it wasnt editable to add initial values
+          if(colmn.initial_value === "=ADDED_BY()") //if special case of ADDED_BY
+            newRecord[colmn.index] = userEmail
+          else
+            newRecord[colmn.index] = colmn.initial_value
+        }
+        else{
+          newRecord[colmn.index] = ""
+        }
+      }
+    }
+    console.log('Submit new record2:', newRecord);
+    let record_list = Object.values(newRecord)
+
+
     try {
       const response = await axios.post('http://localhost:8080/addRecord', {
-        data: newRecord,
+        sheetId: sheetId, 
+        sheetIndex: sheetIndex,
+        record: record_list,
+        prevHeader: sheetData.sheet_data[0],
+        keyIndex: keyIndex
+
+
       });
   
       if (response.data.success) {

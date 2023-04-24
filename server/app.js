@@ -634,24 +634,6 @@ app.get('/api/fetchSheetData', async (req, res) => {
 
   });
 
-  app.get('/api/check-email', async (req, res) =>{
-    const email = req.query.email;
-    const sheetId = '1cn8iTJUjSuKK3qda5-EiGLLQUIXhX9jonsVsampczkM';
-    const range = 'A:A';
-    const auth = new google.auth.GoogleAuth({
-        keyFile: 'credentials.json',
-        scopes: ['https://www.googleapis.com/auth/spreadsheets'],
-    });
-    const client = await auth.getClient();
-    const sheets = google.sheets({version: 'v4', auth: client});
-    const sheetResponse = await sheets.spreadsheets.values.get({
-        spreadsheetId: sheetId,
-        range: range
-    });
-    const sheetData = sheetResponse.data.values;
-    const isDeveloper = sheetData.some(row => row[0] === email);
-    res.send({isDeveloper});
-});
 function compareLists(list1, list2) {
   if (list1.length !== list2.length) {
     // if the lists have different lengths, they are not the same
@@ -765,4 +747,12 @@ function findRowIndex(arr, keyColumn, keyValue) {
 
 
 
+  
+
+  app.post('/addRecord', async (req, res) => {
+    const { data } = req.body;
+    // Logic to store the data in database using the data object
+
+    res.json({ success: true, message: 'Record added successfully' });
+  });
   

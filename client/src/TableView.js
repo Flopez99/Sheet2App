@@ -3,6 +3,8 @@ import { makeStyles } from '@mui/styles';
 import { Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, Typography, Stack, Container, Grid, Button, Box } from '@mui/material';
 import { Dialog, DialogTitle, DialogContent, TextField, DialogActions } from '@mui/material';
 import { Link } from 'react-router-dom';
+import axios from 'axios';
+
 
 const useStyles = makeStyles({
   table: {
@@ -88,10 +90,23 @@ function TableView({ view, sheetData, onClickRecord, userEmail, detailView }) {
     setOpen(true);
   };
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     console.log('Submit new record:', newRecord);
-    // Logic to be added to push the data to the server
-    // Update the SheetData and re-render in DisplayApp ig
+    try {
+      const response = await axios.post('http://localhost:8080/addRecord', {
+        data: newRecord,
+      });
+  
+      if (response.data.success) {
+        console.log(response.data.message);
+        // Update the SheetData and re-render in DisplayApp 
+        // We can call a function passed down as a prop to refresh the data?
+      } else {
+        console.log('Error adding record:', response.data.message);
+      }
+    } catch (error) {
+      console.error('Error sending data to the server:', error);
+    }
     setOpen(false);
     setNewRecord({});
   };

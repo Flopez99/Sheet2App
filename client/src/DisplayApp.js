@@ -1,5 +1,3 @@
-
-// THE TOP PART PUTS IT AT THE BOTTOM OF THE TABLE
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { createTheme, ThemeProvider } from '@mui/material/styles';
@@ -7,8 +5,6 @@ import { AppBar, Toolbar, Typography, Button, BottomNavigation, BottomNavigation
 import TableView from './TableView';
 import DetailView from './DetailView';
 import { Container } from '@mui/system';
-
-
 
 const theme = createTheme({
   root: {
@@ -67,7 +63,6 @@ function DisplayApp(props) {
   const [selectedTableHeader, setSelectedTableHeader] = useState(null) 
   
   const [currentKeyIndex, setCurrentKeyIndex] = useState(-1)
-
 
   const [schemaFlag, setSchemaFlag] = useState(true)
 
@@ -209,8 +204,7 @@ function DisplayApp(props) {
 
   const handleClickRecord = (record, other, tableHeader, key_index) => {
     if(currDetailView){
-      console.log("This is curr detail")
-      console.log(currDetailView)
+      // console.log(currDetailView)
       setSelectedRecord(record)
       setSelectedTableHeader(tableHeader)
       setCurrentKeyIndex(key_index)
@@ -222,6 +216,38 @@ function DisplayApp(props) {
   const handleBackToTableView = () => {
     setSelectedRecord(null) // clear selected record when going back to table view
   }
+
+  //Refresh info after update has been made
+  const refreshSheetData = async (changedTable) => {
+    var sheetId = getIdFromUrl(changedTable.url);
+    var sheetIndex = changedTable.sheet_index;
+
+    try {
+
+      console.log("REFRESHING DATA")
+      console.log(sheetId)
+      console.log(sheetIndex)
+
+      // Get the updated data from the server
+      const newData = await axios.get("http://localhost:8080/records", { params: { sheetId: sheetId, sheetIndex: sheetIndex } });
+      
+      const newSheetData = sheetData.map(table => {
+        if (table.name === activeTableView.table.name) {
+          return {
+            ...table,
+            sheet_data: newData.data.values // replace the entire sheet_data array with the updated data
+          };
+        } else {
+          return table;
+        }
+      });
+
+      // Update the sheetData state with the updated data
+      setSheetData(newSheetData);
+    } catch (error) {
+      console.error('Error sending data to the server:', error);
+    }
+  };
 
   return (
     <ThemeProvider theme={theme}>
@@ -262,6 +288,7 @@ function DisplayApp(props) {
               sheetData={activeDataSource}
               userEmail={props.userEmail}
               detailView = {currDetailView}
+              refreshSheetData={refreshSheetData}
             />
           )}
         </div>

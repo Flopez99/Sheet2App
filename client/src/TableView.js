@@ -21,8 +21,7 @@ const useStyles = makeStyles({
   },
 });
 
-function TableView({ view, sheetData, onClickRecord, userEmail, detailView }) {
-  console.log(sheetData);
+function TableView({ view, sheetData, onClickRecord, userEmail, detailView, refreshSheetData }) {
   const [filteredColumns, setFilteredColumns] = useState([]);
   const [datasource, setDatasource] = useState({});
   const [keyIndex, setKeyIndex] = useState(0);
@@ -31,7 +30,6 @@ function TableView({ view, sheetData, onClickRecord, userEmail, detailView }) {
   const [open, setOpen] = useState(false);
   const [newRecord, setNewRecord] = useState({});
   const [allColumnsInTable, setAllColumnsInTable] = useState([])
-
 
   useEffect(() => {
     const getFilteredColumns = async () => {
@@ -80,7 +78,6 @@ function TableView({ view, sheetData, onClickRecord, userEmail, detailView }) {
 
   const classes = useStyles();
 
-
   const handleClickRecord = (record, other) => {
     onClickRecord(record, other, sheetData.sheet_data[0], keyIndex);
   };
@@ -108,6 +105,7 @@ function TableView({ view, sheetData, onClickRecord, userEmail, detailView }) {
         }
       }
     }
+
     console.log('Submit new record2:', newRecord);
     let record_list = Object.values(newRecord)
 
@@ -119,14 +117,14 @@ function TableView({ view, sheetData, onClickRecord, userEmail, detailView }) {
         record: record_list,
         prevHeader: sheetData.sheet_data[0],
         keyIndex: keyIndex
-
-
       });
   
       if (response.data.success) {
         console.log(response.data.message);
         // Update the SheetData and re-render in DisplayApp 
         // We can call a function passed down as a prop to refresh the data?
+        refreshSheetData(view.table)
+
       } else {
         console.log('Error adding record:', response.data.message);
       }

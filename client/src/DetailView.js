@@ -101,7 +101,6 @@ function DetailView({ record, detailView, view, tableHeader, keyIndex, refreshSh
   };
 
   const handleSaveChanges = async () => {
-    console.log('Record updated:', editedRecord);
     let record_list = Object.values(editedRecord)
     var sheetId = getIdFromUrl(view.table.url);
     var sheetIndex = view.table.sheet_index
@@ -114,7 +113,6 @@ function DetailView({ record, detailView, view, tableHeader, keyIndex, refreshSh
         keyIndex: keyIndex,
         keyValue: record[keyIndex]
       })
-      console.log('HERE')
       if (response.data.success) {
         console.log(response.data.message);
         refreshSheetData(view.table)
@@ -132,8 +130,32 @@ function DetailView({ record, detailView, view, tableHeader, keyIndex, refreshSh
     setEditing(false);
   };
 
-  const handleDeleteRecord = () => {
-    console.log('Record deleted:', record);
+  const handleDeleteRecord = async () => {
+    var sheetId = getIdFromUrl(view.table.url);
+    var sheetIndex = view.table.sheet_index
+
+    try{
+      const response = await axios.post("http://localhost:8080/api/delete_record", {
+        sheetId: sheetId, 
+        sheetIndex: sheetIndex,
+        prevHeader: tableHeader,
+        keyIndex: keyIndex,
+        keyValue: record[keyIndex]
+      })
+      if (response.data.success) {
+        refreshSheetData(view.table)
+        handleBackToTableView()
+
+        // Update the SheetData and re-render in DisplayApp 
+        // We can call a function passed down as a prop to refresh the data?
+      } else {
+        console.log('Error adding record:', response.data.message);
+      }
+    }
+    catch(error) {
+      console.error('Error sending data to the server:', error);
+    }
+
   };
 
   const handleEditButtonClick = () => {

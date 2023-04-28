@@ -313,17 +313,30 @@ function CreateView(props) {
                 </TextField>
               </Grid>
               {viewType === 'TableView' && (
-                <Grid item xs={12}>
-                  <FormControlLabel
-                    control={
-                      <Checkbox
-                        checked={addRecord}
-                        onChange={(event) => setAddRecord(event.target.checked)}
-                      />
-                    }
-                    label="Allow Adding Records"
-                  />
-                </Grid>
+                <Stack spacing={2}>
+                  <Grid item xs={12}>
+                    <FormControlLabel
+                      control={
+                        <Checkbox
+                          checked={addRecord}
+                          onChange={(event) => setAddRecord(event.target.checked)}
+                        />
+                      }
+                      label="Allow Adding Records"
+                    />
+                  </Grid>
+                  <Grid item xs={12}>
+                    <FormControlLabel
+                      control={
+                        <Checkbox
+                          checked={deleteRecord}
+                          onChange={(event) => setDeleteRecord(event.target.checked)}
+                        />
+                      }
+                      label="Allow Deleting Records"
+                    />
+                  </Grid>
+                </Stack>
               )}
               {viewType === 'DetailView' && (
                 <Stack spacing={2}>
@@ -352,6 +365,7 @@ function CreateView(props) {
                 </Stack>
               )}
 
+            <Grid item xs={12}>
               <Box sx={{ display: 'flex', alignItems: 'center', flexWrap: 'wrap', mb: 1 }}>
                 {selectedRoleList.map(role => (
                   <Chip
@@ -362,6 +376,7 @@ function CreateView(props) {
                   />
                 ))}
               </Box>
+            </Grid>
               <Grid item xs={12}>
                 <TextField
                   defaultValue={''}

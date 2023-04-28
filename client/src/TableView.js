@@ -19,6 +19,15 @@ const useStyles = makeStyles({
     fontWeight: 'bold',
     backgroundColor: '#f5f5f5',
   },
+  deleteColumn: {
+    width: '80px', // Adjust the width to your preference
+    padding: 0,
+    textAlign: 'center',
+  },
+  fullWidthButton: {
+    padding: 0,
+    width: '100%',
+  },
 });
 
 function TableView({ view, sheetData, onClickRecord, userEmail, detailView, refreshSheetData }) {
@@ -87,6 +96,33 @@ function TableView({ view, sheetData, onClickRecord, userEmail, detailView, refr
     setOpen(true);
   };
 
+  const handleDeleteRecord = async (record1, key_index) => {
+    var sheetId = getIdFromUrl(view.table.url);
+    var sheetIndex = view.table.sheet_index
+
+    try{
+      const response = await axios.post("http://localhost:8080/api/delete_record", {
+        sheetId: sheetId, 
+        sheetIndex: sheetIndex,
+        prevHeader: sheetData.sheet_data[0],
+        keyIndex: keyIndex,
+        keyValue: record1[keyIndex]
+      })
+      if (response.data.success) {
+        console.log("NEW DATAAAA")
+        refreshSheetData(view.table)
+
+        // Update the SheetData and re-render in DisplayApp 
+        // We can call a function passed down as a prop to refresh the data?
+      } else {
+        console.log('Error adding record:', response.data.message);
+      }
+    }
+    catch(error) {
+      console.error('Error sending data to the server:', error);
+    }
+
+  };
   const handleSubmit = async () => {
     console.log('Submit new record:', newRecord);
     var sheetId = getIdFromUrl(view.table.url);
@@ -106,6 +142,7 @@ function TableView({ view, sheetData, onClickRecord, userEmail, detailView, refr
       }
     }
 
+    
     console.log('Submit new record2:', newRecord);
     let record_list = Object.values(newRecord)
 
@@ -164,6 +201,9 @@ function TableView({ view, sheetData, onClickRecord, userEmail, detailView, refr
                         {column.name}
                       </TableCell>
                     ))}
+                    {view.delete_record && (
+                      <TableCell className={classes.header}>Delete</TableCell>
+                    )}
                   </TableRow>
                 </TableHead>
                 <TableBody>
@@ -177,8 +217,7 @@ function TableView({ view, sheetData, onClickRecord, userEmail, detailView, refr
                           <TableRow
                             key={record[keyIndex]}
                             className={classes.tableRow}
-                            onClick={() => handleClickRecord(record, record[keyIndex])}
-                          >
+                            onMouseUp={() => handleClickRecord(record, record[keyIndex])}                          >
                             {filteredColumns.map((column) => {
                                 if(column.type === "URL"){
                                   return(<TableCell key={column._id}>
@@ -189,6 +228,22 @@ function TableView({ view, sheetData, onClickRecord, userEmail, detailView, refr
                                   return (<TableCell key={column._id}>{record[column.index] || ''}</TableCell>)
                                 }
                               }
+                            )}
+                            {view.delete_record && (
+                              <TableCell className={classes.deleteColumn}>
+                                <Button
+                                  variant="outlined"
+                                  color="error"
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    e.preventDefault();
+                                    handleDeleteRecord(record, record[keyIndex]);
+                                  }}
+                                >
+                                  X
+                                </Button>
+                              </TableCell>
+          
                             )}
                           </TableRow>
                         );

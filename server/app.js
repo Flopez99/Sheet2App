@@ -605,7 +605,7 @@ app.get('/api/fetchSheetData', async (req, res) => {
     const { sheetId, sheetIndex } = req.query;
     console.log("Hi")
     console.log(sheetId);
-    console.log(sheetIndex);
+    console.log(sheetIndex); 
     const auth = new google.auth.GoogleAuth({
         keyFile:"credentials.json",
         scopes:"https://www.googleapis.com/auth/spreadsheets",
@@ -638,7 +638,7 @@ function compareLists(list1, list2) {
   if (list1.length !== list2.length) {
     // if the lists have different lengths, they are not the same
     return false;
-  }
+  } 
 
   for (let i = 0; i < list1.length; i++) {
     if (list1[i] !== list2[i]) {
@@ -646,7 +646,7 @@ function compareLists(list1, list2) {
       return false;
     }
   }
-
+ 
   // if we haven't returned yet, the lists are the same
   return true;
 }
@@ -793,5 +793,80 @@ function findRowIndex(arr, keyColumn, keyValue) {
   
       });  
     res.json({ success: true, message: 'Record added successfully' });
+  });
+
+  app.post('/api/delete_record', async (req, res) => {
+    const { sheetId, sheetIndex, record, prevHeader, keyIndex, keyValue } = req.body;
+  
+    console.log("DELETING RECORDD")
+    console.log(sheetId)
+    console.log(sheetIndex) 
+    console.log(prevHeader)
+    console.log(keyIndex)
+    console.log(keyValue)  
+
+    const auth = new google.auth.GoogleAuth({
+      keyFile: "credentials.json",
+      scopes: "https://www.googleapis.com/auth/spreadsheets",
+    });
+    var sheet_data;
+    const sheets = google.sheets({ version: "v4", auth });
+    const sheetHeader = await sheets.spreadsheets.values.get({
+      auth,
+      spreadsheetId: sheetId,
+      range: `Sheet${sheetIndex}!A1:Z`,
+    });
+  
+    if (sheetHeader.status === 200) {
+      sheet_data = sheetHeader.data.values;
+    } else {
+      console.log("In Here");
+      return res.status(400).json({ error: "Error fetching sheet data" });
+    }
+  
+    console.log(sheet_data);
+  
+    if (!compareLists(prevHeader, sheet_data[0])) {
+      return res.status(500).json({ error: "Schema is inconsistent" });
+    }
+  
+    if (keyIndex < 0) {
+      return res.status(500).json({ error: "KeyIndex Bad" });
+    }
+  
+    var rowIndex = findRowIndex(sheet_data, keyIndex, keyValue);
+  
+    // Get the sheet ID of the target sheet
+    const spreadsheetMetadata = await sheets.spreadsheets.get({
+      auth,
+      spreadsheetId: sheetId,
+      ranges: [],
+      includeGridData: false,
+    });
+  
+    const targetSheetId = spreadsheetMetadata.data.sheets.find(sheet => sheet.properties.title === `Sheet${sheetIndex}`).properties.sheetId;
+  
+    // Now we can delete the row in the Google Sheet using the Google API
+    const response = await sheets.spreadsheets.batchUpdate({
+      auth,
+      spreadsheetId: sheetId,
+      requestBody: {
+        requests: [
+          {
+            deleteDimension: {
+              range: {
+                sheetId: targetSheetId,
+                dimension: "ROWS",
+                startIndex: rowIndex,
+                endIndex: rowIndex + 1,
+              },
+            },
+          },
+        ],
+      },
+    });
+  
+    console.log("Row deleted");
+    res.json({ success: true, message: "Record deleted successfully" });
   });
   

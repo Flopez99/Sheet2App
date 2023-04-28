@@ -287,9 +287,11 @@ function DisplayApp(props) {
             <TableView
               onClickRecord={handleClickRecord}
               view={activeTableView}
+              tableHeader={selectedTableHeader}
               sheetData={activeDataSource}
               userEmail={props.userEmail}
               detailView = {currDetailView}
+              keyIndex = {currentKeyIndex}
               refreshSheetData={refreshSheetData}
             />
           )}

@@ -660,13 +660,15 @@ function findRowIndex(arr, keyColumn, keyValue) {
   return -1;
 }
   app.post('/api/edit_record', async (req, res) => {
-    const { sheetId, sheetIndex, record, prevHeader, keyIndex } = req.body;
+    const { sheetId, sheetIndex, record, prevHeader, keyIndex, keyValue  } = req.body;
     console.log("In Edit Record")
     console.log(sheetId);
     console.log(sheetIndex);
     console.log(record)
     console.log(prevHeader)
     console.log(keyIndex)
+    console.log(keyValue)
+
 
       //gets the sheetdata to find position to edit, saves it in sheet_data
       const auth = new google.auth.GoogleAuth({
@@ -706,7 +708,7 @@ function findRowIndex(arr, keyColumn, keyValue) {
     //getRowIndex
     if(keyIndex < 0)
       return res.status(500).json({ error: 'KeyIndex Bad' });
-    var rowIndex = findRowIndex(sheet_data, keyIndex, record[keyIndex])
+    var rowIndex = findRowIndex(sheet_data, keyIndex, keyValue)
     
     //now we can update the row in google sheet with the record info using googleapi
     const response =  sheets.spreadsheets.values.update({

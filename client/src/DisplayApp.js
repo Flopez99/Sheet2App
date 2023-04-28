@@ -279,6 +279,8 @@ function DisplayApp(props) {
                 view = {activeTableView} 
                 tableHeader={selectedTableHeader}
                 keyIndex = {currentKeyIndex}
+                refreshSheetData={refreshSheetData}
+                handleBackToTableView = {handleBackToTableView}
               />
             </div>
           ) : (

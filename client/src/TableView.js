@@ -116,7 +116,7 @@ function TableView({ view, sheetData, onClickRecord, userEmail, detailView, refr
         sheetIndex: sheetIndex,
         record: record_list,
         prevHeader: sheetData.sheet_data[0],
-        keyIndex: keyIndex
+        keyIndex: keyIndex,
       });
   
       if (response.data.success) {

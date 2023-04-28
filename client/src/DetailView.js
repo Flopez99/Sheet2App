@@ -62,7 +62,7 @@ const useStyles = makeStyles({
 });
 
 
-function DetailView({ record, detailView, view, tableHeader, keyIndex }) { //view is the tableView which it comes from
+function DetailView({ record, detailView, view, tableHeader, keyIndex, refreshSheetData, handleBackToTableView }) { //view is the tableView which it comes from
   const [filteredColumns, setFilteredColumns] = useState([])
   const classes = useStyles();
   const [editedRecord, setEditedRecord] = useState(record);
@@ -111,11 +111,15 @@ function DetailView({ record, detailView, view, tableHeader, keyIndex }) { //vie
         sheetIndex: sheetIndex,
         record: record_list,
         prevHeader: tableHeader,
-        keyIndex: keyIndex
+        keyIndex: keyIndex,
+        keyValue: record[keyIndex]
       })
       console.log('HERE')
       if (response.data.success) {
         console.log(response.data.message);
+        refreshSheetData(view.table)
+        handleBackToTableView()
+
         // Update the SheetData and re-render in DisplayApp 
         // We can call a function passed down as a prop to refresh the data?
       } else {

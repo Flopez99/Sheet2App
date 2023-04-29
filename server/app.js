@@ -659,6 +659,24 @@ function findRowIndex(arr, keyColumn, keyValue) {
   // return -1 if no row with matching key value was found
   return -1;
 }
+function isColumnUnique(arr, columnIndex, keyValue, rowIndex) {
+  const uniqueValues = new Set();
+  uniqueValues.add(keyValue);
+  var count = 0;
+  for (let row of arr) {
+    if(count !== rowIndex){
+      const value = row[columnIndex];
+      if (uniqueValues.has(value)) {
+        console.log("Values: " + value)
+        return false; // Not unique
+      }
+      uniqueValues.add(value);
+    }
+    count++;
+    
+  }
+  return true; // Unique
+}
   app.post('/api/edit_record', async (req, res) => {
     const { sheetId, sheetIndex, record, prevHeader, keyIndex, keyValue  } = req.body;
     console.log("In Edit Record")
@@ -708,7 +726,14 @@ function findRowIndex(arr, keyColumn, keyValue) {
     //getRowIndex
     if(keyIndex < 0)
       return res.status(500).json({ error: 'KeyIndex Bad' });
+
+
     var rowIndex = findRowIndex(sheet_data, keyIndex, keyValue)
+
+    //checks for key integrity
+    if(!(isColumnUnique(sheet_data, keyIndex, keyValue, rowIndex))){
+      return res.status(500).json({ error: 'Repeated Key, No Key Integrity' });
+    }
     
     //now we can update the row in google sheet with the record info using googleapi
     const response =  sheets.spreadsheets.values.update({
@@ -772,12 +797,17 @@ function findRowIndex(arr, keyColumn, keyValue) {
       if(!(compareLists(prevHeader, sheet_data[0])))
         return res.status(500).json({ error: 'Schema is inconsistent' });
   
-      
+          //checks for key integrity
+      if(!(isColumnUnique(sheet_data, keyIndex, record[keyIndex], -1))){
+        return res.status(500).json({ error: 'Repeated Key, No Key Integrity' });
+      }
+
+
       //now we can update the row in google sheet with the record info using googleapi
       const response =  sheets.spreadsheets.values.append({
         auth,
         spreadsheetId: sheetId,
-        range: `Sheet${sheetIndex}!A${sheet_data.length}`,
+        range: `Sheet${sheetIndex}!A${sheet_data.length + 1}`,
         valueInputOption: "USER_ENTERED",
         insertDataOption: 'INSERT_ROWS',
         resource: {

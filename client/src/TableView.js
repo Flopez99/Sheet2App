@@ -39,6 +39,7 @@ function TableView({ view, sheetData, onClickRecord, userEmail, detailView, refr
   const [open, setOpen] = useState(false);
   const [newRecord, setNewRecord] = useState({});
   const [allColumnsInTable, setAllColumnsInTable] = useState([])
+  const [allColumnTypes, setAllColumnTypes] =useState([])
 
   useEffect(() => {
     const getFilteredColumns = async () => {
@@ -77,6 +78,9 @@ function TableView({ view, sheetData, onClickRecord, userEmail, detailView, refr
         index: headers.findIndex((header) => header === obj.name), 
         editable: (detailView?.editable_columns?.some((edit_col_id) => (edit_col_id === obj._id))?true:false )}));
       console.log(init_all_columns)
+      let init_column_type = alignAndExtractTypes(init_all_columns)
+      setAllColumnTypes(init_column_type)
+      console.log(init_column_type)
       setAllColumnsInTable(init_all_columns)
       setKeyIndex(key_index);
       setFilteredColumns(init_columns);
@@ -88,7 +92,7 @@ function TableView({ view, sheetData, onClickRecord, userEmail, detailView, refr
   const classes = useStyles();
 
   const handleClickRecord = (record, other) => {
-    onClickRecord(record, other, sheetData.sheet_data[0], keyIndex);
+    onClickRecord(record, other, sheetData.sheet_data[0], keyIndex, allColumnTypes);
   };
 
   const handleAddRecord = () => {
@@ -301,6 +305,15 @@ function TableView({ view, sheetData, onClickRecord, userEmail, detailView, refr
     const match = url.match(regex);
     return match ? match[1] : null;
   } 
+  function alignAndExtractTypes(arr) {
+    // Sort the array by index
+    arr.sort((a, b) => a.index - b.index);
+  
+    // Extract the type of each object
+    const types = arr.map(obj => obj.type);
+  
+    return types;
+  }
 }
 
 export default TableView;

@@ -65,6 +65,7 @@ function DisplayApp(props) {
   const [currentKeyIndex, setCurrentKeyIndex] = useState(-1)
 
   const [schemaFlag, setSchemaFlag] = useState(true)
+  const [allColumnsTypes, setAllColumnTypes] = useState([])
 
   useEffect(() => {
     const getApp = async () => {
@@ -202,12 +203,13 @@ function DisplayApp(props) {
     setcurrDetailView(newDetailViews.length > 0 ? newDetailViews[0] : null);
   };
 
-  const handleClickRecord = (record, other, tableHeader, key_index) => {
+  const handleClickRecord = (record, other, tableHeader, key_index, all_types) => {
     if(currDetailView){
       // console.log(currDetailView)
       setSelectedRecord(record)
       setSelectedTableHeader(tableHeader)
       setCurrentKeyIndex(key_index)
+      setAllColumnTypes(all_types)
     }else{
       console.log("Uhh there's no detailview")
     }
@@ -281,6 +283,7 @@ function DisplayApp(props) {
                 keyIndex = {currentKeyIndex}
                 refreshSheetData={refreshSheetData}
                 handleBackToTableView = {handleBackToTableView}
+                allColumnsTypes = {allColumnsTypes}
               />
             </div>
           ) : (

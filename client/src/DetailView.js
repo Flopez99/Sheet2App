@@ -62,7 +62,7 @@ const useStyles = makeStyles({
 });
 
 
-function DetailView({ record, detailView, view, tableHeader, keyIndex, refreshSheetData, handleBackToTableView }) { //view is the tableView which it comes from
+function DetailView({ record, detailView, view, tableHeader, keyIndex, refreshSheetData, handleBackToTableView, allColumnsTypes }) { //view is the tableView which it comes from
   const [filteredColumns, setFilteredColumns] = useState([])
   const classes = useStyles();
   const [editedRecord, setEditedRecord] = useState(record);
@@ -104,6 +104,8 @@ function DetailView({ record, detailView, view, tableHeader, keyIndex, refreshSh
     let record_list = Object.values(editedRecord)
     var sheetId = getIdFromUrl(view.table.url);
     var sheetIndex = view.table.sheet_index
+    console.log(allColumnsTypes) //now we have to just check all values with this order
+    
     try{
       const response = await axios.post("http://localhost:8080/api/edit_record", {
         sheetId: sheetId, 
@@ -133,7 +135,6 @@ function DetailView({ record, detailView, view, tableHeader, keyIndex, refreshSh
   const handleDeleteRecord = async () => {
     var sheetId = getIdFromUrl(view.table.url);
     var sheetIndex = view.table.sheet_index
-
     try{
       const response = await axios.post("http://localhost:8080/api/delete_record", {
         sheetId: sheetId, 

@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { makeStyles } from '@mui/styles';
-import { Typography, TextField, Button, Stack, Container, Box, Divider } from '@mui/material';
+import { Dialog, DialogTitle, DialogContent, DialogContentText, Typography, DialogActions, TextField, Button, Stack, Container, Box, Divider } from '@mui/material';
 import axios from 'axios';
 
 const useStyles = makeStyles({
@@ -66,6 +66,7 @@ function DetailView({ record, detailView, view, tableHeader, keyIndex, refreshSh
   const [filteredColumns, setFilteredColumns] = useState([])
   const classes = useStyles();
   const [editedRecord, setEditedRecord] = useState(record);
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [editing, setEditing] = useState(false);
   const [editFilterIndex, setEditFilterIndex] = useState(-1)
     useEffect(() => {
@@ -98,6 +99,18 @@ function DetailView({ record, detailView, view, tableHeader, keyIndex, refreshSh
       ...editedRecord,
       [event.target.name]: event.target.value,
     });
+  };
+  const handleOpenDeleteDialog = () => {
+    setDeleteDialogOpen(true);
+  };
+  
+  const handleCloseDeleteDialog = () => {
+    setDeleteDialogOpen(false);
+  };
+  
+  const handleConfirmDeleteRecord = () => {
+    handleDeleteRecord(record, record[keyIndex]);
+    handleCloseDeleteDialog();
   };
 
   const handleSaveChanges = async () => {
@@ -219,11 +232,32 @@ function DetailView({ record, detailView, view, tableHeader, keyIndex, refreshSh
         ))
       }
       {detailView.delete_record &&
-        <Button variant="contained" color="secondary" onClick={handleDeleteRecord}>
+        <Button variant="contained" sx={{bgcolor: "error.main"}} onClick={handleOpenDeleteDialog}>
           Delete Record
         </Button>
       }
       </Stack>
+      <Container maxWidth="md">
+        <Dialog
+          open={deleteDialogOpen}
+          onClose={handleCloseDeleteDialog}
+          aria-labelledby="alert-dialog-title"
+          aria-describedby="alert-dialog-description"
+        >
+          <DialogTitle id="alert-dialog-title">{"Delete Record?"}</DialogTitle>
+          <DialogContentText id="alert-dialog-description">
+            Are you sure you want to delete this record?
+          </DialogContentText>
+          <DialogActions>
+            <Button onClick={handleCloseDeleteDialog} color="primary">
+              No
+            </Button>
+            <Button onClick={handleConfirmDeleteRecord} color="primary" autoFocus>
+              Yes
+            </Button>
+          </DialogActions>
+        </Dialog>
+      </Container>
     </Container>
   );
   function getIdFromUrl(url) {

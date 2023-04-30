@@ -429,6 +429,13 @@ const navigate = useNavigate();
           >
             Update Datasource
           </Button>
+          <Button
+            fullWidth
+            variant="contained"
+            sx={{ mt: 3, mb: 2, bgcolor: 'error.main' }}
+          >
+            Delete Datasource
+          </Button>
       </Box>
     </Container>
   </ThemeProvider>

@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { makeStyles } from '@mui/styles';
 import { Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, Typography, Stack, Container, Grid, Button, Box } from '@mui/material';
-import { Dialog, DialogTitle, DialogContent, TextField, DialogActions } from '@mui/material';
+import { Dialog, DialogTitle, DialogContent,DialogContentText, TextField, DialogActions } from '@mui/material';
 import { Link } from 'react-router-dom';
 import axios from 'axios';
 
@@ -40,6 +40,8 @@ function TableView({ view, sheetData, onClickRecord, userEmail, detailView, refr
   const [newRecord, setNewRecord] = useState({});
   const [allColumnsInTable, setAllColumnsInTable] = useState([])
   const [allColumnTypes, setAllColumnTypes] =useState([])
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [recordToDelete, setRecordToDelete] = useState(null);
 
   useEffect(() => {
     const getFilteredColumns = async () => {
@@ -98,6 +100,21 @@ function TableView({ view, sheetData, onClickRecord, userEmail, detailView, refr
   const handleAddRecord = () => {
     console.log('Add Record Button Clicked');
     setOpen(true);
+  };
+
+  const handleOpenDeleteDialog = (record) => {
+    setRecordToDelete(record);
+    setDeleteDialogOpen(true);
+  };
+
+  const handleCloseDeleteDialog = () => {
+    setRecordToDelete(null);
+    setDeleteDialogOpen(false);
+  };
+
+  const handleConfirmDeleteRecord = () => {
+    handleDeleteRecord(recordToDelete, recordToDelete[keyIndex]);
+    handleCloseDeleteDialog();
   };
 
   const handleDeleteRecord = async (record1, key_index) => {
@@ -221,18 +238,23 @@ function TableView({ view, sheetData, onClickRecord, userEmail, detailView, refr
                           <TableRow
                             key={record[keyIndex]}
                             className={classes.tableRow}
-                            onMouseUp={() => handleClickRecord(record, record[keyIndex])}                          >
+                            onClick={() => handleClickRecord(record, record[keyIndex])}
+                          >
                             {filteredColumns.map((column) => {
-                                if(column.type === "URL"){
-                                  return(<TableCell key={column._id}>
-                                    <a href={record[column.index]} target="_blank" rel="noreferrer">{record[column.index]}</a>
-                                  </TableCell>)
-                                }
-                                else{
-                                  return (<TableCell key={column._id}>{record[column.index] || ''}</TableCell>)
-                                }
+                              if (column.type === "URL") {
+                                return (
+                                  <TableCell key={column._id}>
+                                    <a href={record[column.index]} target="_blank" rel="noreferrer">
+                                      {record[column.index]}
+                                    </a>
+                                  </TableCell>
+                                );
+                              } else {
+                                return (
+                                  <TableCell key={column._id}>{record[column.index] || ''}</TableCell>
+                                );
                               }
-                            )}
+                            })}
                             {view.delete_record && (
                               <TableCell className={classes.deleteColumn}>
                                 <Button
@@ -241,16 +263,15 @@ function TableView({ view, sheetData, onClickRecord, userEmail, detailView, refr
                                   onClick={(e) => {
                                     e.stopPropagation();
                                     e.preventDefault();
-                                    handleDeleteRecord(record, record[keyIndex]);
+                                    handleOpenDeleteDialog(record);
                                   }}
                                 >
                                   X
                                 </Button>
                               </TableCell>
-          
                             )}
                           </TableRow>
-                        );
+                        );                        
                       }
                     })}
                 </TableBody>
@@ -295,6 +316,27 @@ function TableView({ view, sheetData, onClickRecord, userEmail, detailView, refr
           </Button>
           <Button onClick={handleSubmit} color="primary">
             Add
+          </Button>
+        </DialogActions>
+      </Dialog>
+      <Dialog
+        open={deleteDialogOpen}
+        onClose={handleCloseDeleteDialog}
+        aria-labelledby="alert-dialog-title"
+        aria-describedby="alert-dialog-description"
+      >
+        <DialogTitle id="alert-dialog-title">{"Delete Record?"}</DialogTitle>
+        <DialogContent>
+          <DialogContentText id="alert-dialog-description">
+            Are you sure you want to delete this record?
+          </DialogContentText>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleCloseDeleteDialog} color="primary">
+            No
+          </Button>
+          <Button onClick={handleConfirmDeleteRecord} color="primary" autoFocus>
+            Yes
           </Button>
         </DialogActions>
       </Dialog>

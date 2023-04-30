@@ -515,6 +515,14 @@ function CreateView(props) {
             >
               Save
             </Button>
+            <Button
+              type="submit"
+              fullWidth
+              variant="contained"
+              sx={{ mt: 3, mb: 2, bgcolor: "error.main" }}
+            >
+              Delete View
+            </Button>
           </Box>
         </Box>
       </Container>

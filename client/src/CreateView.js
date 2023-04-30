@@ -25,7 +25,7 @@ import {
   IconButton,
   Stack,
 } from '@mui/material';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { createTheme, ThemeProvider } from '@mui/material/styles';
 import DataSourceDropdown from './DataSourceDropdown';
 
@@ -48,6 +48,7 @@ function CreateView(props) {
   const [userFilter, setUserFilter] = useState();
   const [editFilter, setEditFilter] = useState();
   //const [editableColumns, setEditableColumns] = useState([]);
+  const navigate = useNavigate();
 
   const [columnSettings, setColumnSettings] = useState([]);
 
@@ -252,6 +253,22 @@ function CreateView(props) {
       setColumnSettings(newSettings);
     };
   };
+
+  const handleDeleteView = () => {
+    console.log("DELETING VIEW")
+    console.log(view)
+
+    axios.post("http://localhost:8080/delete_view", {view: view, appId: props.appId})
+    .then((response) => {
+      console.log(response)
+
+
+      navigate('/editapp', props.appId)
+
+    }).catch((error) => {
+      console.log(error)
+    });
+  }
 
   const handleColumnSettingChange = (index, field) => {
     const newSettings = [...columnSettings];
@@ -515,14 +532,17 @@ function CreateView(props) {
             >
               Save
             </Button>
-            <Button
-              type="submit"
+            {view && (
+              <Button
+              onClick={() => handleDeleteView()}
               fullWidth
               variant="contained"
               sx={{ mt: 3, mb: 2, bgcolor: "error.main" }}
             >
               Delete View
             </Button>
+            )}
+            
           </Box>
         </Box>
       </Container>

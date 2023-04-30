@@ -359,7 +359,7 @@ function checkType(array){
             </Button>
           </Box>
           {labelError && (<Alert severity="error">Label only allowed for 1 Column!</Alert>)}
-          {typeError && (<Alert severity="error">All Columns Should habve A Type. Ex. Text, Boolean, URL, Number!</Alert>)}
+          {typeError && (<Alert severity="error">All Columns Should have A Type. Ex. Text, Boolean, URL, Number!</Alert>)}
           {referenceError && (<Alert severity="error">To use reference must place Google Sheet URL + whitespace + sheetIndex. Reference may not be valid</Alert>)}
           {keyError && (<Alert severity="error">Must Have a Key!</Alert>)}
           <Box sx={{ height: 400, width: '100%'}}>

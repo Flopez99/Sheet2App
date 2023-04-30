@@ -345,6 +345,22 @@ const navigate = useNavigate();
     }
   }
 
+  const handleDeleteDataSource = () => {
+    console.log("DELETING VIEW")
+    console.log(datasource)
+
+    axios.post("http://localhost:8080/delete_datasource", {datasourceId: datasource_id, appId: appId})
+    .then((response) => {
+      console.log(response)
+
+
+      navigate('/editapp', {state: appId})
+
+    }).catch((error) => {
+      console.log(error)
+    });
+  }
+
   return (
     <ThemeProvider theme={theme}>
     <Container component="main" maxWidth="md">
@@ -433,6 +449,7 @@ const navigate = useNavigate();
             fullWidth
             variant="contained"
             sx={{ mt: 3, mb: 2, bgcolor: 'error.main' }}
+            onClick = {handleDeleteDataSource}
           >
             Delete Datasource
           </Button>

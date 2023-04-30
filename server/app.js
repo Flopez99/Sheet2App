@@ -253,6 +253,58 @@ app.get('/roles_user', async (req, res) => {
   res.send({ roles });
 })
 
+app.post('/delete_datasource', async (req, res)=> {
+  const datasourceId = req.body.datasourceId
+  const appId = req.body.appId
+
+  try {
+    const app = await AppModel.findById(appId)
+
+    app.data_sources = app.data_sources.filter(d => d !== datasourceId)
+ 
+    await app.save()
+
+    const deletedDataSource = await DataSource.findByIdAndDelete(datasourceId)
+
+    res.status(200).json({
+      message: 'Datasource Deleted Successfuly',
+      dataSource: deletedDataSource,
+    })
+  } catch (err) {
+    console.log(err);
+    res.status(500).json({
+      error: 'Error deleting datasource',
+    });
+  }
+})
+
+
+
+app.post('/delete_view', async (req, res)=> {
+  const view = req.body.view
+  const viewId = view._id
+  const appId = req.body.appId
+
+  try {
+    const app = await AppModel.findById(appId)
+
+    app.views = app.views.filter(v => v !== viewId)
+
+    await app.save()
+
+    const deletedView = await ViewModel.findByIdAndDelete(viewId)
+
+    res.status(200).json({
+      message: 'View Deleted Successfuly',
+      view: deletedView,
+    })
+  } catch (err) {
+    console.log(err);
+    res.status(500).json({
+      error: 'Error deleting view',
+    });
+  }
+})
 
 app.post('/edit_view', async (req, res) => {
   const viewId = req.body.viewId;
@@ -677,86 +729,90 @@ function isColumnUnique(arr, columnIndex, keyValue, rowIndex) {
   }
   return true; // Unique
 }
-  app.post('/api/edit_record', async (req, res) => {
-    const { sheetId, sheetIndex, record, prevHeader, keyIndex, keyValue  } = req.body;
-    console.log("In Edit Record")
-    console.log(sheetId);
-    console.log(sheetIndex);
-    console.log(record)
-    console.log(prevHeader)
-    console.log(keyIndex)
-    console.log(keyValue)
 
 
-      //gets the sheetdata to find position to edit, saves it in sheet_data
-      const auth = new google.auth.GoogleAuth({
-        keyFile:"credentials.json",
-        scopes:"https://www.googleapis.com/auth/spreadsheets",
-    })
-    var sheet_data;
-    const sheets = google.sheets({version:"v4", auth})
-    const sheetHeader = await sheets.spreadsheets.values.get({
-      auth,
-      spreadsheetId: sheetId,
-      range: `Sheet${sheetIndex}!A1:Z`,
-    })
-    .then((response) =>{
-
-      //console.log(response.data)
-      if (response.status === 200) {
-        sheet_data = response.data.values
-      }
-      else{
-          console.log("In Here")
-          return res.status(400).json({ error: 'Error fetching sheet data' });
-      } 
-    })
-    .catch((error) =>{
-      console.error('Error fetching sheet data:', error);
-      return res.status(500).json({ error: 'Error fetching sheet data' });
-    })
-    console.log(sheet_data)
-  
-    //Once we have sheet data we should compare if headers are the same, if not throw
-    //error back
-    
-    if(!(compareLists(prevHeader, sheet_data[0])))
-      return res.status(500).json({ error: 'Schema is inconsistent' });
-
-    //getRowIndex
-    if(keyIndex < 0)
-      return res.status(500).json({ error: 'KeyIndex Bad' });
 
 
-    var rowIndex = findRowIndex(sheet_data, keyIndex, keyValue)
+app.post('/api/edit_record', async (req, res) => {
+  const { sheetId, sheetIndex, record, prevHeader, keyIndex, keyValue  } = req.body;
+  console.log("In Edit Record")
+  console.log(sheetId);
+  console.log(sheetIndex);
+  console.log(record)
+  console.log(prevHeader)
+  console.log(keyIndex)
+  console.log(keyValue)
 
-    //checks for key integrity
-    if(!(isColumnUnique(sheet_data, keyIndex, keyValue, rowIndex))){
-      return res.status(500).json({ error: 'Repeated Key, No Key Integrity' });
-    }
-    
-    //now we can update the row in google sheet with the record info using googleapi
-    const response =  sheets.spreadsheets.values.update({
-      auth,
-      spreadsheetId: sheetId,
-      range: `Sheet${sheetIndex}!A${rowIndex + 1}`,
-      valueInputOption: "USER_ENTERED",
-      resource: {
-        values: [record],
-      },
-    }, (err, res) => {
-      if (err) {
-        console.error(err);
 
-        return;
-      }
-      console.log(`Row updated`);
-
-    });
-    res.json({ success: true, message: 'Record edited successfully' });
-
-  
+    //gets the sheetdata to find position to edit, saves it in sheet_data
+    const auth = new google.auth.GoogleAuth({
+      keyFile:"credentials.json",
+      scopes:"https://www.googleapis.com/auth/spreadsheets",
   })
+  var sheet_data;
+  const sheets = google.sheets({version:"v4", auth})
+  const sheetHeader = await sheets.spreadsheets.values.get({
+    auth,
+    spreadsheetId: sheetId,
+    range: `Sheet${sheetIndex}!A1:Z`,
+  })
+  .then((response) =>{
+
+    //console.log(response.data)
+    if (response.status === 200) {
+      sheet_data = response.data.values
+    }
+    else{
+        console.log("In Here")
+        return res.status(400).json({ error: 'Error fetching sheet data' });
+    } 
+  })
+  .catch((error) =>{
+    console.error('Error fetching sheet data:', error);
+    return res.status(500).json({ error: 'Error fetching sheet data' });
+  })
+  console.log(sheet_data)
+
+  //Once we have sheet data we should compare if headers are the same, if not throw
+  //error back
+  
+  if(!(compareLists(prevHeader, sheet_data[0])))
+    return res.status(500).json({ error: 'Schema is inconsistent' });
+
+  //getRowIndex
+  if(keyIndex < 0)
+    return res.status(500).json({ error: 'KeyIndex Bad' });
+
+
+  var rowIndex = findRowIndex(sheet_data, keyIndex, keyValue)
+
+  //checks for key integrity
+  if(!(isColumnUnique(sheet_data, keyIndex, keyValue, rowIndex))){
+    return res.status(500).json({ error: 'Repeated Key, No Key Integrity' });
+  }
+  
+  //now we can update the row in google sheet with the record info using googleapi
+  const response =  sheets.spreadsheets.values.update({
+    auth,
+    spreadsheetId: sheetId,
+    range: `Sheet${sheetIndex}!A${rowIndex + 1}`,
+    valueInputOption: "USER_ENTERED",
+    resource: {
+      values: [record],
+    },
+  }, (err, res) => {
+    if (err) {
+      console.error(err);
+
+      return;
+    }
+    console.log(`Row updated`);
+
+  });
+  res.json({ success: true, message: 'Record edited successfully' });
+
+
+})
     
   app.post('/addRecord', async (req, res) => {
     const { sheetId, sheetIndex, record, prevHeader, keyIndex } = req.body;

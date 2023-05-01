@@ -3,7 +3,9 @@ import { makeStyles } from '@mui/styles';
 import { Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, Typography, Stack, Container, Grid, Button, Box } from '@mui/material';
 import { Dialog, DialogTitle, DialogContent,DialogContentText, TextField, DialogActions } from '@mui/material';
 import { Link } from 'react-router-dom';
+import { teal } from '@mui/material/colors';
 import axios from 'axios';
+import { buildAggregatedQuickFilterApplier } from '@mui/x-data-grid/hooks/features/filter/gridFilterUtils';
 
 
 const useStyles = makeStyles({
@@ -30,7 +32,7 @@ const useStyles = makeStyles({
   },
 });
 
-function TableView({ view, sheetData, onClickRecord, userEmail, detailView, refreshSheetData }) {
+function TableView({ view, sheetData, onClickRecord, userEmail, detailView, refreshSheetData, all_sheets, all_detail_views, onClickRefRecord }) {
   const [filteredColumns, setFilteredColumns] = useState([]);
   const [datasource, setDatasource] = useState({});
   const [keyIndex, setKeyIndex] = useState(0);
@@ -42,6 +44,8 @@ function TableView({ view, sheetData, onClickRecord, userEmail, detailView, refr
   const [allColumnTypes, setAllColumnTypes] =useState([])
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [recordToDelete, setRecordToDelete] = useState(null);
+  const [allDetailViews, setAllDetailViews] = useState([])
+  const [allSheets, setAllSheets] = useState([])
 
   useEffect(() => {
     const getFilteredColumns = async () => {
@@ -87,14 +91,20 @@ function TableView({ view, sheetData, onClickRecord, userEmail, detailView, refr
       setKeyIndex(key_index);
       setFilteredColumns(init_columns);
       setDatasource(sheetData);
+      setAllDetailViews(all_detail_views)
+      setAllSheets(all_sheets)
     };
     getFilteredColumns();
-  }, [view, sheetData, detailView]);
+  }, [view, sheetData, detailView, all_detail_views, all_sheets]);
 
   const classes = useStyles();
 
-  const handleClickRecord = (record, other) => {
-    onClickRecord(record, other, sheetData.sheet_data[0], keyIndex, allColumnTypes);
+  const handleClickRecord = (record, other, header, key_index, all_col_types) => {
+    onClickRecord(record, other, header, key_index, all_col_types);
+  };
+
+  const handleClickRefRecord = (record, other, header, key_index, all_col_types, ref_detail_view) => {
+    onClickRefRecord(record, other, header, key_index, all_col_types, ref_detail_view);
   };
 
   const handleAddRecord = () => {
@@ -175,6 +185,7 @@ function TableView({ view, sheetData, onClickRecord, userEmail, detailView, refr
         record: record_list,
         prevHeader: sheetData.sheet_data[0],
         keyIndex: keyIndex,
+        typeList: allColumnTypes
       });
   
       if (response.data.success) {
@@ -238,7 +249,7 @@ function TableView({ view, sheetData, onClickRecord, userEmail, detailView, refr
                           <TableRow
                             key={record[keyIndex]}
                             className={classes.tableRow}
-                            onClick={() => handleClickRecord(record, record[keyIndex])}
+                            onClick={() => handleClickRecord(record, record[keyIndex], sheetData.sheet_data[0], keyIndex, allColumnTypes)}
                           >
                             {filteredColumns.map((column) => {
                               if (column.type === "URL") {
@@ -249,7 +260,52 @@ function TableView({ view, sheetData, onClickRecord, userEmail, detailView, refr
                                     </a>
                                   </TableCell>
                                 );
-                              } else {
+                              }
+                              else if(column?.references !== null){
+                                var refDetailView = allDetailViews.find(detailView => detailView.table._id === column.references)
+                                var refDataSource = allSheets.find(sheet => sheet._id === column.references)
+                                console.log(refDataSource)
+                                //record, other, sheetData.sheet_data[0], keyIndex, allColumnTypes
+                                if(refDataSource !== undefined){
+                                  var allRefColumns = refDataSource.columns;
+                                  var refHeader = refDataSource.sheet_data[0]
+                                  allRefColumns = allRefColumns.map((obj) => ({ ...obj, 
+                                    index: refHeader.findIndex((header) => header === obj.name) }))//sets index
+                                  var ref_key_index = allRefColumns.find((column) => (column._id === refDataSource.key))?.index;
+                                  console.log(ref_key_index)
+                                  var ref_record_index = findRowIndex(refDataSource.sheet_data, ref_key_index, record[column.index])
+                                  if(ref_record_index === -1)
+                                    return (<TableCell key={column._id}>{record[column.index] || ''}</TableCell> );
+                                  var ref_record = refDataSource.sheet_data[ref_record_index];
+                                  var label_index = allRefColumns.find(column => column.label === true).index
+                                  var all_ref_column_type = alignAndExtractTypes(allRefColumns)
+                                  console.log(all_ref_column_type)
+                                  if(refDetailView !== undefined){
+                                    console.log(refDetailView)
+                                    return (
+                                    <TableCell className={classes.deleteColumn}>
+                                    <Button
+                                      variant="outlined"
+                                      
+                                      onClick={(e) => {
+                                        e.stopPropagation();
+                                        e.preventDefault();
+                                        handleClickRefRecord(ref_record, ref_record[ref_key_index], refHeader, ref_key_index, all_ref_column_type, refDetailView)
+                                      }}
+                                    >
+                                      {ref_record[label_index]|| ""}
+                                    </Button>
+                                  </TableCell>
+                                  )
+                                  }
+                                  else{
+                                    return (<TableCell key={column._id}>{ref_record[label_index]|| ""}</TableCell>);
+                                  }
+                                }
+                            
+                                return (<TableCell key={column._id}>{record[column.index] || ''}</TableCell> );
+                              } 
+                              else {
                                 return (
                                   <TableCell key={column._id}>{record[column.index] || ''}</TableCell>
                                 );
@@ -259,7 +315,7 @@ function TableView({ view, sheetData, onClickRecord, userEmail, detailView, refr
                               <TableCell className={classes.deleteColumn}>
                                 <Button
                                   variant="outlined"
-                                  color="error"
+                                  color = "error"
                                   onClick={(e) => {
                                     e.stopPropagation();
                                     e.preventDefault();
@@ -355,6 +411,15 @@ function TableView({ view, sheetData, onClickRecord, userEmail, detailView, refr
     const types = arr.map(obj => obj.type);
   
     return types;
+  }
+  function findRowIndex(arr, keyColumn, keyValue) {
+    for (let i = 1; i < arr.length; i++) {
+      if (arr[i][keyColumn] === keyValue) {
+        return i;
+      }
+    }
+    // return -1 if no row with matching key value was found
+    return -1;
   }
 }
 

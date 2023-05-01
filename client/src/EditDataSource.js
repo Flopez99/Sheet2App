@@ -106,6 +106,7 @@ const navigate = useNavigate();
   const [referenceError, setReferenceError] = useState(false)
   const [rows1, setRows1] = useState({})
   const [keyError, setKeyError] = useState(false)
+  const [app, setApp] = useState({})
 
   const theme = createTheme();
   useEffect(async () => {
@@ -125,13 +126,13 @@ const navigate = useNavigate();
         var count = 0;
         for(const column of res.data.columns){
             if(res.data.key === column._id)
-              rows1.push({id: count, key:true, ...column})
+              rows1.push({id: count, key:true, reference_id: null,  ...column})
             else
-              rows1.push({id: count, key:false, ...column})
+              rows1.push({id: count, key:false, reference_id: null, ...column})
             count++;
             if(!(column.references === null || column.references === undefined )){
               console.log(column.references)
-              rows1[count - 1].references = "" + (column.references?.url || '') + ' ' + (column.references?.sheet_index || '')
+              rows1[count - 1].references = column.references?.name || ''
               console.log('REFERNCE!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!')
               console.log(rows1[count -1])
             }
@@ -150,6 +151,12 @@ const navigate = useNavigate();
             console.log(actual_rows)
             setRows1(actual_rows);
         })
+      await axios.get("http://localhost:8080/app", { params: {
+          id: appId
+      }})
+      .then((res) =>{
+          setApp(res.data)
+      })
 
     })
   }, []);
@@ -216,6 +223,8 @@ const navigate = useNavigate();
     let flag = true;
     console.log('in reference')
     console.log(array)
+    console.log(app)
+    var datasources = app.data_sources
     // array.forEach((column) => {
     //   if(column.value.reference !== undefined){
     //     console.log("good")
@@ -224,33 +233,44 @@ const navigate = useNavigate();
     // })
     for(let column of array){
       if(column.value.references !== undefined &&  column.value.references !== "" && column.value.references !== null){
-        console.log(column.value)
-        const stringArr = column.value.references.split(" ")
+        var ref_datasource = datasources.find(datasource => datasource.name === column.value.references)
+        console.log(ref_datasource)
         console.log(column.value.references)
-
-        let url = stringArr[0]
-        let sheetIndex = stringArr[1]
-        console.log(url)
-        console.log(sheetIndex)
-        if(url === null)
-          console.log('error') // should change this to displaying alert
-        await axios.get('http://localhost:8080/datasource_url' , {params : {
-          url: url,
-          sheetIndex: sheetIndex
-        }})
-        .then((res) => {
-          console.log(res)
-          if(res.data === ''){
-            console.log('not good')
-            console.log(column.value)
+        if(ref_datasource !== undefined){
+          console.log(ref_datasource)
+          column.value.reference_id = ref_datasource._id
+        }
+        else{
             setReferenceError(true)
             flag = false;
-          }
-          else{
-            column.value.reference_id = res.data._id
-            //column.value.references = res.data._id
-          }
-        })
+        }
+        // console.log(column.value)
+        // const stringArr = column.value.references.split(" ")
+        // console.log(column.value.references)
+
+        // let url = stringArr[0]
+        // let sheetIndex = stringArr[1]
+        // console.log(url)
+        // console.log(sheetIndex)
+        // if(url === null)
+        //   console.log('error') // should change this to displaying alert
+        // await axios.get('http://localhost:8080/datasource_url' , {params : {
+        //   url: url,
+        //   sheetIndex: sheetIndex
+        // }})
+        // .then((res) => {
+        //   console.log(res)
+        //   if(res.data === ''){
+        //     console.log('not good')
+        //     console.log(column.value)
+        //     setReferenceError(true)
+        //     flag = false;
+        //   }
+        //   else{
+        //     column.value.reference_id = res.data._id
+        //     //column.value.references = res.data._id
+        //   }
+        // })
 
       }
       // if(column.value.reference){
@@ -304,6 +324,7 @@ const navigate = useNavigate();
                   })
             }
             else{
+                console.log(column)
                 await axios.post("http://localhost:8080/updateColumn", {
                 columnId: column.value._id,
                 column_data: {
@@ -379,7 +400,7 @@ const navigate = useNavigate();
         <Typography component="h1" variant="h5">
           Edit DataSource
         </Typography>
-        <Box component="form" noValidate sx={{ mt: 3 }}>
+        <Box component="form" noValidate sx={{ mt: 4 }}>
           <Grid container spacing={1}>
             <Grid item xs={12} sm={12}>
               <TextField

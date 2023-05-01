@@ -542,7 +542,7 @@ app.post('/updateDatasource', async (req, res) =>{
 app.get('/datasource_url' , async (req, res) => {
   console.log('in datasource_url')
   console.log(req.query)
-  DataSource.findOne({ url: req.query.url, sheet_index: req.query.sheetIndex })
+  DataSource.findOne({ name: req.query.refferenceName, sheet_index: req.query.sheetIndex })
   .then(dataSource => {
     res.send(dataSource)
     if (dataSource) {
@@ -729,12 +729,42 @@ function isColumnUnique(arr, columnIndex, keyValue, rowIndex) {
   }
   return true; // Unique
 }
-
-
+function determineType(input) {
+  if (input === '') {
+    return null; // Ignore empty strings
+  }
+  if (!isNaN(input)) {
+    return 'Number';
+  }
+  if (typeof input === 'string' && /^https?:\/\/\S+$/.test(input)) {
+    return 'URL';
+  }
+  if (typeof input === 'string' && (input.toLowerCase() === 'true' || input.toLowerCase() === 'false')) {
+    return 'Boolean';
+  }
+  return 'Text';
+}
+function checkTypes(record, typeList) {
+  for (let i = 0; i < record.length; i++) {
+    const attribute = record[i];
+    const expectedType = typeList[i];
+    const actualType = determineType(attribute);
+    if (actualType !== null && actualType !== expectedType) {
+      console.log(attribute)
+      console.log(actualType)
+      console.log(expectedType)
+      console.log('Here')
+      console.log(record.length)
+      console.log(typeList.length)
+      return false;
+    }
+  }
+  return true;
+}
 
 
 app.post('/api/edit_record', async (req, res) => {
-  const { sheetId, sheetIndex, record, prevHeader, keyIndex, keyValue  } = req.body;
+  const { sheetId, sheetIndex, record, prevHeader, keyIndex, keyValue, typeList  } = req.body;
   console.log("In Edit Record")
   console.log(sheetId);
   console.log(sheetIndex);
@@ -742,6 +772,8 @@ app.post('/api/edit_record', async (req, res) => {
   console.log(prevHeader)
   console.log(keyIndex)
   console.log(keyValue)
+  console.log('TypeList')
+  console.log(typeList)
 
 
     //gets the sheetdata to find position to edit, saves it in sheet_data
@@ -790,7 +822,10 @@ app.post('/api/edit_record', async (req, res) => {
   if(!(isColumnUnique(sheet_data, keyIndex, keyValue, rowIndex))){
     return res.status(500).json({ error: 'Repeated Key, No Key Integrity' });
   }
-  
+  //checks for type integrity
+  if(!(checkTypes(record, typeList))){
+    return res.status(500).json({ error: 'Type Error!' });
+  }
   //now we can update the row in google sheet with the record info using googleapi
   const response =  sheets.spreadsheets.values.update({
     auth,
@@ -815,7 +850,7 @@ app.post('/api/edit_record', async (req, res) => {
 })
     
   app.post('/addRecord', async (req, res) => {
-    const { sheetId, sheetIndex, record, prevHeader, keyIndex } = req.body;
+    const { sheetId, sheetIndex, record, prevHeader, keyIndex, typeList } = req.body;
     console.log(req.body)
     // Logic to store the data in database using the data object
          //gets the sheetdata to find position to edit, saves it in sheet_data
@@ -856,6 +891,11 @@ app.post('/api/edit_record', async (req, res) => {
           //checks for key integrity
       if(!(isColumnUnique(sheet_data, keyIndex, record[keyIndex], -1))){
         return res.status(500).json({ error: 'Repeated Key, No Key Integrity' });
+      }
+
+      //checks for type integrity
+      if(!(checkTypes(record, typeList))){
+        return res.status(500).json({ error: 'Type Error!' });
       }
 
 

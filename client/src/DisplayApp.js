@@ -139,6 +139,7 @@ function DisplayApp(props) {
             console.log('RES.DATA')
             console.log(res.data.values)
             specific_data = res.data.values
+
           }
           catch{
             console.log("ERROOR IN GETTING SHEET DATA")
@@ -146,7 +147,30 @@ function DisplayApp(props) {
           console.log(specific_data)
           sheet_data.push({...view.table, sheet_data: specific_data})
           console.log(sheet_data)
+        } 
+      }
+      console.log(app)
+      var app_datasource = app.data_sources
+      //gets the rest of the datasources from app
+      for(const datasource in app_datasource){
+        if(!(sheet_data.some(sheet => sheet._id === datasource._id))){//checks if is in list alread
+          try{
+            var sheetId = getIdFromUrl(datasource.url);
+            var sheetIndex = datasource.sheet_index
+            const res = await axios.get("http://localhost:8080/records", 
+              { params: {sheetId: sheetId, sheetIndex: sheetIndex} });
+            console.log(datasource.url)
+            console.log('RES.DATA')
+            console.log(res.data.values)
+            specific_data = res.data.values
+
+          }
+          catch{
+            console.log("ERROOR IN GETTING SHEET DATA")
+          }
+          sheet_data.push({...datasource,sheet_data: specific_data})
         }
+
       }
       console.log(sheet_data)
       setSheetData(sheet_data)
@@ -161,10 +185,18 @@ function DisplayApp(props) {
       for(const datasource of sheetData){
         const all_columns = datasource.columns
         const column_headers = datasource.sheet_data[0] //column headers
-        for(const column_name of column_headers){
+        for(const column_name of column_headers){ //checks if all columns in sheet is included in db
           if((all_columns.findIndex(col => col.name === column_name)) === -1){
             setSchemaFlag(false)
             console.log(column_name)
+            console.log("SCHEMA BAD")
+            return
+          }
+        }
+        for(const column of all_columns){ //checks if all columns in db is included in sheet
+          if((column_headers.findIndex(col => col === column.name)) === -1){
+            setSchemaFlag(false)
+            console.log(column)
             console.log("SCHEMA BAD")
             return
           }
@@ -215,12 +247,21 @@ function DisplayApp(props) {
     }
   }
 
+  const handleClickRefRecord = (record, other, tableHeader, key_index, all_types, refDetailView) => {
+      setcurrDetailView(refDetailView)
+      setSelectedRecord(record)
+      setSelectedTableHeader(tableHeader)
+      setCurrentKeyIndex(key_index)
+      setAllColumnTypes(all_types)
+  }
+
   const handleBackToTableView = () => {
     setSelectedRecord(null) // clear selected record when going back to table view
   }
 
   //Refresh info after update has been made
   const refreshSheetData = async (changedTable) => {
+    console.log(changedTable)
     var sheetId = getIdFromUrl(changedTable.url);
     var sheetIndex = changedTable.sheet_index;
 
@@ -234,7 +275,7 @@ function DisplayApp(props) {
       const newData = await axios.get("http://localhost:8080/records", { params: { sheetId: sheetId, sheetIndex: sheetIndex } });
       
       const newSheetData = sheetData.map(table => {
-        if (table.name === activeTableView.table.name) {
+        if (table._id === changedTable._id) {
           return {
             ...table,
             sheet_data: newData.data.values // replace the entire sheet_data array with the updated data
@@ -296,6 +337,9 @@ function DisplayApp(props) {
               detailView = {currDetailView}
               keyIndex = {currentKeyIndex}
               refreshSheetData={refreshSheetData}
+              all_sheets = {sheetData}
+              all_detail_views = {detailViews}
+              onClickRefRecord = {handleClickRefRecord}
             />
           )}
         </div>

@@ -69,7 +69,10 @@ function DetailView({ record, detailView, view, tableHeader, keyIndex, refreshSh
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [editing, setEditing] = useState(false);
   const [editFilterIndex, setEditFilterIndex] = useState(-1)
+  const [allColumnsInTable, setAllColumnsInTable] = useState([])
     useEffect(() => {
+    console.log(record)
+    console.log(detailView)
     const getFilteredColumns = async () => {
       const allColumns = detailView.table.columns;
       const shownColumns = detailView.columns
@@ -79,6 +82,11 @@ function DetailView({ record, detailView, view, tableHeader, keyIndex, refreshSh
           index: tableHeader.findIndex((header) => header === obj.name), 
           editable: (detailView.editable_columns?.some((edit_col_id) => (edit_col_id === obj._id))?true:false )}));
     setFilteredColumns(init_columns)//filtered columns is going to filter column show
+    const init_all_columns = allColumns
+    .map((obj) => ({ ...obj, 
+      index: tableHeader.findIndex((header) => header === obj.name), 
+      editable: (detailView.editable_columns?.some((edit_col_id) => (edit_col_id === obj._id))?true:false )}));
+    setAllColumnsInTable(init_all_columns)
     if(detailView.edit_filter !== null || detailView.edit_filter !== undefined){
       const init_edit_filter_index = tableHeader.findIndex(
         (header) => header === allColumns.find((col) => col._id == detailView.edit_filter).name,
@@ -114,10 +122,17 @@ function DetailView({ record, detailView, view, tableHeader, keyIndex, refreshSh
   };
 
   const handleSaveChanges = async () => {
+    for await (const colmn of allColumnsInTable){
+      if(!(editedRecord[colmn.index])){ // the columns not added by User
+        editedRecord[colmn.index] = ""
+      }
+    }
     let record_list = Object.values(editedRecord)
-    var sheetId = getIdFromUrl(view.table.url);
-    var sheetIndex = view.table.sheet_index
+    var sheetId = getIdFromUrl(detailView.table.url);
+    var sheetIndex = detailView.table.sheet_index
     console.log(allColumnsTypes) //now we have to just check all values with this order
+    console.log(record_list)
+    console.log(editedRecord)
     
     try{
       const response = await axios.post("http://localhost:8080/api/edit_record", {
@@ -126,11 +141,12 @@ function DetailView({ record, detailView, view, tableHeader, keyIndex, refreshSh
         record: record_list,
         prevHeader: tableHeader,
         keyIndex: keyIndex,
-        keyValue: record[keyIndex]
+        keyValue: record[keyIndex],
+        typeList: allColumnsTypes
       })
       if (response.data.success) {
         console.log(response.data.message);
-        refreshSheetData(view.table)
+        refreshSheetData(detailView.table)
         handleBackToTableView()
 
         // Update the SheetData and re-render in DisplayApp 
@@ -146,8 +162,8 @@ function DetailView({ record, detailView, view, tableHeader, keyIndex, refreshSh
   };
 
   const handleDeleteRecord = async () => {
-    var sheetId = getIdFromUrl(view.table.url);
-    var sheetIndex = view.table.sheet_index
+    var sheetId = getIdFromUrl(detailView.table.url);
+    var sheetIndex = detailView.table.sheet_index
     try{
       const response = await axios.post("http://localhost:8080/api/delete_record", {
         sheetId: sheetId, 
@@ -157,7 +173,7 @@ function DetailView({ record, detailView, view, tableHeader, keyIndex, refreshSh
         keyValue: record[keyIndex]
       })
       if (response.data.success) {
-        refreshSheetData(view.table)
+        refreshSheetData(detailView.table)
         handleBackToTableView()
 
         // Update the SheetData and re-render in DisplayApp 

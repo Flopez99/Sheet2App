@@ -28,6 +28,7 @@ import {
 import { Link, useNavigate } from 'react-router-dom';
 import { createTheme, ThemeProvider } from '@mui/material/styles';
 import DataSourceDropdown from './DataSourceDropdown';
+import {Dialog, DialogTitle, DialogContent, DialogContentText, DialogActions} from '@mui/material';
 
 const theme = createTheme();
 
@@ -55,6 +56,8 @@ function CreateView(props) {
   const [selectedRoles, setSelectedRoles] = useState([]);
   
   const [selectedRoleList, setSelectedRoleList] = useState([]);
+
+  const [openDeleteDialog, setOpenDeleteDialog] = useState(false);
 
 
   //Hook for getting the available roles Ran when CreateView is initiated
@@ -255,6 +258,7 @@ function CreateView(props) {
   };
 
   const handleDeleteView = () => {
+    handleCloseDeleteDialog();
     console.log("DELETING VIEW")
     console.log(view)
 
@@ -269,7 +273,13 @@ function CreateView(props) {
       console.log(error)
     });
   }
-
+  const handleOpenDeleteDialog = () => {
+    setOpenDeleteDialog(true);
+  };
+  
+  const handleCloseDeleteDialog = () => {
+    setOpenDeleteDialog(false);
+  };
   const handleColumnSettingChange = (index, field) => {
     const newSettings = [...columnSettings];
     newSettings[index][field] = !newSettings[index][field];
@@ -534,7 +544,7 @@ function CreateView(props) {
             </Button>
             {view && (
               <Button
-              onClick={() => handleDeleteView()}
+              onClick={handleOpenDeleteDialog}
               fullWidth
               variant="contained"
               sx={{ mt: 3, mb: 2, bgcolor: "error.main" }}
@@ -546,6 +556,29 @@ function CreateView(props) {
           </Box>
         </Box>
       </Container>
+      <Dialog
+        open={openDeleteDialog}
+        onClose={handleCloseDeleteDialog}
+        aria-labelledby="alert-dialog-title"
+        aria-describedby="alert-dialog-description"
+      >
+        <DialogTitle id="alert-dialog-title">
+          {"Are you sure you want to delete this view?"}
+        </DialogTitle>
+        <DialogContent>
+          <DialogContentText id="alert-dialog-description">
+            Deleting this view will remove it permanently from the application. This action cannot be undone.
+          </DialogContentText>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleCloseDeleteDialog} color="primary">
+            Cancel
+          </Button>
+          <Button onClick={handleDeleteView} color="primary" autoFocus>
+            Delete
+          </Button>
+        </DialogActions>
+      </Dialog>
     </ThemeProvider>
   );
 }

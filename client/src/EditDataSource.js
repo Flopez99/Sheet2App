@@ -21,6 +21,7 @@ import { useMemo, useRef } from "react";
 import Alert from '@mui/material/Alert';
 import { flattenOptionGroups } from '@mui/base';
 import { useNavigate } from 'react-router-dom'
+import {Dialog, DialogTitle, DialogContent, DialogContentText, DialogActions} from '@mui/material';
 
 const columns  = [
     {
@@ -107,7 +108,7 @@ const navigate = useNavigate();
   const [rows1, setRows1] = useState({})
   const [keyError, setKeyError] = useState(false)
   const [app, setApp] = useState({})
-
+  const [openDeleteDialog, setOpenDeleteDialog] = useState(false);
   const theme = createTheme();
   useEffect(async () => {
     console.log("In Use Effect")
@@ -281,6 +282,13 @@ const navigate = useNavigate();
     return flag;
 
   }
+  const handleOpenDeleteDialog = () => {
+    setOpenDeleteDialog(true);
+  };
+  
+  const handleCloseDeleteDialog = () => {
+    setOpenDeleteDialog(false);
+  };
   const handleUpdate = async() => {
     console.log(apiRef.current.getRowModels());
     var rowModel = await apiRef.current.getRowModels()
@@ -367,6 +375,7 @@ const navigate = useNavigate();
   }
 
   const handleDeleteDataSource = () => {
+    handleCloseDeleteDialog();
     console.log("DELETING VIEW")
     console.log(datasource)
 
@@ -470,12 +479,35 @@ const navigate = useNavigate();
             fullWidth
             variant="contained"
             sx={{ mt: 3, mb: 2, bgcolor: 'error.main' }}
-            onClick = {handleDeleteDataSource}
+            onClick={handleOpenDeleteDialog}
           >
             Delete Datasource
           </Button>
       </Box>
     </Container>
+    <Dialog
+      open={openDeleteDialog}
+      onClose={handleCloseDeleteDialog}
+      aria-labelledby="alert-dialog-title"
+      aria-describedby="alert-dialog-description"
+    >
+      <DialogTitle id="alert-dialog-title">
+        {"Are you sure you want to delete this data source?"}
+      </DialogTitle>
+      <DialogContent>
+        <DialogContentText id="alert-dialog-description">
+          Deleting this data source will remove it permanently from the application. This action cannot be undone.
+        </DialogContentText>
+      </DialogContent>
+      <DialogActions>
+        <Button onClick={handleCloseDeleteDialog} color="primary">
+          Cancel
+        </Button>
+        <Button onClick={handleDeleteDataSource} color="primary" autoFocus>
+          Delete
+        </Button>
+      </DialogActions>
+    </Dialog>
   </ThemeProvider>
   )
   //dataRows = actual headers from google sheet

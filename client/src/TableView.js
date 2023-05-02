@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { makeStyles } from '@mui/styles';
-import { Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, Typography, Stack, Container, Grid, Button, Box } from '@mui/material';
+import { Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, Typography, Stack, Container, Grid, Button, Box, Alert } from '@mui/material';
 import { Dialog, DialogTitle, DialogContent,DialogContentText, TextField, DialogActions } from '@mui/material';
 import { Link } from 'react-router-dom';
 import { teal } from '@mui/material/colors';
@@ -46,6 +46,8 @@ function TableView({ view, sheetData, onClickRecord, userEmail, detailView, refr
   const [recordToDelete, setRecordToDelete] = useState(null);
   const [allDetailViews, setAllDetailViews] = useState([])
   const [allSheets, setAllSheets] = useState([])
+  const [errorFlag, setErrorFlag] = useState(false)
+  const [errorMsg, setErrorMsg] = useState("")
 
   useEffect(() => {
     const getFilteredColumns = async () => {
@@ -133,24 +135,29 @@ function TableView({ view, sheetData, onClickRecord, userEmail, detailView, refr
 
     try{
       const response = await axios.post("http://localhost:8080/api/delete_record", {
-        sheetId: sheetId, 
-        sheetIndex: sheetIndex,
+        sheet_url: view.table.url,
         prevHeader: sheetData.sheet_data[0],
         keyIndex: keyIndex,
         keyValue: record1[keyIndex]
       })
       if (response.data.success) {
         console.log("NEW DATAAAA")
+        setErrorFlag(false)
         refreshSheetData(view.table)
 
         // Update the SheetData and re-render in DisplayApp 
         // We can call a function passed down as a prop to refresh the data?
       } else {
         console.log('Error adding record:', response.data.message);
+        setErrorMsg(response.data.message)
+        setErrorFlag(true)
       }
     }
     catch(error) {
       console.error('Error sending data to the server:', error);
+      setErrorMsg(error)
+      setErrorFlag(true)
+
     }
 
   };
@@ -158,14 +165,17 @@ function TableView({ view, sheetData, onClickRecord, userEmail, detailView, refr
     console.log('Submit new record:', newRecord);
     var sheetId = getIdFromUrl(view.table.url);
     var sheetIndex = view.table.sheet_index
+    var all_col_types = allColumnTypes
     //adding inital values, and setting other variables as ""
     for await (const colmn of allColumnsInTable){
       if(!(newRecord[colmn.index])){ // the columns not added by User
         if(!(colmn.editable)){//checks if it wasnt editable to add initial values
-          if(colmn.initial_value === "=ADDED_BY()") //if special case of ADDED_BY
+          if(colmn.initial_value === "=ADDED_BY()"){ //if special case of ADDED_BY
             newRecord[colmn.index] = userEmail
-          else
+          }
+          else{
             newRecord[colmn.index] = colmn.initial_value
+          }
         }
         else{
           newRecord[colmn.index] = ""
@@ -180,25 +190,32 @@ function TableView({ view, sheetData, onClickRecord, userEmail, detailView, refr
 
     try {
       const response = await axios.post('http://localhost:8080/addRecord', {
-        sheetId: sheetId, 
-        sheetIndex: sheetIndex,
+        sheet_url: view.table.url,
         record: record_list,
         prevHeader: sheetData.sheet_data[0],
         keyIndex: keyIndex,
         typeList: allColumnTypes
       });
-  
+      console.log('in try)')
       if (response.data.success) {
         console.log(response.data.message);
+        setErrorFlag(false)
         // Update the SheetData and re-render in DisplayApp 
         // We can call a function passed down as a prop to refresh the data?
         refreshSheetData(view.table)
 
       } else {
         console.log('Error adding record:', response.data.message);
+        setErrorMsg(response.data.message)
+        setErrorFlag(true)
       }
     } catch (error) {
-      console.error('Error sending data to the server:', error);
+      console.error(error);
+
+      // Access error property if it exists
+      if (error.json && typeof error.json === 'object' && error.json.hasOwnProperty('error')) {
+        console.error(`Server error: ${error.json.error}`);
+      }
     }
     setOpen(false);
     setNewRecord({});
@@ -220,6 +237,7 @@ function TableView({ view, sheetData, onClickRecord, userEmail, detailView, refr
         <Typography variant="h4" component="h2">
           {view.name}
         </Typography>
+        {errorFlag && <Alert severity="error">{errorMsg}</Alert>}
       </Box>
       <Typography alignItems="center">
         <Container>
@@ -409,6 +427,15 @@ function TableView({ view, sheetData, onClickRecord, userEmail, detailView, refr
   
     // Extract the type of each object
     const types = arr.map(obj => obj.type);
+
+      // Check if obj.editable is false and obj.initial_value is not an empty string
+      types.forEach((obj, index) => {
+      if (!obj.editable && obj.initial_value !== "") {
+        types[index] = "initial_value";
+      }
+    });
+
+    console.log(types)
   
     return types;
   }

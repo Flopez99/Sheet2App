@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { makeStyles } from '@mui/styles';
-import { Dialog, DialogTitle, DialogContent, DialogContentText, Typography, DialogActions, TextField, Button, Stack, Container, Box, Divider } from '@mui/material';
+import {Alert,  Dialog, DialogTitle, DialogContent, DialogContentText, Typography, DialogActions, TextField, Button, Stack, Container, Box, Divider } from '@mui/material';
 import axios from 'axios';
 
 const useStyles = makeStyles({
@@ -70,6 +70,8 @@ function DetailView({ record, detailView, view, tableHeader, keyIndex, refreshSh
   const [editing, setEditing] = useState(false);
   const [editFilterIndex, setEditFilterIndex] = useState(-1)
   const [allColumnsInTable, setAllColumnsInTable] = useState([])
+  const [errorFlag, setErrorFlag] = useState(false)
+  const [errorMsg, setErrorMsg] = useState("")
     useEffect(() => {
     console.log(record)
     console.log(detailView)
@@ -136,8 +138,7 @@ function DetailView({ record, detailView, view, tableHeader, keyIndex, refreshSh
     
     try{
       const response = await axios.post("http://localhost:8080/api/edit_record", {
-        sheetId: sheetId, 
-        sheetIndex: sheetIndex,
+        sheet_url: detailView.table.url,
         record: record_list,
         prevHeader: tableHeader,
         keyIndex: keyIndex,
@@ -146,12 +147,15 @@ function DetailView({ record, detailView, view, tableHeader, keyIndex, refreshSh
       })
       if (response.data.success) {
         console.log(response.data.message);
+        setErrorFlag(false)
         refreshSheetData(detailView.table)
         handleBackToTableView()
 
         // Update the SheetData and re-render in DisplayApp 
         // We can call a function passed down as a prop to refresh the data?
       } else {
+        setErrorMsg(response.data.message)
+        setErrorFlag(true)
         console.log('Error adding record:', response.data.message);
       }
     }
@@ -166,8 +170,7 @@ function DetailView({ record, detailView, view, tableHeader, keyIndex, refreshSh
     var sheetIndex = detailView.table.sheet_index
     try{
       const response = await axios.post("http://localhost:8080/api/delete_record", {
-        sheetId: sheetId, 
-        sheetIndex: sheetIndex,
+        sheet_url: detailView.table.url,
         prevHeader: tableHeader,
         keyIndex: keyIndex,
         keyValue: record[keyIndex]
@@ -205,6 +208,7 @@ function DetailView({ record, detailView, view, tableHeader, keyIndex, refreshSh
 
   return (
     <Container maxWidth="sm" component={Box} className={classes.root} elevation = {4}>
+      {errorFlag && <Alert severity="error">{errorMsg}</Alert>}
       <Typography variant="h4" gutterBottom>Record Details</Typography>
       <Divider className={classes.divider} />
       {filteredColumns.map((col, index) => {

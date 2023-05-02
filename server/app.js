@@ -208,8 +208,16 @@ app.get('/roles', async (req, res) => {
   const appId = req.query.appId; 
   const role_sheet = await AppModel.findById(appId)
 
-  
-  const spreadsheetId = getSpreadsheetIdFromUrl(role_sheet.role_membership_url);
+  const idObject = getSpreadsheetIdAndSheetIdFromUrl(role_sheet.role_membership_url);
+  const spreadsheetId = idObject.spreadsheetId;
+  const sheetId = idObject.sheetId
+  if(!(idObject && spreadsheetId && sheetId)){
+    console.log('Bad SheetID, and spreadsheetid')
+    console.log(spreadsheetId)
+    console.log(sheetId)
+    return false;
+  }
+
   const auth = new google.auth.GoogleAuth({  
     keyFile: 'credentials.json', 
     scopes: ['https://www.googleapis.com/auth/spreadsheets'],
@@ -218,10 +226,25 @@ app.get('/roles', async (req, res) => {
   const client = await auth.getClient(); 
   const sheets = google.sheets({ version: 'v4', auth: client });
 
-  const range = `A1:Z1`; 
 
   let roles = []
   try{
+        // Get information about the spreadsheet
+        const spreadsheet = await sheets.spreadsheets.get({
+          spreadsheetId,
+          includeGridData: false,
+        });
+    
+        // Find the sheet with the matching ID
+        const sheet = spreadsheet.data.sheets.find((s) => s.properties.sheetId === parseInt(sheetId));
+    
+        if (!sheet) {
+          console.error(`Sheet with ID ${sheetId} not found in spreadsheet ${spreadsheetId}`);
+          return false;
+        }
+    
+        // Use the sheet name in the range parameter
+        const range = `${sheet.properties.title}!A1:Z1`;
     const result = await sheets.spreadsheets.values.get({ 
         spreadsheetId,
         range, 
@@ -246,7 +269,17 @@ app.get('/roles_user', async (req, res) => {
   const role_sheet = await AppModel.findById(appId)
 
   
-  const spreadsheetId = getSpreadsheetIdFromUrl(role_sheet.role_membership_url);
+
+  const idObject = getSpreadsheetIdAndSheetIdFromUrl(role_sheet.role_membership_url);
+  const spreadsheetId = idObject.spreadsheetId;
+  const sheetId = idObject.sheetId
+  if(!(idObject && spreadsheetId && sheetId)){
+    console.log('Bad SheetID, and spreadsheetid')
+    console.log(spreadsheetId)
+    console.log(sheetId)
+    return false;
+  }
+
   const auth = new google.auth.GoogleAuth({  
     keyFile: 'credentials.json', 
     scopes: ['https://www.googleapis.com/auth/spreadsheets'],
@@ -255,9 +288,26 @@ app.get('/roles_user', async (req, res) => {
   const client = await auth.getClient(); 
   const sheets = google.sheets({ version: 'v4', auth: client });
 
-  const range = `A1:Z`; 
+  //const range = `A1:Z`; 
   let roles = []
   try{
+    // Get information about the spreadsheet
+    const spreadsheet = await sheets.spreadsheets.get({
+      spreadsheetId,
+      includeGridData: false,
+    });
+
+    // Find the sheet with the matching ID
+    const sheet = spreadsheet.data.sheets.find((s) => s.properties.sheetId === parseInt(sheetId));
+
+    if (!sheet) {
+      console.error(`Sheet with ID ${sheetId} not found in spreadsheet ${spreadsheetId}`);
+      return false;
+    }
+
+    // Use the sheet name in the range parameter
+    const range = `${sheet.properties.title}!A1:Z`;
+
     const result = await sheets.spreadsheets.values.get({ 
         spreadsheetId,
         range, 
@@ -652,10 +702,11 @@ const server = app.listen(port, () => {
 
 app.get('/api/fetchSheetData', async (req, res) => {
 
-    const { sheetId, sheetIndex } = req.query;
+    const { sheet_url } = req.query;
     console.log("Hi")
-    console.log(sheetId);
-    console.log(sheetIndex);
+    console.log(req.query)
+    console.log(sheet_url);
+
     const auth = new google.auth.GoogleAuth({
         keyFile:"credentials.json",
         scopes:"https://www.googleapis.com/auth/spreadsheets",
@@ -664,10 +715,36 @@ app.get('/api/fetchSheetData', async (req, res) => {
     const sheets = google.sheets({version:"v4", auth: client})
     //const sheets = google.sheets({version:"v4", auth})
 
+    const idObject = getSpreadsheetIdAndSheetIdFromUrl(sheet_url);
+    const spreadsheetId = idObject.spreadsheetId;
+    const sheetId = idObject.sheetId
+    if(!(idObject && spreadsheetId && sheetId)){
+      console.log('Bad SheetID, and spreadsheetid')
+      console.log(spreadsheetId)
+      console.log(sheetId)
+      return false;
+    }
+    
+    // Get information about the spreadsheet
+    const spreadsheet = await sheets.spreadsheets.get({
+      spreadsheetId,
+      includeGridData: false,
+    });
+
+    // Find the sheet with the matching ID
+    const sheet = spreadsheet.data.sheets.find((s) => s.properties.sheetId === parseInt(sheetId));
+
+    if (!sheet) {
+      console.error(`Sheet with ID ${sheetId} not found in spreadsheet ${spreadsheetId}`);
+      return false;
+    }
+
+    // Use the sheet name in the range parameter
+    const range = `${sheet.properties.title}!A1:Z1`;
+
     const response = await sheets.spreadsheets.values.get({
-        auth,
-        spreadsheetId: sheetId,
-        range: `Sheet${sheetIndex}!A1:Z1`,
+        spreadsheetId: spreadsheetId,
+        range: range,
       })
       .then((response) =>{
         console.log(response.data)
@@ -687,10 +764,7 @@ app.get('/api/fetchSheetData', async (req, res) => {
 
   app.get('/records', async (req, res) => {
 
-    const { sheetId, sheetIndex } = req.query;
-    console.log("Hi")
-    console.log(sheetId);
-    console.log(sheetIndex); 
+    const { sheet_url } = req.query;
     const auth = new google.auth.GoogleAuth({
         keyFile:"credentials.json",
         scopes:"https://www.googleapis.com/auth/spreadsheets",
@@ -698,10 +772,37 @@ app.get('/api/fetchSheetData', async (req, res) => {
     const client = await auth.getClient();
     const sheets = google.sheets({version:"v4", auth: client})
 
+    const idObject = getSpreadsheetIdAndSheetIdFromUrl(sheet_url);
+    const spreadsheetId = idObject.spreadsheetId;
+    const sheetId = idObject.sheetId
+    if(!(idObject && spreadsheetId && sheetId)){
+      console.log('Bad SheetID, and spreadsheetid')
+      console.log(spreadsheetId)
+      console.log(sheetId)
+      return false;
+    }
+
+    // Get information about the spreadsheet
+    const spreadsheet = await sheets.spreadsheets.get({
+      spreadsheetId,
+      includeGridData: false,
+    });
+
+    // Find the sheet with the matching ID
+    const sheet = spreadsheet.data.sheets.find((s) => s.properties.sheetId === parseInt(sheetId));
+
+    if (!sheet) {
+      console.error(`Sheet with ID ${sheetId} not found in spreadsheet ${spreadsheetId}`);
+      return false;
+    }
+
+    // Use the sheet name in the range parameter
+    const range = `${sheet.properties.title}!A1:Z`;
+
+
     const response = await sheets.spreadsheets.values.get({
-        auth,
-        spreadsheetId: sheetId,
-        range: `Sheet${sheetIndex}!A1:Z`,
+        spreadsheetId: spreadsheetId,
+        range: range,
       })
       .then((response) =>{
         console.log(response.data)
@@ -780,12 +881,14 @@ function determineType(input) {
   return 'Text';
 }
 function checkTypes(record, typeList) {
+  console.log("typeList")
+  console.log(typeList)
   for (let i = 0; i < record.length; i++) {
     const attribute = record[i];
     const expectedType = typeList[i];
     const actualType = determineType(attribute);
-    if (actualType !== null && actualType !== expectedType) {
-      console.log(attribute)
+    if (actualType !== null && expectedType !== "initial_value" && actualType !== expectedType) {
+      console.log("record value: " + attribute)
       console.log(actualType)
       console.log(expectedType)
       console.log('Here')
@@ -799,10 +902,9 @@ function checkTypes(record, typeList) {
 
 
 app.post('/api/edit_record', async (req, res) => {
-  const { sheetId, sheetIndex, record, prevHeader, keyIndex, keyValue, typeList  } = req.body;
+  const { sheet_url, record, prevHeader, keyIndex, keyValue, typeList  } = req.body;
   console.log("In Edit Record")
-  console.log(sheetId);
-  console.log(sheetIndex);
+  console.log(sheet_url);
   console.log(record)
   console.log(prevHeader)
   console.log(keyIndex)
@@ -818,10 +920,37 @@ app.post('/api/edit_record', async (req, res) => {
   })
   var sheet_data;
   const sheets = google.sheets({version:"v4", auth})
+
+  const idObject = getSpreadsheetIdAndSheetIdFromUrl(sheet_url);
+  const spreadsheetId = idObject.spreadsheetId;
+  const sheetId = idObject.sheetId
+  if(!(idObject && spreadsheetId && sheetId)){
+    console.log('Bad SheetID, and spreadsheetid')
+    console.log(spreadsheetId)
+    console.log(sheetId)
+    return false;
+  }
+
+    // Get information about the spreadsheet
+    const spreadsheet = await sheets.spreadsheets.get({
+      spreadsheetId,
+      includeGridData: false,
+    });
+
+    // Find the sheet with the matching ID
+    const sheet = spreadsheet.data.sheets.find((s) => s.properties.sheetId === parseInt(sheetId));
+
+    if (!sheet) {
+      console.error(`Sheet with ID ${sheetId} not found in spreadsheet ${spreadsheetId}`);
+      return false;
+    }
+
+    // Use the sheet name in the range parameter
+    const range = `${sheet.properties.title}!A1:Z`;
+
   const sheetHeader = await sheets.spreadsheets.values.get({
-    auth,
-    spreadsheetId: sheetId,
-    range: `Sheet${sheetIndex}!A1:Z`,
+    spreadsheetId: spreadsheetId,
+    range: range,
   })
   .then((response) =>{
 
@@ -863,10 +992,11 @@ app.post('/api/edit_record', async (req, res) => {
     return res.json({ success: false, message: "Type Error!" });
   }
   //now we can update the row in google sheet with the record info using googleapi
+  const range2 = `${sheet.properties.title}!A${rowIndex + 1}`;
   const response =  sheets.spreadsheets.values.update({
     auth,
-    spreadsheetId: sheetId,
-    range: `Sheet${sheetIndex}!A${rowIndex + 1}`,
+    spreadsheetId: spreadsheetId,
+    range: range2,
     valueInputOption: "USER_ENTERED",
     resource: {
       values: [record],
@@ -886,7 +1016,7 @@ app.post('/api/edit_record', async (req, res) => {
 })
     
   app.post('/addRecord', async (req, res) => {
-    const { sheetId, sheetIndex, record, prevHeader, keyIndex, typeList } = req.body;
+    const { sheet_url, record, prevHeader, keyIndex, typeList } = req.body;
     console.log(req.body)
     // Logic to store the data in database using the data object
          //gets the sheetdata to find position to edit, saves it in sheet_data
@@ -896,10 +1026,39 @@ app.post('/api/edit_record', async (req, res) => {
       })
       var sheet_data;
       const sheets = google.sheets({version:"v4", auth})
+
+      const idObject = getSpreadsheetIdAndSheetIdFromUrl(sheet_url);
+      const spreadsheetId = idObject.spreadsheetId;
+      const sheetId = idObject.sheetId
+      if(!(idObject && spreadsheetId && sheetId)){
+        console.log('Bad SheetID, and spreadsheetid')
+        console.log(spreadsheetId)
+        console.log(sheetId)
+        return false;
+      }
+
+
+    // Get information about the spreadsheet
+    const spreadsheet = await sheets.spreadsheets.get({
+      spreadsheetId,
+      includeGridData: false,
+    });
+
+    // Find the sheet with the matching ID
+    const sheet = spreadsheet.data.sheets.find((s) => s.properties.sheetId === parseInt(sheetId));
+
+    if (!sheet) {
+      console.error(`Sheet with ID ${sheetId} not found in spreadsheet ${spreadsheetId}`);
+      return false;
+    }
+
+    // Use the sheet name in the range parameter
+    const range = `${sheet.properties.title}!A1:Z`;
+
       const sheetHeader = await sheets.spreadsheets.values.get({
         auth,
-        spreadsheetId: sheetId,
-        range: `Sheet${sheetIndex}!A1:Z`,
+        spreadsheetId: spreadsheetId,
+        range: range,
       })
       .then((response) =>{
   
@@ -936,10 +1095,11 @@ app.post('/api/edit_record', async (req, res) => {
 
 
       //now we can update the row in google sheet with the record info using googleapi
+      const range2 = `${sheet.properties.title}!A${sheet_data.length + 1}`;
       const response =  sheets.spreadsheets.values.append({
         auth,
-        spreadsheetId: sheetId,
-        range: `Sheet${sheetIndex}!A${sheet_data.length + 1}`,
+        spreadsheetId: spreadsheetId,
+        range: range2,
         valueInputOption: "USER_ENTERED",
         insertDataOption: 'INSERT_ROWS',
         resource: {
@@ -958,11 +1118,9 @@ app.post('/api/edit_record', async (req, res) => {
   });
 
   app.post('/api/delete_record', async (req, res) => {
-    const { sheetId, sheetIndex, record, prevHeader, keyIndex, keyValue } = req.body;
+    const { sheet_url, record, prevHeader, keyIndex, keyValue } = req.body;
   
     console.log("DELETING RECORDD")
-    console.log(sheetId)
-    console.log(sheetIndex) 
     console.log(prevHeader)
     console.log(keyIndex)
     console.log(keyValue)  
@@ -973,10 +1131,39 @@ app.post('/api/edit_record', async (req, res) => {
     });
     var sheet_data;
     const sheets = google.sheets({ version: "v4", auth });
+
+    const idObject = getSpreadsheetIdAndSheetIdFromUrl(sheet_url);
+    const spreadsheetId = idObject.spreadsheetId;
+    const sheetId = idObject.sheetId
+    if(!(idObject && spreadsheetId && sheetId)){
+      console.log('Bad SheetID, and spreadsheetid')
+      console.log(spreadsheetId)
+      console.log(sheetId)
+      return false;
+    }
+
+    // Get information about the spreadsheet
+    const spreadsheet = await sheets.spreadsheets.get({
+      spreadsheetId,
+      includeGridData: false,
+    });
+
+    // Find the sheet with the matching ID
+    const sheet = spreadsheet.data.sheets.find((s) => s.properties.sheetId === parseInt(sheetId));
+
+    if (!sheet) {
+      console.error(`Sheet with ID ${sheetId} not found in spreadsheet ${spreadsheetId}`);
+      return false;
+    }
+
+    // Use the sheet name in the range parameter
+    const range = `${sheet.properties.title}!A1:Z`;
+
+
     const sheetHeader = await sheets.spreadsheets.values.get({
       auth,
-      spreadsheetId: sheetId,
-      range: `Sheet${sheetIndex}!A1:Z`,
+      spreadsheetId: spreadsheetId,
+      range: range,
     });
   
     if (sheetHeader.status === 200) {
@@ -1000,16 +1187,20 @@ app.post('/api/edit_record', async (req, res) => {
     var rowIndex = findRowIndex(sheet_data, keyIndex, keyValue);
   
     // Get the sheet ID of the target sheet
+    
     const spreadsheetMetadata = await sheets.spreadsheets.get({
       auth,
-      spreadsheetId: sheetId,
+      spreadsheetId: spreadsheetId,
       ranges: [],
       includeGridData: false,
     });
-  
-    const targetSheetId = spreadsheetMetadata.data.sheets.find(sheet => sheet.properties.title === `Sheet${sheetIndex}`).properties.sheetId;
+    
+    var properties_title = sheet.properties.title
+    const targetSheetId = spreadsheetMetadata.data.sheets.find(sheet => sheet.properties.title === properties_title).properties.sheetId;
   
     // Now we can delete the row in the Google Sheet using the Google API
+
+
     const response = await sheets.spreadsheets.batchUpdate({
       auth,
       spreadsheetId: sheetId,

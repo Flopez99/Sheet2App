@@ -121,8 +121,8 @@ const navigate = useNavigate();
         setDatasource(res.data)
         setDatasource_name(res.data.name)
         console.log(res.data.name)
-        var sheetId = getIdFromUrl(res.data.url);
-        var sheetIndex = res.data.sheet_index
+        var sheet_url = res.data.url;
+        //var sheetIndex = res.data.sheet_index
         var rows1 = [];
         var count = 0;
         for(const column of res.data.columns){
@@ -141,8 +141,7 @@ const navigate = useNavigate();
         }
 
         await axios.get("http://localhost:8080/api/fetchSheetData" , {params : {
-            sheetId: sheetId,
-            sheetIndex: sheetIndex
+            sheet_url: sheet_url
         }})
         .then(async (res) => {
             console.log(res.data.values)

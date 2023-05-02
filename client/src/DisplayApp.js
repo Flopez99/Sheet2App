@@ -66,6 +66,8 @@ function DisplayApp(props) {
 
   const [schemaFlag, setSchemaFlag] = useState(true)
   const [allColumnsTypes, setAllColumnTypes] = useState([])
+  const [errorFlag, setErrorFlag] = useState(false)
+  const [errorMsg, setErrorMsg] = useState("")
 
   useEffect(() => {
     const getApp = async () => {
@@ -90,6 +92,7 @@ function DisplayApp(props) {
         const res1 = await axios.get("http://localhost:8080/roles_user", { params: { appId: props.appId, userEmail: props.userEmail} });
         const roles = res1.data.roles
         setRoles(roles);
+        console.log("Users Roles")
         console.log(roles)
         const views = []
         for (const role of roles){
@@ -134,7 +137,7 @@ function DisplayApp(props) {
             var sheetId = getIdFromUrl(view.table.url);
             var sheetIndex = view.table.sheet_index
             const res = await axios.get("http://localhost:8080/records", 
-              { params: {sheetId: sheetId, sheetIndex: sheetIndex} });
+              { params: {sheet_url: view.table.url } });
             console.log(view.table.url)
             console.log('RES.DATA')
             console.log(res.data.values)
@@ -158,7 +161,7 @@ function DisplayApp(props) {
             var sheetId = getIdFromUrl(datasource.url);
             var sheetIndex = datasource.sheet_index
             const res = await axios.get("http://localhost:8080/records", 
-              { params: {sheetId: sheetId, sheetIndex: sheetIndex} });
+              { params: {sheet_url: datasource.url} });
             console.log(datasource.url)
             console.log('RES.DATA')
             console.log(res.data.values)
@@ -262,6 +265,7 @@ function DisplayApp(props) {
   //Refresh info after update has been made
   const refreshSheetData = async (changedTable) => {
     console.log(changedTable)
+    var sheet_url = changedTable.url
     var sheetId = getIdFromUrl(changedTable.url);
     var sheetIndex = changedTable.sheet_index;
 
@@ -272,7 +276,7 @@ function DisplayApp(props) {
       console.log(sheetIndex)
 
       // Get the updated data from the server
-      const newData = await axios.get("http://localhost:8080/records", { params: { sheetId: sheetId, sheetIndex: sheetIndex } });
+      const newData = await axios.get("http://localhost:8080/records", { params: { sheet_url: changedTable.url } });
       
       const newSheetData = sheetData.map(table => {
         if (table._id === changedTable._id) {

@@ -120,15 +120,15 @@ function CreateDataSource(props) {
     setSheetIndex(data.get('sheetindex'))
 
     const sheetId = getIdFromUrl(spreadsheetUrl);
-
-    if (sheetId) {
-      console.log(sheetId);
-      console.log(sheetIndex);
-      await fetchSheetData(sheetId, sheetIndex);
+    await fetchSheetData(spreadsheetUrl)
+    // if (sheetId) {
+    //   console.log(sheetId);
+    //   console.log(sheetIndex);
+    //   await fetchSheetData(sheetId, sheetIndex);
       
-    } else {
-      console.log('Invalid URL');
-    }
+    // } else {
+    //   console.log('Invalid URL');
+    // }
   };
 function checkKey(array){
   var key_row;
@@ -411,10 +411,9 @@ function checkType(array){
   }
   
   // Function to fetch the sheet data from your server
-  async function fetchSheetData(sheetId, sheetIndex) {
+  async function fetchSheetData(sheet_url) {
       const response = axios.get("http://localhost:8080/api/fetchSheetData" , {params : {
-        sheetId: sheetId,
-        sheetIndex: sheetIndex
+        sheet_url: sheet_url
       }})
       .then(async (response) => {
         console.log(response)

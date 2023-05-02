@@ -714,6 +714,8 @@ function findRowIndex(arr, keyColumn, keyValue) {
 function isColumnUnique(arr, columnIndex, keyValue, rowIndex) {
   const uniqueValues = new Set();
   uniqueValues.add(keyValue);
+  console.log('KEY VALUE!!')
+  console.log(keyValue)
   var count = 0;
   for (let row of arr) {
     if(count !== rowIndex){
@@ -809,22 +811,23 @@ app.post('/api/edit_record', async (req, res) => {
   //error back
   
   if(!(compareLists(prevHeader, sheet_data[0])))
-    return res.status(500).json({ error: 'Schema is inconsistent' });
+    return res.json({ success: false, message: "Schema is inconsistent" });
 
   //getRowIndex
   if(keyIndex < 0)
-    return res.status(500).json({ error: 'KeyIndex Bad' });
+    return res.json({ success: false, message: "KeyIndex Bad" });
 
 
   var rowIndex = findRowIndex(sheet_data, keyIndex, keyValue)
 
   //checks for key integrity
-  if(!(isColumnUnique(sheet_data, keyIndex, keyValue, rowIndex))){
-    return res.status(500).json({ error: 'Repeated Key, No Key Integrity' });
+  if(!(isColumnUnique(sheet_data, keyIndex, record[keyIndex], rowIndex))){
+    return res.json({ success: false, message: "Repeated Key, No Key Integrity" });
+
   }
   //checks for type integrity
   if(!(checkTypes(record, typeList))){
-    return res.status(500).json({ error: 'Type Error!' });
+    return res.json({ success: false, message: "Type Error!" });
   }
   //now we can update the row in google sheet with the record info using googleapi
   const response =  sheets.spreadsheets.values.update({
@@ -886,16 +889,16 @@ app.post('/api/edit_record', async (req, res) => {
       //error back
       
       if(!(compareLists(prevHeader, sheet_data[0])))
-        return res.status(500).json({ error: 'Schema is inconsistent' });
-  
+        return res.json({ success: false, message: "Schema is inconsistent" });  
           //checks for key integrity
       if(!(isColumnUnique(sheet_data, keyIndex, record[keyIndex], -1))){
-        return res.status(500).json({ error: 'Repeated Key, No Key Integrity' });
+        return res.json({ success: false, message: "Repeated Key, No Key Integrity" });
       }
 
       //checks for type integrity
       if(!(checkTypes(record, typeList))){
-        return res.status(500).json({ error: 'Type Error!' });
+        return res.json({ success: false, message: "Type Error!" });
+
       }
 
 
@@ -953,11 +956,12 @@ app.post('/api/edit_record', async (req, res) => {
     console.log(sheet_data);
   
     if (!compareLists(prevHeader, sheet_data[0])) {
-      return res.status(500).json({ error: "Schema is inconsistent" });
+      return res.json({ success: false, message: "Schema is inconsistent" });
+
     }
   
     if (keyIndex < 0) {
-      return res.status(500).json({ error: "KeyIndex Bad" });
+      return res.json({ success: false, message: "KeyIndex Bad" });
     }
   
     var rowIndex = findRowIndex(sheet_data, keyIndex, keyValue);

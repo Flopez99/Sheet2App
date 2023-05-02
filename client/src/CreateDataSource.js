@@ -105,9 +105,18 @@ function CreateDataSource(props) {
   const [sheetIndex, setSheetIndex] = useState(0)
   const [referenceError, setReferenceError] = useState(false)
   const [keyError, setKeyError] = useState(false)
+  const [app, setApp] = useState({})
 
 
-  
+
+  useEffect(async () => {
+    await axios.get("http://localhost:8080/app", { params: {
+      id: props.appId
+    }})
+    .then((res) =>{
+        setApp(res.data)
+    })
+  },[props])
 
   const handleSubmit = async (event) => {
     event.preventDefault();
@@ -172,6 +181,8 @@ async function checkReference(array){
   let flag = true;
   console.log('in reference')
   console.log(array)
+  var datasources = app.data_sources
+
   // array.forEach((column) => {
   //   if(column.value.reference !== undefined){
   //     console.log("good")
@@ -179,38 +190,53 @@ async function checkReference(array){
   //   }
   // })
   for(let column of array){
-    if(column.value.reference !== ""){
-      console.log(column.value)
-      const stringArr = column.value.reference.split(" ")
-
-      let url = stringArr[0]
-      let sheetIndex = stringArr[1]
-      console.log(url)
-      console.log(sheetIndex)
-      if(url === null)
-        console.log('error') // should change this to displaying alert
-      await axios.get('http://localhost:8080/datasource_url' , {params : {
-        url: url,
-        sheetIndex: sheetIndex
-      }})
-      .then((res) => {
-        console.log(res)
-        if(res.data === ''){
-          console.log('not good')
+    if(column.value.reference !== undefined &&  column.value.reference !== "" && column.value.reference !== null){
+      var ref_datasource = datasources.find(datasource => datasource.name === column.value.reference)
+      console.log(ref_datasource)
+      console.log(column.value.reference)
+      if(ref_datasource !== undefined){
+        console.log(ref_datasource)
+        column.value.reference_id = ref_datasource._id
+      }
+      else{
           setReferenceError(true)
           flag = false;
-        }
-        else{
-          column.value.reference = res.data._id
-        }
-      })
-
+      }
     }
-    // if(column.value.reference){
-    //   console.log('true')
-    //   console.log(column)
-    // }
   }
+  // for(let column of array){
+  //   if(column.value.reference !== ""){
+  //     console.log(column.value)
+  //     const stringArr = column.value.reference.split(" ")
+
+  //     let url = stringArr[0]
+  //     let sheetIndex = stringArr[1]
+  //     console.log(url)
+  //     console.log(sheetIndex)
+  //     if(url === null)
+  //       console.log('error') // should change this to displaying alert
+  //     await axios.get('http://localhost:8080/datasource_url' , {params : {
+  //       url: url,
+  //       sheetIndex: sheetIndex
+  //     }})
+  //     .then((res) => {
+  //       console.log(res)
+  //       if(res.data === ''){
+  //         console.log('not good')
+  //         setReferenceError(true)
+  //         flag = false;
+  //       }
+  //       else{
+  //         column.value.reference = res.data._id
+  //       }
+  //     })
+
+  //   }
+  //   // if(column.value.reference){
+  //   //   console.log('true')
+  //   //   console.log(column)
+  //   // }
+  // }
   return flag;
 
 }
@@ -257,7 +283,7 @@ function checkType(array){
           name: column.value.column_name,
           initial_value: column.value.initial_value,
           label: column.value.label,
-          references:  column.value.reference,
+          references:  column.value.reference_id,
           type: column.value.type
         })
         .then((res) => {
@@ -403,7 +429,7 @@ function checkType(array){
     const rowData = [];
     dataRows.forEach((element, index) =>{
       rowData.push({id: index, column_name: element, 
-        initial_value: "", label: false, reference: "", type: "", key: false });
+        initial_value: "", label: false, reference: "", type: "", key: false, reference_id: null });
     })
     console.log(rowData);
     return rowData

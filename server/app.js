@@ -209,14 +209,12 @@ app.get('/roles', async (req, res) => {
   const role_sheet = await AppModel.findById(appId)
 
   const idObject = getSpreadsheetIdAndSheetIdFromUrl(role_sheet.role_membership_url);
+  if(!(idObject && idObject.spreadsheetId && idObject.sheetId)){
+    console.log('Bad SheetID, and spreadsheetid')
+    return res.status(500)
+  }
   const spreadsheetId = idObject.spreadsheetId;
   const sheetId = idObject.sheetId
-  if(!(idObject && spreadsheetId && sheetId)){
-    console.log('Bad SheetID, and spreadsheetid')
-    console.log(spreadsheetId)
-    console.log(sheetId)
-    return false;
-  }
 
   const auth = new google.auth.GoogleAuth({  
     keyFile: 'credentials.json', 
@@ -271,14 +269,12 @@ app.get('/roles_user', async (req, res) => {
   
 
   const idObject = getSpreadsheetIdAndSheetIdFromUrl(role_sheet.role_membership_url);
+  if(!(idObject && idObject.spreadsheetId && idObject.sheetId)){
+    console.log('Bad SheetID, and spreadsheetid')
+    return res.status(500)
+  }
   const spreadsheetId = idObject.spreadsheetId;
   const sheetId = idObject.sheetId
-  if(!(idObject && spreadsheetId && sheetId)){
-    console.log('Bad SheetID, and spreadsheetid')
-    console.log(spreadsheetId)
-    console.log(sheetId)
-    return false;
-  }
 
   const auth = new google.auth.GoogleAuth({  
     keyFile: 'credentials.json', 
@@ -716,14 +712,12 @@ app.get('/api/fetchSheetData', async (req, res) => {
     //const sheets = google.sheets({version:"v4", auth})
 
     const idObject = getSpreadsheetIdAndSheetIdFromUrl(sheet_url);
+    if(!(idObject && idObject.spreadsheetId && idObject.sheetId)){
+      console.log('Bad SheetID, and spreadsheetid')
+      return res.status(500)
+    }
     const spreadsheetId = idObject.spreadsheetId;
     const sheetId = idObject.sheetId
-    if(!(idObject && spreadsheetId && sheetId)){
-      console.log('Bad SheetID, and spreadsheetid')
-      console.log(spreadsheetId)
-      console.log(sheetId)
-      return false;
-    }
     
     // Get information about the spreadsheet
     const spreadsheet = await sheets.spreadsheets.get({
@@ -773,14 +767,12 @@ app.get('/api/fetchSheetData', async (req, res) => {
     const sheets = google.sheets({version:"v4", auth: client})
 
     const idObject = getSpreadsheetIdAndSheetIdFromUrl(sheet_url);
+    if(!(idObject && idObject.spreadsheetId && idObject.sheetId)){
+      console.log('Bad SheetID, and spreadsheetid')
+      return res.status(500)
+    }
     const spreadsheetId = idObject.spreadsheetId;
     const sheetId = idObject.sheetId
-    if(!(idObject && spreadsheetId && sheetId)){
-      console.log('Bad SheetID, and spreadsheetid')
-      console.log(spreadsheetId)
-      console.log(sheetId)
-      return false;
-    }
 
     // Get information about the spreadsheet
     const spreadsheet = await sheets.spreadsheets.get({
@@ -922,14 +914,12 @@ app.post('/api/edit_record', async (req, res) => {
   const sheets = google.sheets({version:"v4", auth})
 
   const idObject = getSpreadsheetIdAndSheetIdFromUrl(sheet_url);
+  if(!(idObject && idObject.spreadsheetId && idObject.sheetId)){
+    console.log('Bad SheetID, and spreadsheetid')
+    return res.status(500)
+  }
   const spreadsheetId = idObject.spreadsheetId;
   const sheetId = idObject.sheetId
-  if(!(idObject && spreadsheetId && sheetId)){
-    console.log('Bad SheetID, and spreadsheetid')
-    console.log(spreadsheetId)
-    console.log(sheetId)
-    return false;
-  }
 
     // Get information about the spreadsheet
     const spreadsheet = await sheets.spreadsheets.get({
@@ -1028,14 +1018,12 @@ app.post('/api/edit_record', async (req, res) => {
       const sheets = google.sheets({version:"v4", auth})
 
       const idObject = getSpreadsheetIdAndSheetIdFromUrl(sheet_url);
+      if(!(idObject && idObject.spreadsheetId && idObject.sheetId)){
+        console.log('Bad SheetID, and spreadsheetid')
+        return res.status(500)
+      }
       const spreadsheetId = idObject.spreadsheetId;
       const sheetId = idObject.sheetId
-      if(!(idObject && spreadsheetId && sheetId)){
-        console.log('Bad SheetID, and spreadsheetid')
-        console.log(spreadsheetId)
-        console.log(sheetId)
-        return false;
-      }
 
 
     // Get information about the spreadsheet
@@ -1133,14 +1121,12 @@ app.post('/api/edit_record', async (req, res) => {
     const sheets = google.sheets({ version: "v4", auth });
 
     const idObject = getSpreadsheetIdAndSheetIdFromUrl(sheet_url);
+    if(!(idObject && idObject.spreadsheetId && idObject.sheetId)){
+      console.log('Bad SheetID, and spreadsheetid')
+      return res.status(500)
+    }
     const spreadsheetId = idObject.spreadsheetId;
     const sheetId = idObject.sheetId
-    if(!(idObject && spreadsheetId && sheetId)){
-      console.log('Bad SheetID, and spreadsheetid')
-      console.log(spreadsheetId)
-      console.log(sheetId)
-      return false;
-    }
 
     // Get information about the spreadsheet
     const spreadsheet = await sheets.spreadsheets.get({

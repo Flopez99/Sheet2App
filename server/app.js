@@ -1172,30 +1172,18 @@ app.post('/api/edit_record', async (req, res) => {
   
     var rowIndex = findRowIndex(sheet_data, keyIndex, keyValue);
   
-    // Get the sheet ID of the target sheet
-    
-    const spreadsheetMetadata = await sheets.spreadsheets.get({
-      auth,
-      spreadsheetId: spreadsheetId,
-      ranges: [],
-      includeGridData: false,
-    });
-    
-    var properties_title = sheet.properties.title
-    const targetSheetId = spreadsheetMetadata.data.sheets.find(sheet => sheet.properties.title === properties_title).properties.sheetId;
-  
     // Now we can delete the row in the Google Sheet using the Google API
 
 
     const response = await sheets.spreadsheets.batchUpdate({
       auth,
-      spreadsheetId: sheetId,
+      spreadsheetId: spreadsheetId,
       requestBody: {
         requests: [
-          {
+          { 
             deleteDimension: {
               range: {
-                sheetId: targetSheetId,
+                sheetId: sheetId,
                 dimension: "ROWS",
                 startIndex: rowIndex,
                 endIndex: rowIndex + 1,

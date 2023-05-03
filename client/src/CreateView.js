@@ -221,6 +221,8 @@ function CreateView(props) {
     axios.post(endpoint, {view: viewModel, appId: props.appId, viewId:viewID})
     .then((response) => {
       console.log(response)
+      navigate("/editapp", {state: props.appId})
+
     }).catch((error) => {
       console.log(error)
     });
@@ -319,6 +321,13 @@ function CreateView(props) {
                 />
               </Grid>
               <Grid item xs={12}>
+
+              {view && (
+                <h5>
+                  Current DataSource: {selectedDataSource.name}
+                </h5>
+              )}
+
                 <DataSourceDropdown
                   dataSourceList={dataSourceList}
                   selectedDataSource={selectedDataSource}

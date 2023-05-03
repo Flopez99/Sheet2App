@@ -7,7 +7,7 @@ import {
   Button,
 } from '@mui/material';
 import { gapi } from 'gapi-script';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import DashboardIcon from '@mui/icons-material/Dashboard';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 
@@ -15,7 +15,7 @@ const clientId = '144862274224-ji7vp538h3o8cdcp9t24actdpk7vqqjg.apps.googleuserc
 
 function Navbar({ user, isDeveloper }) {
   const navigate = useNavigate();
-  console.log(user);
+  const location = useLocation();
 
   function handleSignOut(event) {
     navigate('/', { state: 'Logged Out' });
@@ -33,7 +33,13 @@ function Navbar({ user, isDeveloper }) {
   });
 
   const handleBackButtonClick = () => {
-    navigate(-1); 
+    
+    const from = location.state?.from;
+    if (from) {
+      navigate(from);
+    } else {
+      navigate(-1);
+    }
   };
 
   return (

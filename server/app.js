@@ -796,7 +796,7 @@ app.get('/api/fetchSheetData', async (req, res) => {
 
     // Use the sheet name in the range parameter
     const range = `${sheet.properties.title}!A1:Z`;
-
+ 
 
     const response = await sheets.spreadsheets.values.get({
         spreadsheetId: spreadsheetId,

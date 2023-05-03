@@ -39,7 +39,6 @@ const handleEditApp = (datasourceid) => {
         <TableRow>
           <TableCell>Datasource Name</TableCell>
           <TableCell>URL</TableCell>
-          <TableCell>Actions</TableCell>
         </TableRow>
       </TableHead>
       <TableBody>
@@ -47,7 +46,6 @@ const handleEditApp = (datasourceid) => {
           <TableRow key={app._id} className={classes.tableRow} onClick={() => handleEditApp(app._id)}>
             <TableCell component="th" scope="row">{app.name}</TableCell>
             <TableCell component="th" scope="row">{app.url}</TableCell>
-            <TableCell>Edit</TableCell>
           </TableRow>
         ))}
       </TableBody>

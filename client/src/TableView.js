@@ -282,6 +282,9 @@ function TableView({ view, sheetData, onClickRecord, userEmail, detailView, refr
                               else if(column?.references !== null){
                                 var refDetailView = allDetailViews.find(detailView => detailView.table._id === column.references)
                                 var refDataSource = allSheets.find(sheet => sheet._id === column.references)
+                                console.log(allSheets)
+                                console.log("All SHeets, references")
+                                console.log(column.references)
                                 console.log(refDataSource)
                                 //record, other, sheetData.sheet_data[0], keyIndex, allColumnTypes
                                 if(refDataSource !== undefined){
@@ -290,11 +293,16 @@ function TableView({ view, sheetData, onClickRecord, userEmail, detailView, refr
                                   allRefColumns = allRefColumns.map((obj) => ({ ...obj, 
                                     index: refHeader.findIndex((header) => header === obj.name) }))//sets index
                                   var ref_key_index = allRefColumns.find((column) => (column._id === refDataSource.key))?.index;
+                                  console.log('IN REF KY INDEX')
                                   console.log(ref_key_index)
+                                  console.log(refDataSource.sheet_data)
+                                  console.log(record[column.index])
                                   var ref_record_index = findRowIndex(refDataSource.sheet_data, ref_key_index, record[column.index])
                                   if(ref_record_index === -1)
                                     return (<TableCell key={column._id}>{record[column.index] || ''}</TableCell> );
                                   var ref_record = refDataSource.sheet_data[ref_record_index];
+                                  console.log('All Refs COlumns')
+                                  console.log(allRefColumns)
                                   var label_index = allRefColumns.find(column => column.label === true).index
                                   var all_ref_column_type = alignAndExtractTypes(allRefColumns)
                                   console.log(all_ref_column_type)
@@ -317,6 +325,9 @@ function TableView({ view, sheetData, onClickRecord, userEmail, detailView, refr
                                   )
                                   }
                                   else{
+                                    console.log('IN REFERENCE no DETAIL VIEW')
+                                    console.log(ref_record)
+                                    console.log(label_index)
                                     return (<TableCell key={column._id}>{ref_record[label_index]|| ""}</TableCell>);
                                   }
                                 }

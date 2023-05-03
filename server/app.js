@@ -447,7 +447,13 @@ app.get('/app', async (req, res) =>{
     var app_data;
     console.log("Getting Id")
     console.log(req.query.id)
-    await AppModel.findById(req.query.id).populate('data_sources')
+    await AppModel.findById(req.query.id)
+    .populate({
+      path: 'data_sources',
+      populate: {
+        path: 'columns'
+      }
+    })
     .populate({
       path: 'views',
       populate: {

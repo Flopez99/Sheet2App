@@ -142,36 +142,47 @@ function DisplayApp(props) {
             console.log('RES.DATA')
             console.log(res.data.values)
             specific_data = res.data.values
+            console.log(specific_data)
+            sheet_data.push({...view.table, sheet_data: specific_data})
+            console.log(sheet_data)
 
           }
           catch{
             console.log("ERROOR IN GETTING SHEET DATA")
           }
-          console.log(specific_data)
-          sheet_data.push({...view.table, sheet_data: specific_data})
-          console.log(sheet_data)
+          // console.log(specific_data)
+          // sheet_data.push({...view.table, sheet_data: specific_data})
+          // console.log(sheet_data)
         } 
       }
       console.log(app)
       var app_datasource = app.data_sources
+      console.log('APP DATASOURCE')
+      console.log(app_datasource)
+      console.log(sheet_data)
       //gets the rest of the datasources from app
-      for(const datasource in app_datasource){
+      for(const datasource of app_datasource){
+        console.log(datasource)
         if(!(sheet_data.some(sheet => sheet._id === datasource._id))){//checks if is in list alread
           try{
-            var sheetId = getIdFromUrl(datasource.url);
-            var sheetIndex = datasource.sheet_index
+            // var sheetId = getIdFromUrl(datasource.url);
+            // var sheetIndex = datasource.sheet_index
+            console.log(datasource)
             const res = await axios.get("http://localhost:8080/records", 
               { params: {sheet_url: datasource.url} });
+            console.log(datasource.name)
             console.log(datasource.url)
             console.log('RES.DATA')
             console.log(res.data.values)
             specific_data = res.data.values
+            sheet_data.push({...datasource,sheet_data: specific_data})
+
 
           }
           catch{
             console.log("ERROOR IN GETTING SHEET DATA")
           }
-          sheet_data.push({...datasource,sheet_data: specific_data})
+          //sheet_data.push({...datasource,sheet_data: specific_data})
         }
 
       }
@@ -186,8 +197,10 @@ function DisplayApp(props) {
     const checkSchema = async () => {
       console.log("IN CHECK SCHEMA")
       for(const datasource of sheetData){
+        console.log(datasource)
         const all_columns = datasource.columns
         const column_headers = datasource.sheet_data[0] //column headers
+        console.log(column_headers)
         for(const column_name of column_headers){ //checks if all columns in sheet is included in db
           if((all_columns.findIndex(col => col.name === column_name)) === -1){
             setSchemaFlag(false)

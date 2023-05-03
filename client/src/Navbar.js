@@ -39,7 +39,7 @@ function Navbar({ user, isDeveloper }) {
   return (
     <AppBar position="relative">
       <Toolbar>
-        {Object.keys(user).length !== 0 && isDeveloper && (
+        {Object.keys(user).length !== 0 && (
           <IconButton
             edge="start"
             color="inherit"

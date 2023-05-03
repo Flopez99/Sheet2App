@@ -40,7 +40,6 @@ function ViewsList(views) {
         <TableRow>
           <TableCell>View Name</TableCell>
           <TableCell>View Type</TableCell>
-          <TableCell>Actions</TableCell>
         </TableRow>
       </TableHead>
       <TableBody>
@@ -48,7 +47,6 @@ function ViewsList(views) {
           <TableRow key={view._id} className={classes.tableRow} onClick={() => handleEditApp(view)}>
             <TableCell component="th" scope="row">{view.name}</TableCell>
             <TableCell component="th" scope="row">{view.view_type}</TableCell>
-            <TableCell>Edit</TableCell>
           </TableRow>
         ))}
       </TableBody>

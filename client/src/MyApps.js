@@ -11,7 +11,7 @@ function MyApps({ userEmail }) {
           alignItems: 'center',
           }}>
       <Button component={Link} to="/developer" variant="contained" color ="primary">
-        Switch to Developer
+        Back to Dashboard
       </Button>
       <Box sx={{ flexGrow: 1 }} /> 
         <Typography variant="h3" sx={{letterSpacing: '2px'}}>

@@ -153,6 +153,9 @@ function DisplayApp(props) {
         } 
       }
       console.log(app)
+      console.log("LOOOOOOOOOOOOOOOOOOOOK")
+      console.log(sheetData)
+
       var app_datasource = app.data_sources
       //gets the rest of the datasources from app
       for(const datasource in app_datasource){
@@ -175,9 +178,12 @@ function DisplayApp(props) {
         }
 
       }
+      console.log("LOOOK AGAINN")
       console.log(sheet_data)
       setSheetData(sheet_data)
     };
+
+    
     if(Object.keys(tableViews).length !== 0)
       getSheetData();
   },[tableViews])
@@ -264,31 +270,43 @@ function DisplayApp(props) {
 
   //Refresh info after update has been made
   const refreshSheetData = async (changedTable) => {
-    console.log(changedTable)
-    var sheet_url = changedTable.url
-    var sheetId = getIdFromUrl(changedTable.url);
-    var sheetIndex = changedTable.sheet_index;
-
     try {
+      console.log("REFRESHING ALL SHEETS DATA IN THE SAME SPREADSHEET");
+      console.log(sheetData)
+      const changedTableSpreadsheetId = getIdFromUrl(changedTable.url);
+  
+      const newSheetData = await Promise.all(
+        sheetData.map(async table => {
+          console.log("TABLE")
+          console.log(table)
+          console.log(table.url)
+          if(table.url){
+            const tableSpreadsheetId = getIdFromUrl(table.url);
+  
+            if (tableSpreadsheetId === changedTableSpreadsheetId) {
+              const sheet_url = table.url;
 
-      console.log("REFRESHING DATA")
-      console.log(sheetId)
-      console.log(sheetIndex)
+              const newData = await axios.get("http://localhost:8080/records", {
+                params: { sheet_url } 
+              });
 
-      // Get the updated data from the server
-      const newData = await axios.get("http://localhost:8080/records", { params: { sheet_url: changedTable.url } });
-      
-      const newSheetData = sheetData.map(table => {
-        if (table._id === changedTable._id) {
-          return {
-            ...table,
-            sheet_data: newData.data.values // replace the entire sheet_data array with the updated data
-          };
-        } else {
-          return table;
-        }
-      });
+    
+              return {
+                ...table,
+                sheet_data: newData.data.values // replace the entire sheet_data array with the updated data
+              };
+            } else {
+              return table;
+            }
+          }else{
+            return table
+          }
+          
+        })
+      );
+  
 
+      console.log("Setting sheet data")
       // Update the sheetData state with the updated data
       setSheetData(newSheetData);
     } catch (error) {

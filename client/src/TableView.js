@@ -434,17 +434,28 @@ function TableView({ view, sheetData, onClickRecord, userEmail, detailView, refr
   } 
   function alignAndExtractTypes(arr) {
     // Sort the array by index
+    console.log(arr)
     arr.sort((a, b) => a.index - b.index);
   
     // Extract the type of each object
-    const types = arr.map(obj => obj.type);
+    var types = arr.map(obj => {
+    if ((!obj.editable) && obj.initial_value !== "") {
+      return "initial_value";
+    }
+    else{
+      return obj.type
+    }
+  });
 
       // Check if obj.editable is false and obj.initial_value is not an empty string
-      types.forEach((obj, index) => {
-      if (!obj.editable && obj.initial_value !== "") {
-        types[index] = "initial_value";
-      }
-    });
+    //   arr.forEach((obj) => {
+    //   if ((!obj.editable) && obj.initial_value !== "") {
+    //     return "initial_value";
+    //   }
+    //   else{
+    //     return obj.type
+    //   }
+    // });
 
     console.log(types)
   

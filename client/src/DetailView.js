@@ -124,11 +124,31 @@ function DetailView({ record, detailView, view, tableHeader, keyIndex, refreshSh
   };
 
   const handleSaveChanges = async () => {
+    console.log(editedRecord)
+    console.log(allColumnsInTable)
     for await (const colmn of allColumnsInTable){
+      console.log(colmn)
+
       if(!(editedRecord[colmn.index])){ // the columns not added by User
-        editedRecord[colmn.index] = ""
+        //editedRecord[colmn.index] = ""
+
+        if(!(colmn.editable)){//checks if it wasnt editable to add initial values
+          if(colmn.initial_value !== "=ADDED_BY()"){ //if special case of ADDED_BY
+            console.log("in edit")
+            console.log(colmn.init_value)
+            editedRecord[colmn.index] = colmn.initial_value
+          }
+        }
+        else{
+          editedRecord[colmn.index] = ""
+        }
+
+      }
+      else if((!colmn.editable) && colmn.initial_value !== "=ADDED_BY()" && colmn.initial_value !== ""){
+        editedRecord[colmn.index] = colmn.initial_value
       }
     }
+
     let record_list = Object.values(editedRecord)
     var sheetId = getIdFromUrl(detailView.table.url);
     var sheetIndex = detailView.table.sheet_index

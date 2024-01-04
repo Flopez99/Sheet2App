@@ -788,7 +788,7 @@ app.get('/api/fetchSheetData', async (req, res) => {
 
     // Find the sheet with the matching ID
     const sheet = spreadsheet.data.sheets.find((s) => s.properties.sheetId === parseInt(sheetId));
-
+ 
     if (!sheet) {
       console.error(`Sheet with ID ${sheetId} not found in spreadsheet ${spreadsheetId}`);
       return false;
@@ -811,7 +811,7 @@ app.get('/api/fetchSheetData', async (req, res) => {
             res.status(400).json({ error: 'Error fetching sheet data' });
         } 
       })
-      .catch((error) =>{
+      .catch((error) =>{ 
         console.error('Error fetching sheet data:', error);
         res.status(500).json({ error: 'Error fetching sheet data' });
       })

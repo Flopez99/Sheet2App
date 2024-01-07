@@ -34,9 +34,12 @@ var bodyParser = require('body-parser');
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json())
 
-app.get("/", (req, res) => {
+// Serve static files from the React app
+app.use(express.static(path.join(__dirname, '..', 'client', 'build')));
 
-  res.sendFile(path.resolve(__dirname, "client", "build", "index.html"));
+// Handle React routing, return all requests to React app
+app.get('*', (req, res) => {
+  res.sendFile(path.join(__dirname, '..', 'client', 'build', 'index.js'));
 });
 // // Serve static files from the React app
 // app.use(express.static(path.join(__dirname, '..', 'client', 'build')));

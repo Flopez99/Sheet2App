@@ -34,7 +34,10 @@ function UserAppsList({ userEmail, endUser }) {
         console.log(response.data)
         setUserApps(response.data);
       })
-      .catch(error => console.error(error));
+      .catch(error =>{
+        console.error(error)
+        console.log("HELLLOOOO")
+      })
   }, [userEmail, endPoint]);
 
   const handleEditApp = (appId) => {

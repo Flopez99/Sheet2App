@@ -34,13 +34,6 @@ var bodyParser = require('body-parser');
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json())
 
-// Serve static files from the React app
-app.use(express.static(path.join(__dirname, '..', 'client', 'build')));
-
-// Handle React routing, return all requests to React app
-app.get('*', (req, res) => {
-  res.sendFile(path.join(__dirname, '..', 'client', 'build', 'index.html'));
-});
 
 // Gets the spreadsheet ID from the role_membership_url
 const getSpreadsheetIdFromUrl = (url) => {
@@ -650,6 +643,8 @@ app.get('/datasource_url' , async (req, res) => {
 })
 //Cross checks email with the global developers list
 app.get('/api/check-email', async (req, res) =>{
+    console.log("HELLOOOOO")
+
     const email = req.query.email;
     const sheetId = '1cn8iTJUjSuKK3qda5-EiGLLQUIXhX9jonsVsampczkM';
     const range = 'A:A';
@@ -664,9 +659,11 @@ app.get('/api/check-email', async (req, res) =>{
         range: range
     });
     const sheetData = sheetResponse.data.values;
+
     const isDeveloper = sheetData.some(row => row[0] === email);
     res.send({isDeveloper});
 });
+
 app.post('/updateApp', async(req, res) =>{
   const { id, app_name, role_membership_url, published } = req.body;
 
@@ -1211,3 +1208,10 @@ app.post('/api/edit_record', async (req, res) => {
     res.json({ success: true, message: "Record deleted successfully" });
   });
   
+  // Serve static files from the React app
+app.use(express.static(path.join(__dirname, '..', 'client', 'build')));
+
+// Handle React routing, return all requests to React app
+app.get('*', (req, res) => {
+  res.sendFile(path.join(__dirname, '..', 'client', 'build', 'index.html'));
+});

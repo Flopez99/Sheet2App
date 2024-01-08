@@ -21,6 +21,7 @@ function LandingPage() {
     axios
       .get(`http://localhost:8080/api/check-email?email=${email}`)
       .then((response) => {
+        console.log("NO ERROR " + response.data.isDeveloper)
         setIsDeveloper(response.data.isDeveloper);
         if (response.data.isDeveloper) {
           navigate('/developer', { state: userObject });
@@ -29,6 +30,7 @@ function LandingPage() {
         }
       })
       .catch((error) => {
+        console.log("EERRRROOORRRRRRR")
         console.error(error);
       });
   }

@@ -17,11 +17,12 @@ function LandingPage() {
 
     const email = userObject.email;
 
+    const baseURL = process.env.NODE_ENV === 'development' ? 'http://localhost:8080' : 'https://sheet-to-app-23128db2a102.herokuapp.com/';    
+
     //Request the backend to see if the email is in the global devs list
     axios
-      .get(`http://localhost:8080/api/check-email?email=${email}`)
+      .get(`${baseURL}/api/check-email?email=${email}`)
       .then((response) => {
-        console.log("NO ERROR " + response.data.isDeveloper)
         setIsDeveloper(response.data.isDeveloper);
         if (response.data.isDeveloper) {
           navigate('/developer', { state: userObject });

@@ -24,9 +24,11 @@ function UserAppsList({ userEmail, endUser }) {
   const [userApps, setUserApps] = useState([]);
   const navigate = useNavigate();
 
+  const baseURL = process.env.NODE_ENV === 'development' ? 'http://localhost:8080' : 'https://sheet-to-app-23128db2a102.herokuapp.com/';    
+
   const endPoint = endUser
-    ? 'http://localhost:8080/api/apps-enduser'
-    : 'http://localhost:8080/api/apps';
+    ? `${baseURL}/api/apps-enduser`
+    : `${baseURL}/api/apps`;
 
   useEffect(() => {
     axios.get(endPoint, { params: { userEmail } })

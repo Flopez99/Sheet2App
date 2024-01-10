@@ -20,6 +20,7 @@ import Alert from '@mui/material/Alert';
 import { flattenOptionGroups } from '@mui/base';
 import { useNavigate } from 'react-router-dom'
 
+const siteURL = process.env.SITE_URL || 'http://localhost:8080';
 
 
 
@@ -110,7 +111,7 @@ function CreateDataSource(props) {
 
 
   useEffect(async () => {
-    await axios.get(`${process.env.SITE_URL}/app`, { params: {
+    await axios.get(`${siteURL}/app`, { params: {
       id: props.appId
     }})
     .then((res) =>{
@@ -247,7 +248,7 @@ function checkType(array){
       // array.forEach( (column) => {
       for await (const column of array){
         console.log(column)
-        await axios.post(`${process.env.SITE_URL}/column`, {
+        await axios.post(`${siteURL}/column`, {
           name: column.value.column_name,
           initial_value: column.value.initial_value,
           label: column.value.label,
@@ -264,7 +265,7 @@ function checkType(array){
       console.log(" name: " + datasource_name)
       console.log(key_column)
       var datasourceId;
-      await axios.post(`${process.env.SITE_URL}/datasource`, {
+      await axios.post(`${siteURL}/datasource`, {
         name: datasource_name,
         url: spreadsheetUrl,
         sheet_index: sheetIndex,
@@ -276,7 +277,7 @@ function checkType(array){
         console.log(res.data._id)
         datasourceId = res.data._id
       })
-      await axios.post(`${process.env.SITE_URL}/app_datasource`, {
+      await axios.post(`${siteURL}/app_datasource`, {
         appId: props.appId,
         datasourceId: datasourceId 
       })
@@ -406,7 +407,7 @@ function checkType(array){
   
   // Function to fetch the sheet data from your server
   async function fetchSheetData(sheet_url) {
-      const response = axios.get(`${process.env.SITE_URL}/api/fetchSheetData` , {params : {
+      const response = axios.get(`${siteURL}/api/fetchSheetData` , {params : {
         sheet_url: sheet_url
       }})
       .then(async (response) => {

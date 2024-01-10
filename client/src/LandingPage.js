@@ -17,9 +17,11 @@ function LandingPage() {
 
     const email = userObject.email;
 
+    const siteURL = process.env.SITE_URL || 'http://localhost:8080';
+    
     //Request the backend to see if the email is in the global devs list
     axios
-      .get(`${process.env.SITE_URL}/api/check-email?email=${email}`)
+      .get(`${siteURL}/api/check-email?email=${email}`)
       .then((response) => {
         setIsDeveloper(response.data.isDeveloper);
         if (response.data.isDeveloper) {

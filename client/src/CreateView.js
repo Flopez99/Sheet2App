@@ -31,6 +31,7 @@ import DataSourceDropdown from './DataSourceDropdown';
 import {Dialog, DialogTitle, DialogContent, DialogContentText, DialogActions} from '@mui/material';
 
 const theme = createTheme();
+const siteURL = process.env.SITE_URL || 'http://localhost:8080';
 
 function CreateView(props) {
   console.log(props)
@@ -63,7 +64,7 @@ function CreateView(props) {
   //Hook for getting the available roles Ran when CreateView is initiated
   useEffect(() => {
     console.log(props.appId)
-    axios.get(`${process.env.SITE_URL}/roles`, {params: {
+    axios.get(`${siteURL}/roles`, {params: {
       appId: props.appId
     }})
       .then(response => { 
@@ -138,7 +139,7 @@ function CreateView(props) {
   }, [view]);
 
   useEffect(() => {
-    axios.get(`${process.env.SITE_URL}/datasource_list1`, {params: {
+    axios.get(`${siteURL}/datasource_list1`, {params: {
       appId: props.appId
       }})
       .then((response) => {
@@ -162,7 +163,7 @@ function CreateView(props) {
     async function fetchData() {
       const data_columns = [];
       console.log(selectedDataSource);
-      const res = await axios.get(`${process.env.SITE_URL}/datasource`, {
+      const res = await axios.get(`${siteURL}/datasource`, {
         params: {
           id: selectedDataSource,
         },
@@ -215,7 +216,7 @@ function CreateView(props) {
     };
     console.log(viewModel)
 
-    const endpoint = view ? `${process.env.SITE_URL}/edit_view` : `${process.env.SITE_URL}/create_view`;
+    const endpoint = view ? `${siteURL}/edit_view` : `${siteURL}/create_view`;
     const viewID = view ? view._id : 0
 
     axios.post(endpoint, {view: viewModel, appId: props.appId, viewId:viewID})
@@ -264,7 +265,7 @@ function CreateView(props) {
     console.log("DELETING VIEW")
     console.log(view)
 
-    axios.post(`${process.env.SITE_URL}/delete_view`, {view: view, appId: props.appId})
+    axios.post(`${siteURL}/delete_view`, {view: view, appId: props.appId})
     .then((response) => {
       console.log(response)
 

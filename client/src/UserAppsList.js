@@ -4,6 +4,8 @@ import { makeStyles } from '@mui/styles';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom'
 
+const siteURL = process.env.SITE_URL || 'http://localhost:8080';
+
 const useStyles = makeStyles({
   table: {
     minWidth: 650,
@@ -26,8 +28,8 @@ function UserAppsList({ userEmail, endUser }) {
 
 
   const endPoint = endUser
-    ? `${process.env.SITE_URL}/api/apps-enduser`
-    : `${process.env.SITE_URL}/api/apps`;
+    ? `${siteURL}/api/apps-enduser`
+    : `${siteURL}/api/apps`;
 
   useEffect(() => {
     axios.get(endPoint, { params: { userEmail } })

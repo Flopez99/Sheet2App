@@ -5,6 +5,8 @@ import { makeStyles } from '@mui/styles';
 import {Alert,  Dialog, DialogTitle, DialogContent, DialogContentText, Typography, DialogActions, TextField, Button, Stack, Container, Box, Divider } from '@mui/material';
 import axios from 'axios';
 
+const siteURL = process.env.SITE_URL || 'http://localhost:8080';
+
 const useStyles = makeStyles({
   root: {
     display: 'flex',
@@ -157,7 +159,7 @@ function DetailView({ record, detailView, view, tableHeader, keyIndex, refreshSh
     console.log(editedRecord)
     
     try{
-      const response = await axios.post(`${process.env.SITE_URL}/api/edit_record`, {
+      const response = await axios.post(`${siteURL}/api/edit_record`, {
         sheet_url: detailView.table.url,
         record: record_list,
         prevHeader: tableHeader,
@@ -189,7 +191,7 @@ function DetailView({ record, detailView, view, tableHeader, keyIndex, refreshSh
     var sheetId = getIdFromUrl(detailView.table.url);
     var sheetIndex = detailView.table.sheet_index
     try{
-      const response = await axios.post(`${process.env.SITE_URL}/api/delete_record`, {
+      const response = await axios.post(`${siteURL}/api/delete_record`, {
         sheet_url: detailView.table.url,
         prevHeader: tableHeader,
         keyIndex: keyIndex,

@@ -7,6 +7,7 @@ import { teal } from '@mui/material/colors';
 import axios from 'axios';
 import { buildAggregatedQuickFilterApplier } from '@mui/x-data-grid/hooks/features/filter/gridFilterUtils';
 
+const siteURL = process.env.SITE_URL || 'http://localhost:8080';
 
 const useStyles = makeStyles({
   table: {
@@ -134,7 +135,7 @@ function TableView({ view, sheetData, onClickRecord, userEmail, detailView, refr
     var sheetIndex = view.table.sheet_index
 
     try{
-      const response = await axios.post(`${process.env.SITE_URL}/api/delete_record`, {
+      const response = await axios.post(`${siteURL}/api/delete_record`, {
         sheet_url: view.table.url,
         prevHeader: sheetData.sheet_data[0],
         keyIndex: keyIndex,
@@ -189,7 +190,7 @@ function TableView({ view, sheetData, onClickRecord, userEmail, detailView, refr
 
 
     try {
-      const response = await axios.post(`${process.env.SITE_URL}/addRecord`, {
+      const response = await axios.post(`${siteURL}/addRecord`, {
         sheet_url: view.table.url,
         record: record_list,
         prevHeader: sheetData.sheet_data[0],

@@ -6,6 +6,7 @@ import {Stack, Button, Link, Typography, AppBar, Card, CardActionArea, CardConte
 import TableView from './TableView';
 import EndUserNavBar from './EndUserNavBar';
 
+const siteURL = process.env.SITE_URL || 'http://localhost:8080';
 
 function EndUserApp(props) {
   console.log('appid')
@@ -16,7 +17,7 @@ function EndUserApp(props) {
   useEffect(() => {
     const getApp = async () => {
       try {
-        const res = await axios.get(`${process.env.SITE_URL}/app`, { params: { id: props.appId } });
+        const res = await axios.get(`${siteURL}/app`, { params: { id: props.appId } });
         console.log("Got App");
         console.log(res.data);
         setApp(res.data);

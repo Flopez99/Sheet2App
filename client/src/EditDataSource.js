@@ -23,6 +23,8 @@ import { flattenOptionGroups } from '@mui/base';
 import { useNavigate } from 'react-router-dom'
 import {Dialog, DialogTitle, DialogContent, DialogContentText, DialogActions} from '@mui/material';
 
+const siteURL = process.env.SITE_URL || 'http://localhost:8080';
+
 const columns  = [
     {
       field: 'name',
@@ -112,7 +114,7 @@ const navigate = useNavigate();
   const theme = createTheme();
   useEffect(async () => {
     console.log("In Use Effect")
-    await axios.get(`${process.env.SITE_URL}/datasource`, { params: {
+    await axios.get(`${siteURL}/datasource`, { params: {
         id: datasource_id
     }})
     .then(async (res) =>{
@@ -140,7 +142,7 @@ const navigate = useNavigate();
             console.log(rows1.references !== undefined)
         }
 
-        await axios.get(`${process.env.SITE_URL}/api/fetchSheetData` , {params : {
+        await axios.get(`${siteURL}/api/fetchSheetData` , {params : {
             sheet_url: sheet_url
         }})
         .then(async (res) => {
@@ -151,7 +153,7 @@ const navigate = useNavigate();
             console.log(actual_rows)
             setRows1(actual_rows);
         })
-      await axios.get(`${process.env.SITE_URL}/app`, { params: {
+      await axios.get(`${siteURL}/app`, { params: {
           id: appId
       }})
       .then((res) =>{
@@ -283,7 +285,7 @@ const navigate = useNavigate();
                 //new Column
                 console.log(column.value)
                 //if(column.value.)
-                await axios.post(`${process.env.SITE_URL}/column`, {
+                await axios.post(`${siteURL}/column`, {
                     name: column.value.name,
                     initial_value: column.value.initial_value,
                     label: column.value.label,
@@ -300,7 +302,7 @@ const navigate = useNavigate();
             }
             else{
                 console.log(column)
-                await axios.post(`${process.env.SITE_URL}/updateColumn`, {
+                await axios.post(`${siteURL}/updateColumn`, {
                 columnId: column.value._id,
                 column_data: {
                     name: column.value.name,
@@ -324,7 +326,7 @@ const navigate = useNavigate();
         console.log(" name: " + datasource_name)
         console.log(new_columns)
         console.log(key_column)
-        await axios.post(`${process.env.SITE_URL}/updateDatasource`, {
+        await axios.post(`${siteURL}/updateDatasource`, {
             datasourceId: datasource_id,
             name: datasource_name,
             key: key_column,
@@ -346,7 +348,7 @@ const navigate = useNavigate();
     console.log("DELETING VIEW")
     console.log(datasource)
 
-    axios.post(`${process.env.SITE_URL}/delete_datasource`, {datasourceId: datasource_id, appId: appId})
+    axios.post(`${siteURL}/delete_datasource`, {datasourceId: datasource_id, appId: appId})
     .then((response) => {
       console.log(response)
 
@@ -501,7 +503,7 @@ const navigate = useNavigate();
     for (const db_column of rows){ //rows that are in the DB
       if(!(existingColumns.includes(db_column._id))){
         console.log(db_column)
-        await axios.post(`${process.env.SITE_URL}/delete_column`, {
+        await axios.post(`${siteURL}/delete_column`, {
           columnId: db_column._id
         })
         .then((res) => {

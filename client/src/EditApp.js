@@ -22,6 +22,7 @@ import ViewsList from './ViewsList';
 import Paper from '@mui/material/Box';
 
 const theme = createTheme();
+const siteURL = process.env.SITE_URL || 'http://localhost:8080';
 
 
 function EditApp(props) {//props.datasource contains datasource id needed to fill in page
@@ -32,7 +33,7 @@ function EditApp(props) {//props.datasource contains datasource id needed to fil
  const navigate = useNavigate();
 
  useEffect(async () => {
-    await axios.get(`${process.env.SITE_URL}/app`, { params: {
+    await axios.get(`${siteURL}/app`, { params: {
         id: props.appId
     }})
     .then((res) =>{
@@ -61,7 +62,7 @@ function EditApp(props) {//props.datasource contains datasource id needed to fil
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    await axios.post(`${process.env.SITE_URL}/updateApp`, {
+    await axios.post(`${siteURL}/updateApp`, {
       id: props.appId,
       app_name: appName,
       role_membership_url: roleMembershipUrl,
@@ -76,7 +77,7 @@ function EditApp(props) {//props.datasource contains datasource id needed to fil
 
   const handleDeleteApp = async () => {
     if (window.confirm('Are you sure you want to delete this app?')) {
-      await axios.post(`${process.env.SITE_URL}/deleteApp`, {
+      await axios.post(`${siteURL}/deleteApp`, {
         id: props.appId
       })
       .then((response) => {

@@ -6,6 +6,8 @@ import TableView from './TableView';
 import DetailView from './DetailView';
 import { Container } from '@mui/system';
 
+const siteURL = process.env.SITE_URL || 'http://localhost:8080';
+
 const theme = createTheme({
   root: {
     flexGrow: 1,
@@ -72,7 +74,7 @@ function DisplayApp(props) {
   useEffect(() => {
     const getApp = async () => {
       try {
-        const res = await axios.get(`${process.env.SITE_URL}/app`, { params: { id: props.appId } });
+        const res = await axios.get(`${siteURL}/app`, { params: { id: props.appId } });
         console.log("Got App");
         console.log(res.data);
         setApp(res.data);
@@ -89,7 +91,7 @@ function DisplayApp(props) {
     const getViews = async () => {
       try{
         //set views specific to roles
-        const res1 = await axios.get(`${process.env.SITE_URL}/roles_user`, { params: { appId: props.appId, userEmail: props.userEmail} });
+        const res1 = await axios.get(`${siteURL}/roles_user`, { params: { appId: props.appId, userEmail: props.userEmail} });
         const roles = res1.data.roles
         setRoles(roles);
         console.log("Users Roles")
@@ -136,7 +138,7 @@ function DisplayApp(props) {
           try{
             var sheetId = getIdFromUrl(view.table.url);
             var sheetIndex = view.table.sheet_index
-            const res = await axios.get(`${process.env.SITE_URL}/records`, 
+            const res = await axios.get(`${siteURL}/records`, 
               { params: {sheet_url: view.table.url } });
             console.log(view.table.url)
             console.log('RES.DATA')
@@ -171,7 +173,7 @@ function DisplayApp(props) {
             // var sheetId = getIdFromUrl(datasource.url);
             // var sheetIndex = datasource.sheet_index
             console.log(datasource)
-            const res = await axios.get(`${process.env.SITE_URL}/records`, 
+            const res = await axios.get(`${siteURL}/records`, 
               { params: {sheet_url: datasource.url} });
             console.log(datasource.name)
             console.log(datasource.url)
@@ -299,7 +301,7 @@ function DisplayApp(props) {
             if (tableSpreadsheetId === changedTableSpreadsheetId) {
               const sheet_url = table.url;
 
-              const newData = await axios.get(`${process.env.SITE_URL}/records`, {
+              const newData = await axios.get(`${siteURL}/records`, {
                 params: { sheet_url } 
               });
 

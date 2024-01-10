@@ -16,6 +16,7 @@ import DataSource from './DataSource';
 import axios from 'axios'
 import { useNavigate } from 'react-router-dom'
 
+const siteURL = process.env.SITE_URL || 'http://localhost:8080';
 
 const theme = createTheme();
 
@@ -35,7 +36,7 @@ function CreateApp(props) {
     // data_sources: [{type:Schema.Types.ObjectId, ref: 'DataSource'}],
     // role_membership_url: {type:String, required:true}
 
-    await axios.post(`${process.env.SITE_URL}/app`, {
+    await axios.post(`${siteURL}/app`, {
       creator: props.user.email,
       app_name: data.get('App Name'),
       published: false,

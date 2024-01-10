@@ -63,7 +63,7 @@ function CreateView(props) {
   //Hook for getting the available roles Ran when CreateView is initiated
   useEffect(() => {
     console.log(props.appId)
-    axios.get('http://localhost:8080/roles', {params: {
+    axios.get(`${process.env.SITE_URL}/roles`, {params: {
       appId: props.appId
     }})
       .then(response => { 
@@ -138,7 +138,7 @@ function CreateView(props) {
   }, [view]);
 
   useEffect(() => {
-    axios.get('http://localhost:8080/datasource_list1', {params: {
+    axios.get(`${process.env.SITE_URL}/datasource_list1`, {params: {
       appId: props.appId
       }})
       .then((response) => {
@@ -162,7 +162,7 @@ function CreateView(props) {
     async function fetchData() {
       const data_columns = [];
       console.log(selectedDataSource);
-      const res = await axios.get("http://localhost:8080/datasource", {
+      const res = await axios.get(`${process.env.SITE_URL}/datasource`, {
         params: {
           id: selectedDataSource,
         },
@@ -215,7 +215,7 @@ function CreateView(props) {
     };
     console.log(viewModel)
 
-    const endpoint = view ? "http://localhost:8080/edit_view" : "http://localhost:8080/create_view";
+    const endpoint = view ? `${process.env.SITE_URL}/edit_view` : `${process.env.SITE_URL}/create_view`;
     const viewID = view ? view._id : 0
 
     axios.post(endpoint, {view: viewModel, appId: props.appId, viewId:viewID})
@@ -264,7 +264,7 @@ function CreateView(props) {
     console.log("DELETING VIEW")
     console.log(view)
 
-    axios.post("http://localhost:8080/delete_view", {view: view, appId: props.appId})
+    axios.post(`${process.env.SITE_URL}/delete_view`, {view: view, appId: props.appId})
     .then((response) => {
       console.log(response)
 

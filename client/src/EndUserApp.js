@@ -16,7 +16,7 @@ function EndUserApp(props) {
   useEffect(() => {
     const getApp = async () => {
       try {
-        const res = await axios.get("http://localhost:8080/app", { params: { id: props.appId } });
+        const res = await axios.get(`${process.env.SITE_URL}/app`, { params: { id: props.appId } });
         console.log("Got App");
         console.log(res.data);
         setApp(res.data);

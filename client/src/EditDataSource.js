@@ -112,7 +112,7 @@ const navigate = useNavigate();
   const theme = createTheme();
   useEffect(async () => {
     console.log("In Use Effect")
-    await axios.get("http://localhost:8080/datasource", { params: {
+    await axios.get(`${process.env.SITE_URL}/datasource`, { params: {
         id: datasource_id
     }})
     .then(async (res) =>{
@@ -140,7 +140,7 @@ const navigate = useNavigate();
             console.log(rows1.references !== undefined)
         }
 
-        await axios.get("http://localhost:8080/api/fetchSheetData" , {params : {
+        await axios.get(`${process.env.SITE_URL}/api/fetchSheetData` , {params : {
             sheet_url: sheet_url
         }})
         .then(async (res) => {
@@ -151,7 +151,7 @@ const navigate = useNavigate();
             console.log(actual_rows)
             setRows1(actual_rows);
         })
-      await axios.get("http://localhost:8080/app", { params: {
+      await axios.get(`${process.env.SITE_URL}/app`, { params: {
           id: appId
       }})
       .then((res) =>{
@@ -244,39 +244,7 @@ const navigate = useNavigate();
             setReferenceError(true)
             flag = false;
         }
-        // console.log(column.value)
-        // const stringArr = column.value.references.split(" ")
-        // console.log(column.value.references)
-
-        // let url = stringArr[0]
-        // let sheetIndex = stringArr[1]
-        // console.log(url)
-        // console.log(sheetIndex)
-        // if(url === null)
-        //   console.log('error') // should change this to displaying alert
-        // await axios.get('http://localhost:8080/datasource_url' , {params : {
-        //   url: url,
-        //   sheetIndex: sheetIndex
-        // }})
-        // .then((res) => {
-        //   console.log(res)
-        //   if(res.data === ''){
-        //     console.log('not good')
-        //     console.log(column.value)
-        //     setReferenceError(true)
-        //     flag = false;
-        //   }
-        //   else{
-        //     column.value.reference_id = res.data._id
-        //     //column.value.references = res.data._id
-        //   }
-        // })
-
       }
-      // if(column.value.reference){
-      //   console.log('true')
-      //   console.log(column)
-      // }
     }
     return flag;
 
@@ -315,7 +283,7 @@ const navigate = useNavigate();
                 //new Column
                 console.log(column.value)
                 //if(column.value.)
-                await axios.post("http://localhost:8080/column", {
+                await axios.post(`${process.env.SITE_URL}/column`, {
                     name: column.value.name,
                     initial_value: column.value.initial_value,
                     label: column.value.label,
@@ -332,7 +300,7 @@ const navigate = useNavigate();
             }
             else{
                 console.log(column)
-                await axios.post("http://localhost:8080/updateColumn", {
+                await axios.post(`${process.env.SITE_URL}/updateColumn`, {
                 columnId: column.value._id,
                 column_data: {
                     name: column.value.name,
@@ -356,7 +324,7 @@ const navigate = useNavigate();
         console.log(" name: " + datasource_name)
         console.log(new_columns)
         console.log(key_column)
-        await axios.post("http://localhost:8080/updateDatasource", {
+        await axios.post(`${process.env.SITE_URL}/updateDatasource`, {
             datasourceId: datasource_id,
             name: datasource_name,
             key: key_column,
@@ -378,7 +346,7 @@ const navigate = useNavigate();
     console.log("DELETING VIEW")
     console.log(datasource)
 
-    axios.post("http://localhost:8080/delete_datasource", {datasourceId: datasource_id, appId: appId})
+    axios.post(`${process.env.SITE_URL}/delete_datasource`, {datasourceId: datasource_id, appId: appId})
     .then((response) => {
       console.log(response)
 
@@ -533,7 +501,7 @@ const navigate = useNavigate();
     for (const db_column of rows){ //rows that are in the DB
       if(!(existingColumns.includes(db_column._id))){
         console.log(db_column)
-        await axios.post("http://localhost:8080/delete_column", {
+        await axios.post(`${process.env.SITE_URL}/delete_column`, {
           columnId: db_column._id
         })
         .then((res) => {

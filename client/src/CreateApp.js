@@ -34,7 +34,8 @@ function CreateApp(props) {
     // views: [{type:Schema.Types.ObjectId, ref: 'View'}],
     // data_sources: [{type:Schema.Types.ObjectId, ref: 'DataSource'}],
     // role_membership_url: {type:String, required:true}
-    await axios.post("http://localhost:8080/app", {
+
+    await axios.post(`${process.env.SITE_URL}/app`, {
       creator: props.user.email,
       app_name: data.get('App Name'),
       published: false,

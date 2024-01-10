@@ -32,7 +32,7 @@ function EditApp(props) {//props.datasource contains datasource id needed to fil
  const navigate = useNavigate();
 
  useEffect(async () => {
-    await axios.get("http://localhost:8080/app", { params: {
+    await axios.get(`${process.env.SITE_URL}/app`, { params: {
         id: props.appId
     }})
     .then((res) =>{
@@ -61,7 +61,7 @@ function EditApp(props) {//props.datasource contains datasource id needed to fil
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    await axios.post('http://localhost:8080/updateApp', {
+    await axios.post(`${process.env.SITE_URL}/updateApp`, {
       id: props.appId,
       app_name: appName,
       role_membership_url: roleMembershipUrl,
@@ -76,7 +76,7 @@ function EditApp(props) {//props.datasource contains datasource id needed to fil
 
   const handleDeleteApp = async () => {
     if (window.confirm('Are you sure you want to delete this app?')) {
-      await axios.post('http://localhost:8080/deleteApp', {
+      await axios.post(`${process.env.SITE_URL}/deleteApp`, {
         id: props.appId
       })
       .then((response) => {

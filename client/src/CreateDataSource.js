@@ -110,7 +110,7 @@ function CreateDataSource(props) {
 
 
   useEffect(async () => {
-    await axios.get("http://localhost:8080/app", { params: {
+    await axios.get(`${process.env.SITE_URL}/app`, { params: {
       id: props.appId
     }})
     .then((res) =>{
@@ -204,39 +204,7 @@ async function checkReference(array){
       }
     }
   }
-  // for(let column of array){
-  //   if(column.value.reference !== ""){
-  //     console.log(column.value)
-  //     const stringArr = column.value.reference.split(" ")
 
-  //     let url = stringArr[0]
-  //     let sheetIndex = stringArr[1]
-  //     console.log(url)
-  //     console.log(sheetIndex)
-  //     if(url === null)
-  //       console.log('error') // should change this to displaying alert
-  //     await axios.get('http://localhost:8080/datasource_url' , {params : {
-  //       url: url,
-  //       sheetIndex: sheetIndex
-  //     }})
-  //     .then((res) => {
-  //       console.log(res)
-  //       if(res.data === ''){
-  //         console.log('not good')
-  //         setReferenceError(true)
-  //         flag = false;
-  //       }
-  //       else{
-  //         column.value.reference = res.data._id
-  //       }
-  //     })
-
-  //   }
-  //   // if(column.value.reference){
-  //   //   console.log('true')
-  //   //   console.log(column)
-  //   // }
-  // }
   return flag;
 
 }
@@ -279,7 +247,7 @@ function checkType(array){
       // array.forEach( (column) => {
       for await (const column of array){
         console.log(column)
-        await axios.post("http://localhost:8080/column", {
+        await axios.post(`${process.env.SITE_URL}/column`, {
           name: column.value.column_name,
           initial_value: column.value.initial_value,
           label: column.value.label,
@@ -296,7 +264,7 @@ function checkType(array){
       console.log(" name: " + datasource_name)
       console.log(key_column)
       var datasourceId;
-      await axios.post("http://localhost:8080/datasource", {
+      await axios.post(`${process.env.SITE_URL}/datasource`, {
         name: datasource_name,
         url: spreadsheetUrl,
         sheet_index: sheetIndex,
@@ -308,7 +276,7 @@ function checkType(array){
         console.log(res.data._id)
         datasourceId = res.data._id
       })
-      await axios.post('http://localhost:8080/app_datasource', {
+      await axios.post(`${process.env.SITE_URL}/app_datasource`, {
         appId: props.appId,
         datasourceId: datasourceId 
       })
@@ -438,7 +406,7 @@ function checkType(array){
   
   // Function to fetch the sheet data from your server
   async function fetchSheetData(sheet_url) {
-      const response = axios.get("http://localhost:8080/api/fetchSheetData" , {params : {
+      const response = axios.get(`${process.env.SITE_URL}/api/fetchSheetData` , {params : {
         sheet_url: sheet_url
       }})
       .then(async (response) => {

@@ -134,7 +134,7 @@ function TableView({ view, sheetData, onClickRecord, userEmail, detailView, refr
     var sheetIndex = view.table.sheet_index
 
     try{
-      const response = await axios.post("http://localhost:8080/api/delete_record", {
+      const response = await axios.post(`${process.env.SITE_URL}/api/delete_record`, {
         sheet_url: view.table.url,
         prevHeader: sheetData.sheet_data[0],
         keyIndex: keyIndex,
@@ -189,7 +189,7 @@ function TableView({ view, sheetData, onClickRecord, userEmail, detailView, refr
 
 
     try {
-      const response = await axios.post('http://localhost:8080/addRecord', {
+      const response = await axios.post(`${process.env.SITE_URL}/addRecord`, {
         sheet_url: view.table.url,
         record: record_list,
         prevHeader: sheetData.sheet_data[0],

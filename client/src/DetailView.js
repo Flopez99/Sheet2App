@@ -157,7 +157,7 @@ function DetailView({ record, detailView, view, tableHeader, keyIndex, refreshSh
     console.log(editedRecord)
     
     try{
-      const response = await axios.post("http://localhost:8080/api/edit_record", {
+      const response = await axios.post(`${process.env.SITE_URL}/api/edit_record`, {
         sheet_url: detailView.table.url,
         record: record_list,
         prevHeader: tableHeader,
@@ -189,7 +189,7 @@ function DetailView({ record, detailView, view, tableHeader, keyIndex, refreshSh
     var sheetId = getIdFromUrl(detailView.table.url);
     var sheetIndex = detailView.table.sheet_index
     try{
-      const response = await axios.post("http://localhost:8080/api/delete_record", {
+      const response = await axios.post(`${process.env.SITE_URL}/api/delete_record`, {
         sheet_url: detailView.table.url,
         prevHeader: tableHeader,
         keyIndex: keyIndex,

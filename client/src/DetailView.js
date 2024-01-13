@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { makeStyles } from '@mui/styles';
-import {Alert,  Dialog, DialogTitle, DialogContent, DialogContentText, Typography, DialogActions, TextField, Button, Stack, Container, Box, Divider } from '@mui/material';
+import {Alert,  Dialog, DialogTitle, DialogContentText, Typography, DialogActions, TextField, Button, Stack, Container, Box, Divider } from '@mui/material';
 import axios from 'axios';
 
 const siteURL = process.env.SITE_URL || 'http://localhost:8080';
@@ -31,7 +31,6 @@ const useStyles = makeStyles({
     minWidth: '120px',
     fontWeight: 'bold',
     textAlign: 'right',
-    //backgroundColor: '#f0f0f0',
     padding: '5px',
     borderRadius: '4px',
     marginRight: '10px',
@@ -49,7 +48,6 @@ const useStyles = makeStyles({
     },
   },
   recordBox: {
-    //border: '1px solid #ccc',
     borderRadius: '4px',
     padding: '5px',
     width: '100%',
@@ -152,8 +150,6 @@ function DetailView({ record, detailView, view, tableHeader, keyIndex, refreshSh
     }
 
     let record_list = Object.values(editedRecord)
-    var sheetId = getIdFromUrl(detailView.table.url);
-    var sheetIndex = detailView.table.sheet_index
     console.log(allColumnsTypes) //now we have to just check all values with this order
     console.log(record_list)
     console.log(editedRecord)
@@ -188,8 +184,6 @@ function DetailView({ record, detailView, view, tableHeader, keyIndex, refreshSh
   };
 
   const handleDeleteRecord = async () => {
-    var sheetId = getIdFromUrl(detailView.table.url);
-    var sheetIndex = detailView.table.sheet_index
     try{
       const response = await axios.post(`${siteURL}/api/delete_record`, {
         sheet_url: detailView.table.url,

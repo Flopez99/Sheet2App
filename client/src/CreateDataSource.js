@@ -122,23 +122,12 @@ function CreateDataSource(props) {
   const handleSubmit = async (event) => {
     event.preventDefault();
     const data = new FormData(event.currentTarget);
-    // datasource_name = data.get('datasourcename')
-    // spreadsheetUrl = data.get('spreadsheeturl');
-    // sheetIndex = data.get('sheetindex');
+
     setDatasource_name(data.get('datasourcename'))
     setSpreadsheetUrl(data.get('spreadsheeturl'))
     setSheetIndex(data.get('sheetindex'))
 
-    const sheetId = getIdFromUrl(spreadsheetUrl);
     await fetchSheetData(spreadsheetUrl)
-    // if (sheetId) {
-    //   console.log(sheetId);
-    //   console.log(sheetIndex);
-    //   await fetchSheetData(sheetId, sheetIndex);
-      
-    // } else {
-    //   console.log('Invalid URL');
-    // }
   };
 function checkKey(array){
   var key_row;
@@ -150,7 +139,7 @@ function checkKey(array){
       }
     })
     console.log(count)
-    if(count != 1){
+    if(count !== 1){
       setKeyError(true)
       return null
     }
@@ -169,7 +158,7 @@ function checkLabel(array){
       }
     })
     console.log(count)
-    if(count != 1){
+    if(count !== 1){
       setLabelError(true)
       return null
     }
@@ -184,12 +173,6 @@ async function checkReference(array){
   console.log(array)
   var datasources = app.data_sources
 
-  // array.forEach((column) => {
-  //   if(column.value.reference !== undefined){
-  //     console.log("good")
-  //     console.log(column.value.reference)
-  //   }
-  // })
   for(let column of array){
     if(column.value.reference !== undefined &&  column.value.reference !== "" && column.value.reference !== null){
       var ref_datasource = datasources.find(datasource => datasource.name === column.value.reference)
@@ -235,7 +218,7 @@ function checkType(array){
     boolFlag = boolFlag && checkType(array);
     var label_row
     var key_row = checkKey(array)
-    if(label_row= checkLabel(array) === null)
+    if(label_row === checkLabel(array) === null)
       boolFlag = false;
     if(key_row === null)
       boolFlag = false;
@@ -245,7 +228,7 @@ function checkType(array){
       //creates columns
       var key_column;
       var column_list = []
-      // array.forEach( (column) => {
+
       for await (const column of array){
         console.log(column)
         await axios.post(`${siteURL}/column`, {

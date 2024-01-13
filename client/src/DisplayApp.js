@@ -1,10 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { createTheme, ThemeProvider } from '@mui/material/styles';
-import { AppBar, Toolbar, Typography, Button, BottomNavigation, BottomNavigationAction, Tabs, Tab } from '@mui/material';
+import {Typography, Button, Tabs, Tab } from '@mui/material';
 import TableView from './TableView';
 import DetailView from './DetailView';
-import { Container } from '@mui/system';
 
 const siteURL = process.env.SITE_URL || 'http://localhost:8080';
 
@@ -49,27 +48,20 @@ const theme = createTheme({
 
 
 function DisplayApp(props) {
-  console.log(props)
   const [app, setApp] = useState({})
-  const [views, setViews] = useState([]);
+  const [setViews] = useState([]);
   const [tableViews, setTableViews] = useState([])
   const [detailViews, setDetailViews] = useState([])
   const [currDetailView, setcurrDetailView] = useState([])
-
   const [sheetData, setSheetData] = useState([]) 
   const [activeTableViewIndex, setActiveTableViewIndex] = useState(0);
-
-  const [roles, setRoles] = useState([])
+  const [setRoles] = useState([])
   const classes = theme;
   const [selectedRecord, setSelectedRecord] = useState(null) 
   const [selectedTableHeader, setSelectedTableHeader] = useState(null) 
-  
   const [currentKeyIndex, setCurrentKeyIndex] = useState(-1)
-
   const [schemaFlag, setSchemaFlag] = useState(true)
   const [allColumnsTypes, setAllColumnTypes] = useState([])
-  const [errorFlag, setErrorFlag] = useState(false)
-  const [errorMsg, setErrorMsg] = useState("")
 
   useEffect(() => {
     const getApp = async () => {
@@ -78,7 +70,6 @@ function DisplayApp(props) {
         console.log("Got App");
         console.log(res.data);
         setApp(res.data);
-        const app = res.data
 
       } catch (error) {
         console.error(error);
@@ -99,18 +90,13 @@ function DisplayApp(props) {
         const views = []
         for (const role of roles){
           const tempArr = (app.views).filter(view => view.roles.includes(role))
-          console.log(role)
-          console.log(tempArr)
           views.push.apply(views, tempArr)
         }
-        console.log(views)
         const views_no_dup = [...new Set(views)]
-        console.log(views_no_dup)
         setViews(views_no_dup);
         const tableViews1 =  views_no_dup.filter(view => view.view_type === "TableView")
         const detailViews1 =  views_no_dup.filter(view => view.view_type === "DetailView")
 
-        console.log(tableViews1)
         setTableViews(tableViews1)
         setDetailViews(detailViews1)
         
@@ -136,63 +122,34 @@ function DisplayApp(props) {
           console.log(view.table.name)
           var specific_data;
           try{
-            var sheetId = getIdFromUrl(view.table.url);
-            var sheetIndex = view.table.sheet_index
             const res = await axios.get(`${siteURL}/records`, 
               { params: {sheet_url: view.table.url } });
-            console.log(view.table.url)
-            console.log('RES.DATA')
-            console.log(res.data.values)
             specific_data = res.data.values
-            console.log(specific_data)
             sheet_data.push({...view.table, sheet_data: specific_data})
-            console.log(sheet_data)
-
           }
           catch{
             console.log("ERROOR IN GETTING SHEET DATA")
           }
-          // console.log(specific_data)
-          // sheet_data.push({...view.table, sheet_data: specific_data})
-          // console.log(sheet_data)
         } 
       }
-      console.log(app)
-      console.log("LOOOOOOOOOOOOOOOOOOOOK")
-      console.log(sheetData)
 
       var app_datasource = app.data_sources
-      console.log('APP DATASOURCE')
-      console.log(app_datasource)
-      console.log(sheet_data)
       //gets the rest of the datasources from app
       for(const datasource of app_datasource){
-        console.log(datasource)
         if(!(sheet_data.some(sheet => sheet._id === datasource._id))){//checks if is in list alread
           try{
-            // var sheetId = getIdFromUrl(datasource.url);
-            // var sheetIndex = datasource.sheet_index
-            console.log(datasource)
             const res = await axios.get(`${siteURL}/records`, 
               { params: {sheet_url: datasource.url} });
-            console.log(datasource.name)
-            console.log(datasource.url)
-            console.log('RES.DATA')
-            console.log(res.data.values)
             specific_data = res.data.values
             sheet_data.push({...datasource,sheet_data: specific_data})
-
-
           }
           catch{
             console.log("ERROOR IN GETTING SHEET DATA")
           }
-          //sheet_data.push({...datasource,sheet_data: specific_data})
         }
 
       }
-      console.log("LOOOK AGAINN")
-      console.log(sheet_data)
+  
       setSheetData(sheet_data)
     };
 
@@ -203,31 +160,23 @@ function DisplayApp(props) {
 
   useEffect(() => {
     const checkSchema = async () => {
-      console.log("IN CHECK SCHEMA")
       for(const datasource of sheetData){
-        console.log(datasource)
         const all_columns = datasource.columns
         const column_headers = datasource.sheet_data[0] //column headers
-        console.log(column_headers)
         for(const column_name of column_headers){ //checks if all columns in sheet is included in db
           if((all_columns.findIndex(col => col.name === column_name)) === -1){
             setSchemaFlag(false)
-            console.log(column_name)
-            console.log("SCHEMA BAD")
             return
           }
         }
         for(const column of all_columns){ //checks if all columns in db is included in sheet
           if((column_headers.findIndex(col => col === column.name)) === -1){
             setSchemaFlag(false)
-            console.log(column)
-            console.log("SCHEMA BAD")
             return
           }
         }
       }
       setSchemaFlag(true)
-      console.log("SCHEMA GOOD")
     }
     if(Object.keys(sheetData).length !== 0)
       checkSchema();
@@ -250,18 +199,12 @@ function DisplayApp(props) {
     const newTableView = tableViews[index];
     setActiveTableViewIndex(index);
 
-    const newDataSource = sheetData.find(e => e._id === newTableView.table._id);
-
     const newDetailViews = detailViews.filter(view => view.table.name === newTableView.table.name);
-
-    console.log("yo")
-    console.log(newDetailViews)
     setcurrDetailView(newDetailViews.length > 0 ? newDetailViews[0] : null);
   };
 
   const handleClickRecord = (record, other, tableHeader, key_index, all_types) => {
     if(currDetailView){
-      // console.log(currDetailView)
       setSelectedRecord(record)
       setSelectedTableHeader(tableHeader)
       setCurrentKeyIndex(key_index)
@@ -286,15 +229,10 @@ function DisplayApp(props) {
   //Refresh info after update has been made
   const refreshSheetData = async (changedTable) => {
     try {
-      console.log("REFRESHING ALL SHEETS DATA IN THE SAME SPREADSHEET");
-      console.log(sheetData)
       const changedTableSpreadsheetId = getIdFromUrl(changedTable.url);
   
       const newSheetData = await Promise.all(
         sheetData.map(async table => {
-          console.log("TABLE")
-          console.log(table)
-          console.log(table.url)
           if(table.url){
             const tableSpreadsheetId = getIdFromUrl(table.url);
   
@@ -320,8 +258,6 @@ function DisplayApp(props) {
         })
       );
   
-
-      console.log("Setting sheet data")
       // Update the sheetData state with the updated data
       setSheetData(newSheetData);
     } catch (error) {

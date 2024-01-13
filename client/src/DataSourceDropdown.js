@@ -1,6 +1,5 @@
 import React from 'react';
 import { MenuItem, FormControl, Select, InputLabel } from '@mui/material';
-import CreateView from './CreateView';
 
 function DataSourceDropdown(props) {
   const { dataSourceList, selectedDataSource, setSelectedDataSource } = props;

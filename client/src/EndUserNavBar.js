@@ -5,10 +5,7 @@ import { useNavigate } from 'react-router-dom'
 import {Box} from '@mui/material';
 
 function EndUserNavBar(props) {
-  console.log(props)
   const tableViews = props.tableViews
-  console.log(tableViews)
-
   const navigate = useNavigate();
   return (
     <Box sx={{ width: 500 }}>
@@ -16,7 +13,6 @@ function EndUserNavBar(props) {
         showLabels
         //value={value}
         onChange={(event, newValue) => {
-          console.log(`/view_${newValue}`)
           navigate(`/end_user_view/${newValue}`)
         }}
       >

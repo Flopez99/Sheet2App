@@ -55,7 +55,7 @@ function DeveloperApps() {
                 Switch to End User
               </Typography>
               <Typography variant="body1" paragraph>
-                View your apps from an end user's perspective.
+                "View your apps from an end user's perspective."
               </Typography>
               <Button
                 component={Link}

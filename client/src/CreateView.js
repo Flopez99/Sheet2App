@@ -2,7 +2,6 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 
 import {
-  AppBar,
   Box,
   Button,
   Checkbox,
@@ -18,14 +17,12 @@ import {
   TableContainer,
   TableHead,
   TableRow,
-  Toolbar,
   MenuItem,
   TextField,
   Typography,
-  IconButton,
   Stack,
 } from '@mui/material';
-import { Link, useNavigate } from 'react-router-dom';
+import {useNavigate } from 'react-router-dom';
 import { createTheme, ThemeProvider } from '@mui/material/styles';
 import DataSourceDropdown from './DataSourceDropdown';
 import {Dialog, DialogTitle, DialogContent, DialogContentText, DialogActions} from '@mui/material';
@@ -40,7 +37,7 @@ function CreateView(props) {
   const [name, setName] = useState('');
   const [selectedDataSource, setSelectedDataSource] = useState('');
   const [dataSourceList, setDataSourceList] = useState([]);
-  const [columns, setColumns] = useState([]);
+  const [setColumns] = useState([]);
   const [viewType, setViewType] = useState('TableView'); //TableView or DetailView
   const [addRecord, setAddRecord] = useState(false);
   const [editRecord, setEditRecord] = useState(false);
@@ -49,15 +46,11 @@ function CreateView(props) {
   const [filter, setFilter] = useState();
   const [userFilter, setUserFilter] = useState();
   const [editFilter, setEditFilter] = useState();
-  //const [editableColumns, setEditableColumns] = useState([]);
   const navigate = useNavigate();
-
   const [columnSettings, setColumnSettings] = useState([]);
+  const [setSelectedRoles] = useState([]);
 
-  const [selectedRoles, setSelectedRoles] = useState([]);
-  
   const [selectedRoleList, setSelectedRoleList] = useState([]);
-
   const [openDeleteDialog, setOpenDeleteDialog] = useState(false);
 
 
@@ -156,7 +149,6 @@ function CreateView(props) {
       initialSettings.push({ show: false, filter: false, userFilter: false });
     }
 
-    //setColumnSettings(initialSettings);
   }, []);
 
   useEffect(() => {
@@ -231,7 +223,6 @@ function CreateView(props) {
 
   const handleRoleDelete = (role) => { 
     setSelectedRoleList(selectedRoleList.filter((r) => r !== role));
-   //setRoles([...roles, role]);
   };
 
   //handles changes for checkboxes that can only have 1 value as true

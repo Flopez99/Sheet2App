@@ -7,8 +7,8 @@ import { Box, Container, Typography } from '@mui/material';
 
 function LandingPage() {
   const navigate = useNavigate();
-  const [user, setUser] = useState({});
-  const [isDeveloper, setIsDeveloper] = useState(false);
+  const [setUser] = useState({});
+  const [setIsDeveloper] = useState(false);
 
   function handleCallBackResponse(response) {
     console.log('Encoded JWT Id token: ' + response.credential);
@@ -16,7 +16,6 @@ function LandingPage() {
     setUser(userObject);
 
     const email = userObject.email;
-
     const siteURL = process.env.SITE_URL || 'http://localhost:8080';
     
     //Request the backend to see if the email is in the global devs list
@@ -31,7 +30,6 @@ function LandingPage() {
         }
       })
       .catch((error) => {
-        console.log("EERRRROOORRRRRRR")
         console.error(error);
       });
   }

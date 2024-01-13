@@ -5,21 +5,16 @@ import Avatar from '@mui/material/Avatar';
 import Button from '@mui/material/Button';
 import CssBaseline from '@mui/material/CssBaseline';
 import TextField from '@mui/material/TextField';
-import FormControlLabel from '@mui/material/FormControlLabel';
-import Checkbox from '@mui/material/Checkbox';
-import { Link } from 'react-router-dom';
 import Grid from '@mui/material/Grid';
-import { DataGrid, GridRowsProp, GridColDef, GridValueGetterParams } from '@mui/x-data-grid';
+import { DataGrid } from '@mui/x-data-grid';
 import Box from '@mui/material/Box';
 import LockOutlinedIcon from '@mui/icons-material/LockOutlined';
 import Typography from '@mui/material/Typography';
 import Container from '@mui/material/Container';
 import { createTheme, ThemeProvider } from '@mui/material/styles';
 import axios from 'axios'
-import { updateCacheWithNewRows } from '@mui/x-data-grid/hooks/features/rows/gridRowsUtils';
 import { useMemo, useRef } from "react";
 import Alert from '@mui/material/Alert';
-import { flattenOptionGroups } from '@mui/base';
 import { useNavigate } from 'react-router-dom'
 import {Dialog, DialogTitle, DialogContent, DialogContentText, DialogActions} from '@mui/material';
 
@@ -64,8 +59,6 @@ const columns  = [
       width: 110,
       editable: true,
       flex: 1,
-      // valueGetter: (params: GridValueGetterParams) => 
-      // (params.row.references?.url || '') + ' ' + (params.row.references?.sheet_index || '')
     },
     {
       field: 'type',
@@ -112,6 +105,7 @@ const navigate = useNavigate();
   const [app, setApp] = useState({})
   const [openDeleteDialog, setOpenDeleteDialog] = useState(false);
   const theme = createTheme();
+
   useEffect(async () => {
     console.log("In Use Effect")
     await axios.get(`${siteURL}/datasource`, { params: {
@@ -191,7 +185,7 @@ const navigate = useNavigate();
         }
       })
       console.log(count)
-      if(count != 1){
+      if(count !== 1){
         setKeyError(true)
         return null
       }
@@ -223,16 +217,8 @@ const navigate = useNavigate();
   };
   async function checkReference(array){
     let flag = true;
-    console.log('in reference')
-    console.log(array)
-    console.log(app)
     var datasources = app.data_sources
-    // array.forEach((column) => {
-    //   if(column.value.reference !== undefined){
-    //     console.log("good")
-    //     console.log(column.value.reference)
-    //   }
-    // })
+
     for(let column of array){
       if(column.value.references !== undefined &&  column.value.references !== "" && column.value.references !== null){
         var ref_datasource = datasources.find(datasource => datasource.name === column.value.references)
@@ -259,7 +245,6 @@ const navigate = useNavigate();
     setOpenDeleteDialog(false);
   };
   const handleUpdate = async() => {
-    console.log(apiRef.current.getRowModels());
     var rowModel = await apiRef.current.getRowModels()
     var array =   Array.from(rowModel, ([key, value]) =>({value}));
     //check if multiple Label
@@ -323,9 +308,6 @@ const navigate = useNavigate();
         }
         
         //creates datasource
-        console.log(" name: " + datasource_name)
-        console.log(new_columns)
-        console.log(key_column)
         await axios.post(`${siteURL}/updateDatasource`, {
             datasourceId: datasource_id,
             name: datasource_name,
@@ -334,9 +316,6 @@ const navigate = useNavigate();
             consistent: true
         })
         .then((res) => {
-            console.log(res.data)
-            console.log(res.data._id)
-            console.log(appId)
             navigate("/editApp",{state: appId} )
         })
 
@@ -345,8 +324,6 @@ const navigate = useNavigate();
 
   const handleDeleteDataSource = () => {
     handleCloseDeleteDialog();
-    console.log("DELETING VIEW")
-    console.log(datasource)
 
     axios.post(`${siteURL}/delete_datasource`, {datasourceId: datasource_id, appId: appId})
     .then((response) => {

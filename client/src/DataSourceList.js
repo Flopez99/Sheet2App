@@ -1,8 +1,6 @@
 import React from 'react'
-import { useEffect, useState } from 'react';
 import { Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper } from '@mui/material';
 import { makeStyles } from '@mui/styles';
-import axios from 'axios';
 import { useNavigate } from 'react-router-dom'
 
 const useStyles = makeStyles({

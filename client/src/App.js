@@ -7,10 +7,10 @@ import DeveloperApps from './DeveloperApps';
 import MyApps from './MyApps';
 import EndUserApps from './EndUserApps';
 import DataSource from './DataSource';
-import CreateDataSource from './CreateDataSource';
+import CreateDataSource from './CreateDataSource'; 
 import { Route, Routes, useLocation } from 'react-router-dom';
 import LandingPage from './LandingPage';
-import {useEffect, useState, useMemo} from 'react'
+import { useState, useMemo} from 'react' 
 import EditApp from './EditApp';
 import CreateView from './CreateView';
 import EditDataSource from './EditDataSource';
@@ -51,7 +51,7 @@ function App() {
                 console.log("Logged Out")
                 setIsDeveloper(false);
                 setUser({});
-            }
+            } 
         }
       }
       if(location.pathname === "/editapp"){
